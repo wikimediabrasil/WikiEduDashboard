@@ -68,3 +68,10 @@
             %td.title
               %small
                 = link_to cu.course.title, course_slug_path(cu.course.slug)
+                - if cu.user.courses.size > 1
+                  .other-courses-card
+                    %strong= t("courses.other_courses_label", default: "Other courses:")
+                    - cu.user.courses.each do |course|
+                      - next if course.id == cu.course.id
+                      .other-course-link
+                        = link_to course.title, course_slug_path(course.slug)

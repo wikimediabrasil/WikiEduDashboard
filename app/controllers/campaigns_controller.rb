@@ -89,7 +89,7 @@ class CampaignsController < ApplicationController
 
         @courses_users = CoursesUsers.where(
           course: @campaign.nonprivate_courses, role: CoursesUsers::Roles::STUDENT_ROLE
-        ).eager_load(:user, :course)
+        ).eager_load(:user, :course).includes(user: :courses)
 
         if params[:username].present?
           @courses_users = @courses_users.where('users.username LIKE ?', "%#{params[:username]}%")

@@ -21,3 +21,39 @@
       display flex
       align-items center
       gap 10px
+
+  .other-courses-card
+    background white
+    border 1px solid $border_lt
+    border-radius 4px
+    padding 12px
+    margin-top 10px
+    box-shadow 0 4px 12px rgba(0,0,0,0.1)
+    font-size 13px
+    min-width 200px
+
+    strong
+      display block
+      margin-bottom 8px
+      color $text_dk
+      font-weight 600
+      border-bottom 1px solid $border_lt
+      padding-bottom 6px
+      text-transform uppercase
+      font-size 11px
+      letter-spacing 0.5px
+
+    .other-course-link
+      margin-top 6px
+      line-height 1.4
+
+      a
+        color $brand_primary
+        text-decoration none
+        transition color 0.2s ease
+        display block
+
+        &:hover
+          color sprout
+          transform translateX(2px)
+
