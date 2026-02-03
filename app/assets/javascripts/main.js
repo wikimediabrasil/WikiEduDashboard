@@ -15,9 +15,16 @@ window.List = require('list.js'); // List is used for sorting tables outside of 
 
 import flatpickr from 'flatpickr';
 import TomSelect from 'tom-select';
+import Spanish from 'flatpickr/dist/l10n/es.js';
+import Portuguese from 'flatpickr/dist/l10n/pt.js';
 
 window.flatpickr = flatpickr;
 window.TomSelect = TomSelect;
+
+window.flatpickrLocales = {
+  es: Spanish.es,
+  pt: Portuguese.pt
+};
 
 document.addEventListener('DOMContentLoaded', () => {
   /* eslint-disable */
