@@ -200,6 +200,29 @@ describe CampaignsController, type: :request do
     end
   end
 
+  describe '#users' do
+    let(:course) { create(:course) }
+    let(:campaign) { create(:campaign) }
+    let(:student) { create(:user) }
+    let(:instructor) { create(:user, username: 'Dr. Instructor') }
+
+    before do
+      campaign.courses << course
+      create(:courses_user, course_id: course.id, user_id: student.id,
+                            role: CoursesUsers::Roles::STUDENT_ROLE)
+      create(:courses_user, course_id: course.id, user_id: instructor.id,
+                            role: CoursesUsers::Roles::INSTRUCTOR_ROLE)
+    end
+
+    it 'assigns @courses_users with students only and includes associations' do
+      get "/campaigns/#{campaign.slug}/users"
+      expect(assigns(:courses_users)).to include(CoursesUsers.find_by(user_id: student.id))
+      expect(assigns(:courses_users)).not_to include(CoursesUsers.find_by(user_id: instructor.id))
+      expect(assigns(:courses_users).eager_load_values).to include(:user, :course)
+      expect(assigns(:courses_users).includes_values).to include(user: :courses)
+    end
+  end
+
   describe '#users.json' do
     let(:course) { create(:course) }
     let(:campaign) { create(:campaign) }
