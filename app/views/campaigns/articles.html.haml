@@ -107,9 +107,23 @@
       -  courses = result[:courses]
       -  articles = result[:articles]
 
+      - active_filters = []
+      - active_filters << "#{t('articles.article_title')}: \"#{params[:title]}\"" if params[:title].present?
+      - active_filters << "#{t('courses.school')}: #{params[:school].inspect}" if params[:school].present?
+      - active_filters << "#{t('metrics.char_added')}: #{params[:char_added_from]} - #{params[:char_added_to]}" if params[:char_added_from].present? || params[:char_added_to].present?
+      - active_filters << "#{t('metrics.references_count')}: #{params[:references_count_from]} - #{params[:references_count_to]}" if params[:references_count_from].present? || params[:references_count_to].present?
+      - active_filters << "#{t('metrics.view')}: #{params[:view_count_from]} - #{params[:view_count_to]}" if params[:view_count_from].present? || params[:view_count_to].present?
+      - search_terms = active_filters.any? ? "#{active_filters.join(', ')}" : nil
+
+
       = will_paginate articles_courses
 
       %tbody.list
+        - if search_terms.present?
+          - if articles_courses.total_entries > 1
+            %h4= t('application.search_results.other', search_terms: search_terms, count: articles_courses.count)
+          - else
+            %h4= t('application.search_results.one', search_terms: search_terms, count: articles_courses.count)
         - if articles_courses.empty?
           %tr.disabled
             %td{:class => "text-center", :colSpan => 7}

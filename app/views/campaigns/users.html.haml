@@ -58,7 +58,19 @@
           %th.sort.sortable{"data-default-order" => "asc", "data-sort" => "title"}
             = t("#{@presenter.course_string_prefix}.course")
             %span.sortable-indicator
+
+        - active_filters = []
+        - active_filters << "#{t('users.username')}: \"#{params[:username]}\"" if params[:username].present?
+        - active_filters << "#{t(@presenter.course_string_prefix + '.course')}: #{params[:course_title].inspect}" if params[:course_title].present?
+        - active_filters << "#{t('courses.edit_count')}: #{params[:min_revision_count]} - #{params[:max_revision_count]}" if params[:min_revision_count].present? || params[:max_revision_count].present?
+        - search_terms = active_filters.any? ? "#{active_filters.join(', ')}" : nil
+      
       %tbody.list
+        - if search_terms.present?
+          - if @courses_users.count > 1
+            %h4= t('application.search_results.other', search_terms: search_terms, count: @courses_users.count)
+          - else
+            %h4= t('application.search_results.one', search_terms: search_terms, count: @courses_users.count)
         - @courses_users.each do |cu|
           %tr
             %td.username
