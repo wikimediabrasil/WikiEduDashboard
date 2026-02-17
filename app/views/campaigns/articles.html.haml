@@ -68,6 +68,12 @@
         .form-actions
           = submit_tag t('form_search.search'), class: 'button'
           = link_to t('form_search.clear'), articles_campaign_path(@campaign.slug), class: 'button'
+    
+    -  result = @presenter.campaign_articles
+    -  articles_courses = result[:articles_courses]
+    -  courses = result[:courses]
+    -  articles = result[:articles]
+    
     %table.table.table--hoverable.table--sortable
       %thead
         %tr
@@ -102,13 +108,6 @@
             = t("#{@presenter.course_string_prefix}.courses")
             %span.sortable-indicator
 
-      -  result = @presenter.campaign_articles
-      -  articles_courses = result[:articles_courses]
-      -  courses = result[:courses]
-      -  articles = result[:articles]
-
-      = will_paginate articles_courses
-
       %tbody.list
         - if articles_courses.empty?
           %tr.disabled
@@ -121,4 +120,4 @@
             - cache ["article_row", ac.article_id, ac.course_id, ac.updated_at, locale] do
               = render 'campaigns/article_row', article:, article_course: ac, course:
 
-    = will_paginate articles_courses
+    = will_paginate articles_courses, renderer: WillPaginate::LinkRenderer, previous_label: t('articles.previous'), next_label: t('articles.next'), inner_window: 1, outer_window: 1

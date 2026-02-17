@@ -107,32 +107,6 @@
         .form-actions
           %button.button{type: 'submit'}= t('campaign.search')
           %button.button.button--clear{type: 'button', onclick: 'document.getElementById("title_query").value=""; document.getElementById("creation_start").value=""; document.getElementById("creation_end").value=""; document.getElementById("start_date_start").value=""; document.getElementById("start_date_end").value=""; document.getElementById("school_select").value=""; document.getElementById("revisions_min").value=""; document.getElementById("revisions_max").value=""; document.getElementById("word_count_min").value=""; document.getElementById("word_count_max").value=""; document.getElementById("references_min").value=""; document.getElementById("references_max").value=""; document.getElementById("views_min").value=""; document.getElementById("views_max").value=""; document.getElementById("users_min").value=""; document.getElementById("users_max").value=""; this.form.action = this.form.action.replace(/#.*$/, "") + "#courses_table"; this.form.submit();'}= t('form_search.clear')
-      .sort-select
-        %select.sorts{rel: 'courses'}
-          %option{rel: 'asc', value: 'title'}
-            = t("courses.title")
-          %option{rel: 'asc', value: 'school'}
-            = t("courses.school")
-          %option{rel: 'desc', value: 'revisions'}
-            = t("metrics.revisions")
-          %option{rel: 'desc', value: 'characters'}
-            = t("metrics.word_count")
-          %option{rel: 'desc', value: 'average-words'}
-            = t("metrics.word_count_average")
-          %option{rel: 'desc', value: 'references'}
-            = t("metrics.references_count")
-          %option{rel: 'desc', value: 'views'}
-            = t("metrics.view")
-          %option{rel: 'desc', value: 'students'}
-            = t("users.editors")
-          %option{rel: 'desc', value: 'untrained'}
-            = t("courses.untrained")
-          - unless Features.wiki_ed?
-            %option{rel: 'desc', value: 'creation-date'}
-              = t("courses.creation_date")
-          %option{rel: 'asc', value: 'start-date'}
-            = t("courses.start_date")
-
     %table.table.table--hoverable.table--sortable{ id: 'courses_table' }
       %thead
         %tr
@@ -197,7 +171,13 @@
             = render 'campaigns/course_row', course: c, admin: false, user: false
         - else
           - programs = @presenter.courses_by_recent_edits
-          = will_paginate programs
           - programs.each do |course|
             - cache [course, locale, @presenter.can_remove_course?]  do
               = render 'campaigns/course_row', course: course, admin: false, user: false
+
+    -# Paginación después de la tabla
+    - if @search_terms.present?
+      = will_paginate @results, renderer: WillPaginate::LinkRenderer, previous_label: t('articles.previous'), next_label: t('articles.next'), inner_window: 1, outer_window: 1
+    - else
+      - programs = @presenter.courses_by_recent_edits
+      = will_paginate programs, renderer: WillPaginate::LinkRenderer, previous_label: t('articles.previous'), next_label: t('articles.next'), inner_window: 1, outer_window: 1

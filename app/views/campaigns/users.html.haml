@@ -68,3 +68,4 @@
             %td.title
               %small
                 = link_to cu.course.title, course_slug_path(cu.course.slug)
+  = will_paginate @courses_users, renderer: WillPaginate::LinkRenderer, previous_label: t('articles.previous'), next_label: t('articles.next'), inner_window: 1, outer_window: 1

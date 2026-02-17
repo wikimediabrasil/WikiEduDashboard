@@ -10,7 +10,8 @@ class CoursesPresenter
   def initialize(current_user:, campaign_param: nil, courses_list: nil, page: nil, tag: nil,
                  articles_title: nil, course_title: nil, char_added_from: nil, char_added_to: nil,
                  references_count_from: nil, references_count_to: nil,
-                 view_count_from: nil, view_count_to: nil, school: nil)
+                 view_count_from: nil, view_count_to: nil, school: nil, 
+                 sort_column: nil, sort_direction: nil)
     @current_user = current_user
     @campaign_param = campaign_param
     @page = page
@@ -24,6 +25,8 @@ class CoursesPresenter
     @references_count_to = references_count_to
     @view_count_from = view_count_from
     @view_count_to = view_count_to
+    @sort_column = sort_column
+    @sort_direction = sort_direction
     @courses_list = courses_list || campaign_courses
   end
 
@@ -71,14 +74,14 @@ class CoursesPresenter
                                                                                              :slug)
   end
 
-  PER_PAGE = 100
+  PER_PAGE = 10
   # Returns a scoped query for ranked articles_courses using a deferred join via RankedArticlesCoursesQuery # rubocop:disable Layout/LineLength
   def articles_courses_scope
     return @articles_courses_scope unless @articles_courses_scope.nil?
 
     @articles_courses_scope = Query::RankedArticlesCoursesQuery.new(
       courses: course_ids_and_slugs,
-      per_page: PER_PAGE,
+      per_page: 10,
       offset:,
       too_many: too_many_articles?,
       article_title: @articles_title,
@@ -135,7 +138,7 @@ class CoursesPresenter
     ArticlesCourses.tracked.includes(article: :wiki)
                    .includes(:course).where(courses: { private: false })
                    .where(course: @courses_list)
-                   .paginate(page: @page, per_page: 100)
+                   .paginate(page: @page, per_page: 10)
   end
 
   def can_remove_course?
@@ -414,12 +417,12 @@ class CoursesPresenter
       end
     end
 
-    scope.distinct
+    scope.distinct.order('recent_revision_count DESC, title ASC').paginate(page: @page, per_page: 2)
   end
 
   def courses_by_recent_edits
     # Sort first by recent edit count, and then by course title
-    courses.order('recent_revision_count DESC, title').paginate(page: @page, per_page: 100)
+    courses.order('recent_revision_count DESC, title').paginate(page: @page, per_page: 1)
   end
 
   def active_courses_by_recent_edits

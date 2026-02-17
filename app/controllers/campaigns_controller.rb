@@ -9,6 +9,7 @@ class CampaignsController < ApplicationController
                                         update destroy add_organizer remove_organizer
                                         remove_course ores_plot
                                         alerts active_courses]
+  before_action :set_page, only: [:programs, :articles, :users]
   before_action :require_create_permissions, only: [:create]
   before_action :require_write_permissions, only: %i[update destroy add_organizer
                                                      remove_organizer remove_course edit]
@@ -114,7 +115,7 @@ class CampaignsController < ApplicationController
                            end
         end
 
-        @courses_users = @courses_users.order(revision_count: :desc)
+        @courses_users = @courses_users.order(revision_count: :desc).paginate(page: @page, per_page: 10)
       end
 
       format.json do
@@ -154,6 +155,7 @@ class CampaignsController < ApplicationController
 
   def programs
     set_page
+    set_sort
     set_presenter
     filters = params.slice(:title_query, :creation_start, :creation_end,
                            :start_date_start, :start_date_end,
@@ -322,10 +324,24 @@ class CampaignsController < ApplicationController
     @page = nil unless @page&.positive?
   end
 
+  def set_sort 
+    @sort_column = params[:sort] || 'recent_revision_count'
+    @sort_direction = params[:direction] || 'desc'
+
+    valid_columns = %w[title school recent_revision_count character_sum 
+                     average_word_count references_count view_sum 
+                     user_count trained_count created_at start]
+                
+    @sort_column = 'recent_revision_count' unless valid_columns.include?(@sort_column)
+    @sort_direction = 'desc' unless %w[asc desc].include?(@sort_direction.upcase)
+  end
+
   def set_presenter
     @presenter = CoursesPresenter.new(current_user:,
                                       campaign_param: @campaign.slug,
                                       page: @page,
+                                      sort_column: @sort_column,
+                                      sort_direction: @sort_direction,
                                       articles_title: params[:title],
                                       course_title: params[:course_title],
                                       char_added_from: params[:char_added_from],
