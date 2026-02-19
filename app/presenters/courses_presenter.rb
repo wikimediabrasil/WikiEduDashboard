@@ -92,7 +92,9 @@ class CoursesPresenter
       references_count_to: @references_count_to,
       view_count_from: @view_count_from,
       view_count_to: @view_count_to,
-      school: @school
+      school: @school,
+      sort_column: @sort_column,
+      sort_direction: @sort_direction
     ).scope
   end
 
@@ -417,12 +419,20 @@ class CoursesPresenter
       end
     end
 
-    scope.distinct.order('recent_revision_count DESC, title ASC').paginate(page: @page, per_page: 2)
+    # scope.distinct.order('recent_revision_count DESC, title ASC').paginate(page: @page, per_page: 2)
+    if @sort_column.present? && @sort_direction.present?
+      order_clause ="#{@sort_column}  #{@sort_direction.upcase}"
+      order_clause += ', title ASC' unless @sort_column == 'title'
+    else 
+      order_clause = 'recent_revision_count DESC, title ASC'
+    end
+    scope.distinct.order(order_clause).paginate(page: @page, per_page: 2)
   end
 
   def courses_by_recent_edits
     # Sort first by recent edit count, and then by course title
-    courses.order('recent_revision_count DESC, title').paginate(page: @page, per_page: 1)
+    # courses.order('recent_revision_count DESC, title').paginate(page: @page, per_page: 1)
+    filter_courses({})
   end
 
   def active_courses_by_recent_edits

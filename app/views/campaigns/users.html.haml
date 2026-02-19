@@ -18,6 +18,8 @@
           %option{rel: "desc", value: "revision-count"}= t('courses.edit_count')
           %option{rel: "desc", value: "title"}= t("#{@presenter.course_string_prefix}.course")
       = form_tag users_campaign_path(@campaign.slug), method: :get, class: 'users-search-form' do
+        = hidden_field_tag :sort, params[:sort]        
+        = hidden_field_tag :direction, params[:direction]
         .form-fields
           .form-row
             = text_field_tag :username, params[:username], placeholder: t('users.username'), class: 'input-full-width'
@@ -46,16 +48,49 @@
           .form-actions
             = submit_tag t('form_search.search'), class: 'button'
             = link_to t('form_search.clear'), users_campaign_path(@campaign.slug), class: 'button'
+            :javascript
+              window.DISABLE_USERS_LISTJS = true;
+              
+              document.addEventListener('DOMContentLoaded', function() {
+                const headers = document.querySelectorAll('#users table th.sortable');
+                
+                headers.forEach(function(th) {
+                  th.style.cursor = 'pointer';
+                  
+                  th.onclick = function(e) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                    
+                    const backendColumn = th.getAttribute('data-backend-column');
+                    const defaultOrder = th.getAttribute('data-default-order') || 'asc';
+                    
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const currentSort = urlParams.get('sort');
+                    const currentDirection = urlParams.get('direction');
+                    
+                    let newDirection = defaultOrder;
+                    if (currentSort === backendColumn) {
+                      newDirection = currentDirection === 'asc' ? 'desc' : 'asc';
+                    }
+                    
+                    urlParams.set('sort', backendColumn);
+                    urlParams.set('direction', newDirection);
+                    urlParams.delete('page');
+                    
+                    window.location.href = window.location.pathname + '?' + urlParams.toString();
+                  };
+                });
+              });
     %table.table.table--hoverable.table--sortable
       %thead
         %tr
-          %th.sort.sortable{"data-default-order" => "asc", "data-sort" => "username"}
+          %th.sort.sortable{"data-default-order" => "asc", "data-sort" => "username", 'data-backend-column' => 'username'}
             = t('users.username')
             %span.sortable-indicator
-          %th.sort.sortable.desc{"data-default-order" => "desc", "data-sort" => "revision-count"}
+          %th.sort.sortable.desc{"data-default-order" => "desc", "data-sort" => "revision-count", 'data-backend-column' => 'revision_count'}
             = t('courses.edit_count')
             %span.sortable-indicator
-          %th.sort.sortable{"data-default-order" => "asc", "data-sort" => "title"}
+          %th.sort.sortable{"data-default-order" => "asc", "data-sort" => "title", 'data-backend-column' => 'title'}
             = t("#{@presenter.course_string_prefix}.course")
             %span.sortable-indicator
       %tbody.list
