@@ -155,3 +155,5 @@
               = render 'campaigns/article_row', article:, article_course: ac, course:
 
     = will_paginate articles_courses, renderer: WillPaginate::LinkRenderer, previous_label: t('articles.previous'), next_label: t('articles.next'), inner_window: 1, outer_window: 1
+    .page-entries-info{style: 'text-align: center; color: #666; font-size: 14px; margin-top: 10px;'}
+      = t('articles.page_info', current: articles_courses.current_page, total_pages: articles_courses.total_pages, count: articles_courses.length, total: articles_courses.total_entries) 

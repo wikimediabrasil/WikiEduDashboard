@@ -205,6 +205,8 @@ en:
     no_available: No Available Articles
     next: Next
     previous: Previous
+    page_info: "Page %{current} of %{total_pages}, showing %{count} records of %{total}"
+    page_info: "Page %{current} of %{total_pages}, showing %{count} records of %{total}"
     article_title: Article Title
     assigned_to: Assigned To
     character_doc: The sum of characters added to articles by enrolled editors between the start and end dates

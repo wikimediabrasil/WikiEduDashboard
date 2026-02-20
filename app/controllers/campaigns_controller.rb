@@ -132,7 +132,7 @@ class CampaignsController < ApplicationController
           order_clause = 'courses_users.revision_count DESC, users.username ASC'
         end
 
-        @courses_users = @courses_users.order(order_clause).paginate(page: @page, per_page: 10)
+        @courses_users = @courses_users.order(order_clause).paginate(page: @page, per_page: 25)
       end
 
       format.json do

@@ -1,5 +1,5 @@
-# Configuración de will_paginate para usar las clases CSS de pagination.styl
-# que son compatibles con react-paginate
+# Configuration for will_paginate to use the CSS classes from pagination.styl
+# which are compatible with react-paginate
 
 require 'will_paginate/view_helpers/action_view'
 
@@ -28,7 +28,7 @@ module WillPaginate
     protected
 
     def html_container(html)
-      tag(:div, tag(:ul, html, class: 'pagination'), class: 'pagination-container', style: 'text-align: center; margin: 30px 10px;')
+      tag(:div, tag(:ul, html, class: 'pagination'), class: 'pagination-container')
     end
 
     def page_number(page)
@@ -51,10 +51,10 @@ module WillPaginate
       tag(:li, link('...', '#'), class: 'disabled')
     end
 
-    # Preservar todos los parámetros de búsqueda en los links de paginación
+    # Preserve all search parameters in the pagination links
     def url(page)
       @base_url_params ||= begin
-        # Convertir params a hash y excluir action/controller
+        # Convert params to hash and exclude action/controller
         url_params = @template.params.to_unsafe_h.except('action', 'controller').symbolize_keys
         merge_optional_params(url_params)
       end

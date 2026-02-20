@@ -104,3 +104,5 @@
               %small
                 = link_to cu.course.title, course_slug_path(cu.course.slug)
   = will_paginate @courses_users, renderer: WillPaginate::LinkRenderer, previous_label: t('articles.previous'), next_label: t('articles.next'), inner_window: 1, outer_window: 1
+  .page-entries-info{style: 'text-align: center; color: #666; font-size: 14px; margin-top: 10px;'}
+    = t('articles.page_info', current: @courses_users.current_page, total_pages: @courses_users.total_pages, count: @courses_users.length, total: @courses_users.total_entries)

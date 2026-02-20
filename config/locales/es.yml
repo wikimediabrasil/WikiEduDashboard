@@ -187,6 +187,7 @@ es:
     no_available: No hay artículos disponibles
     next: Siguiente
     previous: Anterior
+    page_info: "Página %{current} de %{total_pages}, mostrando %{count} registros de %{total}"
     article_title: Título del artículo
     assigned_to: Asignado a
     character_doc: La suma de caracteres agregados a los artículos por los editores
