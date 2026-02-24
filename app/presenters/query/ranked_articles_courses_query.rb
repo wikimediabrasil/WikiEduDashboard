@@ -8,7 +8,8 @@ class Query::RankedArticlesCoursesQuery
   def initialize(courses:, per_page:, offset:, too_many:, article_title: nil, course_title: nil,
                  char_added_from: nil, char_added_to: nil,
                  references_count_from: nil, references_count_to: nil,
-                 view_count_from: nil, view_count_to: nil, school: nil)
+                 view_count_from: nil, view_count_to: nil, school: nil,
+                 sort_column: nil, sort_direction: nil)
     @courses = courses
     @per_page = per_page
     @offset = offset
@@ -22,6 +23,8 @@ class Query::RankedArticlesCoursesQuery
     @references_count_to = references_count_to
     @view_count_from = view_count_from
     @view_count_to = view_count_to
+    @sort_column = sort_column
+    @sort_direction = sort_direction
   end
 
   # Builds the final scope by joining the subquery on ID, used to fetch paginated and ranked results. # rubocop:disable Layout/LineLength
@@ -44,8 +47,37 @@ class Query::RankedArticlesCoursesQuery
     q = apply_range_filters(q)
 
     q = q.select(:id)
-    q = @too_many ? q : q.order('articles.deleted ASC, articles_courses.character_sum DESC')
+    q = if @too_many
+          q  
+        else
+          if @sort_column.present? && @sort_direction.present?
+            order_clause = order_clause_for_articles(@sort_column, @sort_direction)
+          else
+            order_clause = 'articles.deleted ASC, articles_courses.character_sum DESC'
+          end
+          q.order(order_clause)
+        end
     q.limit(@per_page).offset(@offset)
+  end
+
+  def order_clause_for_articles(column, direction)
+    column_map = {
+      'title' => 'articles.title',
+      'char_added' => 'articles_courses.character_sum',
+      'references' => 'articles_courses.references_count',
+      'views' => 'articles_courses.view_count'
+    }
+    
+    sql_column = column_map[column] || column
+    direction_sql = direction.upcase
+    
+    order_parts = ['articles.deleted ASC']
+    
+    order_parts << "#{sql_column} #{direction_sql}"
+    
+    order_parts << 'articles.title ASC' unless column == 'title'
+    
+    order_parts.join(', ')
   end
 
   private

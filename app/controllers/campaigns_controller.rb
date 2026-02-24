@@ -9,6 +9,8 @@ class CampaignsController < ApplicationController
                                         update destroy add_organizer remove_organizer
                                         remove_course ores_plot
                                         alerts active_courses]
+  before_action :set_page, only: [:programs, :articles, :users]
+  before_action :set_sort, only: [:programs, :articles, :users]
   before_action :require_create_permissions, only: [:create]
   before_action :require_write_permissions, only: %i[update destroy add_organizer
                                                      remove_organizer remove_course edit]
@@ -120,6 +122,7 @@ class CampaignsController < ApplicationController
 
   def programs
     set_page
+    set_sort
     set_presenter
     filters = extract_program_filters
 
@@ -286,7 +289,22 @@ class CampaignsController < ApplicationController
     courses_users = filter_by_revision_count(courses_users)
     courses_users = filter_by_course_title(courses_users)
 
-    courses_users.order(revision_count: :desc)
+    if @sort_column.present? && @sort_direction.present?
+      column_map = {
+        'username' => 'users.username',
+        'revision_count' => 'courses_users.revision_count',
+        'title' => 'courses.title'
+      }
+          
+      sql_column = column_map[@sort_column] || @sort_column
+      order_clause = "#{sql_column} #{@sort_direction}"
+          
+      order_clause += ', users.username ASC' unless @sort_column == 'username'
+    else
+      order_clause = 'courses_users.revision_count DESC, users.username ASC'
+    end
+
+    courses_users.order(order_clause).paginate(page: @page, per_page: 25)
   end
 
   def filter_by_username(courses_users)
@@ -338,10 +356,37 @@ class CampaignsController < ApplicationController
     @page = nil unless @page&.positive?
   end
 
+  def set_sort 
+    case action_name
+    when 'articles'
+      default_column = 'char_added'
+    when 'users'
+      default_column = 'revision_count'
+    else
+      default_column = 'recent_revision_count'
+    end
+    
+    default_direction = 'DESC'
+    @sort_column = params[:sort] || default_column
+    @sort_direction = params[:direction] || default_direction
+
+    valid_columns = %w[title school recent_revision_count character_sum 
+                     average_word_count references_count view_sum 
+                     user_count trained_count created_at start
+                     char_added references views lang_project course_title
+                     username revision_count
+                    ]
+                
+    @sort_column = default_column unless valid_columns.include?(@sort_column)
+    @sort_direction = default_direction unless %w[ASC DESC].include?(@sort_direction.upcase)
+  end
+
   def set_presenter
     @presenter = CoursesPresenter.new(current_user:,
                                       campaign_param: @campaign.slug,
                                       page: @page,
+                                      sort_column: @sort_column,
+                                      sort_direction: @sort_direction,
                                       articles_title: params[:title],
                                       course_title: params[:course_title],
                                       char_added_from: params[:char_added_from],
