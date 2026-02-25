@@ -1004,7 +1004,7 @@ pt:
       O número estimado de edições nos últimos %{timeframe} dias, com
       base na média de edições por dia no último período.
     revisions_none: Este curso não tem atividade recente de edição na Wikipédia.
-    school: Escola
+    school: Instituição
     school_and_term: Instituição/período
     search_all_tickets_for_this_course: Procurar este curso em todos os pedidos
     search_courses: Pesquisar cursos
@@ -1012,7 +1012,7 @@ pt:
     start_typing: Começar a escrever
     stay_in_sandbox: Permanecer na zona de testes
     student: Estudante
-    students: Estudantes
+    students: Editores
     students_taught: Alunos ensinados
     students_count: "# Estudantes"
     student_editors: Editores estudantes

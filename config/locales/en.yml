@@ -889,7 +889,7 @@ en:
       The estimated number of edits in the past %{timeframe} days, based on the
       average edits per day over the last period.
     revisions_none: This course has no recent Wikipedia editing activity.
-    school: School
+    school: Institution
     school_and_term: Institution/Term
     search_all_tickets_for_this_course: Search all tickets for this course
     search_courses: Search courses
@@ -899,7 +899,7 @@ en:
     max_group_size: Max. group size
     max_group_size_tooltip: Maximum number of students who can work on the same article. Leave blank for unlimited.
     student: Student
-    students: Students
+    students: Editors
     students_taught: Students Taught
     students_count: "# Students"
     student_editors: Student Editors

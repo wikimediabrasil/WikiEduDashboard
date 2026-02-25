@@ -851,7 +851,7 @@ es:
       para unirse al curso. (Todavía podrás hacer cambios más adelante.)
     revisions_doc: El número de ediciones en los últimos %{timeframe} días
     revisions_none: Este curso no tiene ediciones recientes en Wikipedia.
-    school: Escuela
+    school: Institución
     school_and_term: Institución/Período
     search_courses: Buscar cursos
     start: Inicio
@@ -861,7 +861,7 @@ es:
     max_group_size_tooltip:
       Número máximo de estudiantes que pueden trabajar en el
       mismo artículo. Dejar en blanco para un número ilimitado.
-    students: Estudiantes
+    students: Editores
     students_count: "# Estudiantes"
     student_editors: Editores estudiantiles
     students_none: Este curso no tiene estudiantes.
