@@ -10,7 +10,7 @@ class CoursesPresenter
   def initialize(current_user:, campaign_param: nil, courses_list: nil, page: nil, tag: nil,
                  articles_title: nil, course_title: nil, char_added_from: nil, char_added_to: nil,
                  references_count_from: nil, references_count_to: nil,
-                 view_count_from: nil, view_count_to: nil, school: nil, 
+                 view_count_from: nil, view_count_to: nil, school: nil,
                  sort_column: nil, sort_direction: nil)
     @current_user = current_user
     @campaign_param = campaign_param
@@ -175,7 +175,7 @@ class CoursesPresenter
       'lower(title) like ? OR lower(school) like ? ' \
       'OR lower(term) like ? OR lower(username) like ?',
       "%#{q}%", "%#{q}%", "%#{q}%", "%#{q}%"
-    ).distinct
+    ).distinct.paginate(page: @page, per_page: 25)
   end
 
   def search_courses_by_title(q)
@@ -236,7 +236,7 @@ class CoursesPresenter
     if @sort_column.present? && @sort_direction.present?
       order_clause ="#{@sort_column}  #{@sort_direction.upcase}"
       order_clause += ', title ASC' unless @sort_column == 'title'
-    else 
+    else
       order_clause = 'recent_revision_count DESC, title ASC'
     end
 
