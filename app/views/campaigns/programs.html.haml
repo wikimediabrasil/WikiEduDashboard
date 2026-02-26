@@ -40,8 +40,8 @@
               = hidden_field_tag :creation_start, params[:creation_start], id: 'creation_start'
               = hidden_field_tag :creation_end, params[:creation_end], id: 'creation_end'
             .form-row.advanced-search-grid-small
-              %label{for: 'start_date_range'}= t("courses.start_date")
-              = text_field_tag :start_date_range, nil, id: 'start_date_range', class: 'w100', placeholder: t('courses.start_date')
+              %label{for: 'start_date_range'}= t("form_search.program_date")
+              = text_field_tag :start_date_range, nil, id: 'start_date_range', class: 'w100', placeholder: t('form_search.program_date')
               = hidden_field_tag :start_date_start, params[:start_date_start], id: 'start_date_start'
               = hidden_field_tag :start_date_end, params[:start_date_end], id: 'start_date_end'
             :javascript
@@ -195,7 +195,7 @@
               %span.sortable-indicator
 
           %th.sort.sortable{style: 'width: 160px;', 'data-default-order' => 'desc', 'data-sort' => 'start-date', 'data-backend-column' => 'created_at'}
-            = t('courses.start_date')
+            = t('form_search.program_date')
             %span.sortable-indicator
 
           - if @presenter.can_remove_course?
