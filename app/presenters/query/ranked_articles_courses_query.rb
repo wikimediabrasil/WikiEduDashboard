@@ -47,17 +47,19 @@ class Query::RankedArticlesCoursesQuery
     q = apply_range_filters(q)
 
     q = q.select(:id)
-    q = if @too_many
-          q  
-        else
-          if @sort_column.present? && @sort_direction.present?
-            order_clause = order_clause_for_articles(@sort_column, @sort_direction)
-          else
-            order_clause = 'articles.deleted ASC, articles_courses.character_sum DESC'
-          end
-          q.order(order_clause)
-        end
+    q = apply_sorting(q)
     q.limit(@per_page).offset(@offset)
+  end
+
+  def apply_sorting(query)
+    return query if @too_many
+
+    order_clause = if @sort_column.present? && @sort_direction.present?
+                     order_clause_for_articles(@sort_column, @sort_direction)
+                   else
+                     'articles.deleted ASC, articles_courses.character_sum DESC'
+                   end
+    query.order(order_clause)
   end
 
   def order_clause_for_articles(column, direction)
@@ -67,16 +69,16 @@ class Query::RankedArticlesCoursesQuery
       'references' => 'articles_courses.references_count',
       'views' => 'articles_courses.view_count'
     }
-    
+
     sql_column = column_map[column] || column
     direction_sql = direction.upcase
-    
+
     order_parts = ['articles.deleted ASC']
-    
+
     order_parts << "#{sql_column} #{direction_sql}"
-    
+
     order_parts << 'articles.title ASC' unless column == 'title'
-    
+
     order_parts.join(', ')
   end
 
