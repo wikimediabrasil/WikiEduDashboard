@@ -289,22 +289,24 @@ class CampaignsController < ApplicationController
     courses_users = filter_by_revision_count(courses_users)
     courses_users = filter_by_course_title(courses_users)
 
-    if @sort_column.present? && @sort_direction.present?
-      column_map = {
-        'username' => 'users.username',
-        'revision_count' => 'courses_users.revision_count',
-        'title' => 'courses.title'
-      }
-          
-      sql_column = column_map[@sort_column] || @sort_column
-      order_clause = "#{sql_column} #{@sort_direction}"
-          
-      order_clause += ', users.username ASC' unless @sort_column == 'username'
-    else
-      order_clause = 'courses_users.revision_count DESC, users.username ASC'
+    courses_users.order(users_order_clause).paginate(page: @page, per_page: 25)
+  end
+
+  def users_order_clause
+    unless @sort_column.present? && @sort_direction.present?
+      return 'courses_users.revision_count DESC, users.username ASC'
     end
 
-    courses_users.order(order_clause).paginate(page: @page, per_page: 25)
+    column_map = {
+      'username' => 'users.username',
+      'revision_count' => 'courses_users.revision_count',
+      'title' => 'courses.title'
+    }
+
+    sql_column = column_map[@sort_column] || @sort_column
+    order_clause = "#{sql_column} #{@sort_direction}"
+    order_clause += ', users.username ASC' unless @sort_column == 'username'
+    order_clause
   end
 
   def filter_by_username(courses_users)
@@ -356,29 +358,30 @@ class CampaignsController < ApplicationController
     @page = nil unless @page&.positive?
   end
 
-  def set_sort 
-    case action_name
-    when 'articles'
-      default_column = 'char_added'
-    when 'users'
-      default_column = 'revision_count'
-    else
-      default_column = 'recent_revision_count'
-    end
-    
+  def set_sort
     default_direction = 'DESC'
-    @sort_column = params[:sort] || default_column
+    @sort_column = params[:sort] || default_sort_column
     @sort_direction = params[:direction] || default_direction
 
-    valid_columns = %w[title school recent_revision_count character_sum 
-                     average_word_count references_count view_sum 
-                     user_count trained_count created_at start
-                     char_added references views lang_project course_title
-                     username revision_count
-                    ]
-                
-    @sort_column = default_column unless valid_columns.include?(@sort_column)
+    valid_columns = %w[title school recent_revision_count character_sum
+                       average_word_count references_count view_sum
+                       user_count trained_count created_at start
+                       char_added references views lang_project course_title
+                       username revision_count]
+
+    @sort_column = default_sort_column unless valid_columns.include?(@sort_column)
     @sort_direction = default_direction unless %w[ASC DESC].include?(@sort_direction.upcase)
+  end
+
+  def default_sort_column
+    case action_name
+    when 'articles'
+      'char_added'
+    when 'users'
+      'revision_count'
+    else
+      'recent_revision_count'
+    end
   end
 
   def set_presenter
