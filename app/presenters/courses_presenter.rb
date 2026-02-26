@@ -77,13 +77,28 @@ class CoursesPresenter
   PER_PAGE = 25
   # Returns a scoped query for ranked articles_courses using a deferred join via RankedArticlesCoursesQuery # rubocop:disable Layout/LineLength
   def articles_courses_scope
-    return @articles_courses_scope unless @articles_courses_scope.nil?
+    @articles_courses_scope ||= Query::RankedArticlesCoursesQuery.new(
+      **ranked_articles_courses_query_params
+    ).scope
+  end
 
-    @articles_courses_scope = Query::RankedArticlesCoursesQuery.new(
+  def ranked_articles_courses_query_params
+    base_query_params.merge(filter_query_params)
+  end
+
+  def base_query_params
+    {
       courses: course_ids_and_slugs,
       per_page: PER_PAGE,
       offset:,
       too_many: too_many_articles?,
+      sort_column: @sort_column,
+      sort_direction: @sort_direction
+    }
+  end
+
+  def filter_query_params
+    {
       article_title: @articles_title,
       course_title: @course_title,
       char_added_from: @char_added_from,
@@ -92,10 +107,8 @@ class CoursesPresenter
       references_count_to: @references_count_to,
       view_count_from: @view_count_from,
       view_count_to: @view_count_to,
-      school: @school,
-      sort_column: @sort_column,
-      sort_direction: @sort_direction
-    ).scope
+      school: @school
+    }
   end
 
   # Fetch and index articles by ID for efficient lookup
@@ -214,11 +227,30 @@ class CoursesPresenter
   end
 
   def filter_courses(filters)
-    scope = courses
+    scope = filter_courses_by_text(courses, filters)
+    scope = filter_courses_by_integer_ranges(scope, filters)
+    scope = filter_courses_by_time_ranges(scope, filters)
 
+    scope.distinct.order(courses_order_clause).paginate(page: @page, per_page: 25)
+  end
+
+  def courses_order_clause
+    unless @sort_column.present? && @sort_direction.present?
+      return 'recent_revision_count DESC, title ASC'
+    end
+
+    order_clause = "#{@sort_column} #{@sort_direction.upcase}"
+    order_clause += ', title ASC' unless @sort_column == 'title'
+    order_clause
+  end
+
+  def filter_courses_by_text(scope, filters)
     scope = filter_title(scope, filters[:title_query])
     scope = scope.where(school: filters[:school]) if filters[:school].present?
+    scope
+  end
 
+  def filter_courses_by_integer_ranges(scope, filters)
     scope = filter_integer_range(scope, filters, :revisions_min, :revisions_max,
                                  'courses.recent_revision_count')
     scope = filter_integer_range(scope, filters, :word_count_min, :word_count_max,
@@ -227,20 +259,12 @@ class CoursesPresenter
     scope = filter_integer_range(scope, filters, :references_min, :references_max,
                                  'courses.references_count')
     scope = filter_integer_range(scope, filters, :views_min, :views_max, 'courses.view_sum')
-    scope = filter_integer_range(scope, filters, :users_min, :users_max, 'courses.user_count')
+    filter_integer_range(scope, filters, :users_min, :users_max, 'courses.user_count')
+  end
 
+  def filter_courses_by_time_ranges(scope, filters)
     scope = filter_time_range(scope, filters, :creation_start, :creation_end, 'courses.created_at')
-    scope = filter_time_range(scope, filters, :start_date_start, :start_date_end, 'courses.start')
-
-    # scope.distinct.order('recent_revision_count DESC, title ASC').paginate(page: @page, per_page: 2)
-    if @sort_column.present? && @sort_direction.present?
-      order_clause ="#{@sort_column}  #{@sort_direction.upcase}"
-      order_clause += ', title ASC' unless @sort_column == 'title'
-    else
-      order_clause = 'recent_revision_count DESC, title ASC'
-    end
-
-    scope.distinct.order(order_clause).paginate(page: @page, per_page: 25)
+    filter_time_range(scope, filters, :start_date_start, :start_date_end, 'courses.start')
   end
 
   def courses_by_recent_edits
