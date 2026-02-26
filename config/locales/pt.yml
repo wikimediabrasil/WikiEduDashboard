@@ -1474,6 +1474,10 @@ pt:
       "Alegação criada".
     restorations_performed: Restaurações efetuadas
     reverts_performed: Reversões efetuadas
+    editors: Editores
+    editors_doc: Este é o número de usuários únicos que editaram artigos no curso.
+    program_date: Data do programa
+    program_date_doc: Esta é a data do programa.
   namespace:
     all: Todos
     main: Domínio principal

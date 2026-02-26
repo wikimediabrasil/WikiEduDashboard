@@ -1104,6 +1104,10 @@ es:
       o «afirmación creada».
     restorations_performed: Restauraciones realizadas
     reverts_performed: Reversiones realizadas
+    editors: Editores
+    editors_doc: Este es el número de usuarios únicos que han editado artículos en el curso.
+    program_date: Fecha del programa
+    program_date_doc: Esta es la fecha del programa.
   namespace:
     all: Todos
     main: Espacio principal

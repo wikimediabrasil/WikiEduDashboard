@@ -1263,7 +1263,10 @@ en:
       or "Created claim" instead.
     restorations_performed: Restorations performed
     reverts_performed: Reverts performed
-
+    editors: Editors
+    editors_doc: This is the number of unique users who have edited articles in the course.
+    program_date: Program Date
+    program_date_doc: This is the date of the program.
   namespace:
     all: All
     main: Mainspace
@@ -2082,5 +2085,5 @@ en:
     between: "between"
     and: "and"
     program_date: "Program Date"
-  
+
 
