@@ -1589,4 +1589,5 @@ es:
     clear: "Limpiar"
     between: "entre"
     and: "y"
+    program_date: "Fecha del programa"
 ...

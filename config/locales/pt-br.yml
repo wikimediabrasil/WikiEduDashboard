@@ -2276,4 +2276,5 @@ pt-br:
     clear: "Limpar"
     between: "entre"
     and: "e"
+    program_date: "Data do programa"
 ...
