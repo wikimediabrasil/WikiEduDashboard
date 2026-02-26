@@ -187,16 +187,24 @@
               .tooltip.dark
                 %p= t('courses.view_doc')
           %th.sort.sortable{style: 'width: 200px;', 'data-default-order' => 'desc', 'data-sort' => 'students', 'data-backend-column' => 'user_count'}
-            = t('users.editors')
-            %span.sortable-indicator
+            .tooltip-trigger
+              = t('users.editors')
+              %span.sortable-indicator
+              %span.tooltip-indicator
+              .tooltip.dark
+                %p= t('metrics.editors_doc')
           - unless Features.wiki_ed?
             %th.sort.sortable{'data-default-order' => 'desc', 'data-sort' => 'creation-date', style: 'width: 160px'}
               = t('courses.creation_date')
               %span.sortable-indicator
 
           %th.sort.sortable{style: 'width: 160px;', 'data-default-order' => 'desc', 'data-sort' => 'start-date', 'data-backend-column' => 'created_at'}
-            = t('form_search.program_date')
-            %span.sortable-indicator
+            .tooltip-trigger
+              = t('form_search.program_date')
+              %span.sortable-indicator
+              %span.tooltip-indicator
+              .tooltip.dark
+                %p= t('metrics.program_date_doc')
 
           - if @presenter.can_remove_course?
             %th{style: 'width:100px'}
