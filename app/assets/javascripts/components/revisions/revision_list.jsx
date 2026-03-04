@@ -5,6 +5,65 @@ import Revision from './revision.jsx';
 import CourseUtils from '../../utils/course_utils.js';
 import ArticleUtils from '../../utils/article_utils.js';
 
+const RevisionPagination = ({ totalItems, itemsPerPage, currentPage, onPageChange, totalPages }) => {
+  const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
+  return (
+    <>
+      <div className="pagination" style={{ margin: '5px 10px' }}>
+        <a
+          className={`previous_page ${currentPage === 1 ? 'disabled' : ''}`}
+          onClick={(e) => {
+            e.preventDefault();
+            if (currentPage > 1) onPageChange(currentPage - 1);
+          }}
+          href="#"
+        >
+          {I18n.t('articles.previous')}
+        </a>
+        {
+          pageNumbers.map(number => (
+            <a
+              key={number}
+              className={currentPage === number ? 'current' : ''}
+              onClick={(e) => {
+                e.preventDefault();
+                if (currentPage !== number) onPageChange(number);
+              }}
+              href="#"
+              style={currentPage === number ? {
+                cursor: 'default',
+                backgroundColor: '#676eb4',
+                color: '#fff',
+                border: 'none'
+              } : {}}
+            >
+              {number}
+            </a>
+          ))
+        }
+        <a
+          className={`next_page ${currentPage === totalPages ? 'disabled' : ''}`}
+          onClick={(e) => {
+            e.preventDefault();
+            if (currentPage < totalPages) onPageChange(currentPage + 1);
+          }}
+          href="#"
+        >
+          {I18n.t('articles.next')}
+        </a>
+      </div>
+      <div className="page-entries-info" style={{ textAlign: 'center', color: '#666', fontSize: '14px', marginTop: '0' }}>
+        {I18n.t('articles.page_info', {
+          current: currentPage,
+          total_pages: totalPages,
+          count: itemsPerPage,
+          total: totalItems
+        })}
+      </div>
+    </>
+  );
+};
+
 const RevisionList = ({ revisions, course, sortBy, wikidataLabels, sort, loaded, students }) => {
   const [selectedIndex, setSelectedIndex] = useState(-1);
 
@@ -12,7 +71,12 @@ const RevisionList = ({ revisions, course, sortBy, wikidataLabels, sort, loaded,
     setSelectedIndex(index);
   };
 
-  const elements = revisions.map((revision, index) => (
+  const [page, setPage] = React.useState(1);
+  const perPage = 15;
+  const paginatedRevisions = revisions.slice((page - 1) * perPage, page * perPage);
+  const totalPages = Math.ceil(revisions.length / perPage);
+
+  const elements = paginatedRevisions.map((revision, index) => (
     <Revision
       revision={revision}
       key={revision.id}
@@ -65,14 +129,23 @@ const RevisionList = ({ revisions, course, sortBy, wikidataLabels, sort, loaded,
   // Whether or not the revisions is really an empty array is confirmed after the revisions
   // are successfully loaded
   return (
-    <List
-      elements={elements}
-      keys={keys}
-      table_key="revisions"
-      none_message={loaded ? CourseUtils.i18n('revisions_none', course.string_prefix) : ''}
-      sortBy={sortBy}
-      sortable={true}
-    />
+    <>
+      <List
+        elements={elements}
+        keys={keys}
+        table_key="revisions"
+        none_message={loaded ? CourseUtils.i18n('revisions_none', course.string_prefix) : ''}
+        sortBy={sortBy}
+        sortable={true}
+      />
+      <RevisionPagination
+        totalItems={revisions.length}
+        itemsPerPage={perPage}
+        currentPage={page}
+        onPageChange={setPage}
+        totalPages={totalPages}
+      />
+    </>
   );
 };
 

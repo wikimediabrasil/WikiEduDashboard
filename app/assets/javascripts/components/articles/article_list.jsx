@@ -11,11 +11,69 @@ import CourseOresPlot from './course_ores_plot.jsx';
 import articleListKeys from './article_list_keys';
 import ArticleUtils from '../../utils/article_utils.js';
 import { parse, stringify } from 'query-string';
-import { PaginatedArticleControls } from './PaginatedArticleControls';
 import Select from 'react-select';
 import sortSelectStyles from '../../styles/sort_select';
 
 const defaults_params = { wiki: 'all', tracked: 'tracked', newness: 'both' };
+
+const ArticlesPagination = ({ totalItems, itemsPerPage, currentPage, onPageChange, totalPages }) => {
+  const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
+  return (
+    <>
+      <div className="pagination" style={{ margin: '5px 10px' }}>
+        <a
+          className={`previous_page ${currentPage === 1 ? 'disabled' : ''}`}
+          onClick={(e) => {
+            e.preventDefault();
+            if (currentPage > 1) onPageChange(currentPage - 1);
+          }}
+          href="#"
+        >
+          {I18n.t('articles.previous')}
+        </a>
+        {
+          pageNumbers.map(number => (
+            <a
+              key={number}
+              className={currentPage === number ? 'current' : ''}
+              onClick={(e) => {
+                e.preventDefault();
+                if (currentPage !== number) onPageChange(number);
+              }}
+              href="#"
+              style={currentPage === number ? {
+                cursor: 'default',
+                backgroundColor: '#676eb4',
+                color: '#fff',
+                border: 'none'
+              } : {}}
+            >
+              {number}
+            </a>
+          ))
+        }
+        <a
+          className={`next_page ${currentPage === totalPages ? 'disabled' : ''}`}
+          onClick={(e) => {
+            e.preventDefault();
+            if (currentPage < totalPages) onPageChange(currentPage + 1);
+          }}
+          href="#"
+        >
+          {I18n.t('articles.next')}
+        </a>
+      </div>
+      <div className="page-entries-info" style={{ textAlign: 'center', color: '#666', fontSize: '14px', marginTop: '0' }}>
+        {I18n.t('articles.page_info', {
+          current: currentPage,
+          total_pages: totalPages,
+          count: itemsPerPage,
+          total: totalItems
+        })}
+      </div>
+    </>
+  );
+};
 
 const ArticleList = createReactClass({
   displayName: 'ArticleList',
@@ -72,6 +130,8 @@ const ArticleList = createReactClass({
     }
     return {
       selectedIndex: -1,
+      currentPage: 1,
+      perPage: 10
     };
   },
 
@@ -141,6 +201,10 @@ const ArticleList = createReactClass({
       wikiFilterValue = `${wikiFilter.project}`;
     }
     return wikiFilterValue;
+  },
+
+  handlePageChange(newPage) {
+    this.setState({ currentPage: newPage });
   },
 
   render() {
@@ -219,6 +283,9 @@ const ArticleList = createReactClass({
         pageLogsMessage={pageLogsMessage}
       />
     ));
+
+    const paginatedArticles = articleElements.slice((this.state.currentPage - 1) * this.state.perPage, this.state.currentPage * this.state.perPage);
+    const totalPages = Math.ceil(articleElements.length / this.state.perPage);
 
     let header;
     if (Features.wikiEd) {
@@ -321,27 +388,29 @@ const ArticleList = createReactClass({
         </div>
       </div>
     );
-    const limitReached = this.props.limitReached;
-    const showMoreSection = (
-      <div className="see-more">
-        <PaginatedArticleControls showMore={this.showMore} limitReached={limitReached} />
-      </div>
-    );
 
     return (
-      <div id="articles" className="mt4">
-        {sectionHeader}
-        {showMoreSection}
-        <List
-          elements={articleElements}
-          keys={keys}
-          sortable={true}
-          table_key="articles"
-          className="table--expandable table--hoverable"
-          none_message={ArticleUtils.I18n('edited_none', project)}
-          sortBy={this.props.sortArticles}
-        />
-      </div>
+      <>
+        <div id="articles" className="mt4">
+          {sectionHeader}
+          <List
+            elements={paginatedArticles}
+            keys={keys}
+            sortable={true}
+            table_key="articles"
+            className="table--expandable table--hoverable"
+            none_message={ArticleUtils.I18n('edited_none', project)}
+            sortBy={this.props.sortArticles}
+          />
+          <ArticlesPagination
+            totalItems={articleElements.length}
+            itemsPerPage={this.state.perPage}
+            currentPage={this.state.currentPage}
+            onPageChange={page => this.handlePageChange(page)}
+            totalPages={totalPages}
+          />
+        </div>
+      </>
     );
   }
 });
