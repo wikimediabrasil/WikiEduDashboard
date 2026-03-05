@@ -10,12 +10,14 @@ import CourseUtils from '~/app/assets/javascripts/utils/course_utils.js';
 import { addNotification } from '~/app/assets/javascripts/actions/notification_actions.js';
 import { initiateConfirm } from '~/app/assets/javascripts/actions/confirm_actions';
 import { getFiltered } from '~/app/assets/javascripts/utils/model_utils';
-import { addUser, removeUser } from '~/app/assets/javascripts/actions/user_actions';
+// import { addUser, removeUser } from '~/app/assets/javascripts/actions/user_actions';
+import { addUser } from '~/app/assets/javascripts/actions/user_actions';
 import useExpandablePopover from '../../hooks/useExpandablePopover';
 import { useParams } from 'react-router-dom';
 import { INSTRUCTOR_ROLE, STUDENT_ROLE } from '../../constants/user_roles';
-
-const EnrollButton = ({ users, role, course, current_user, allowed, inline }) => {
+import TomSelect from 'tom-select';
+// const EnrollButton = ({ users, role, course, current_user, allowed, inline }) => {
+const EnrollButton = ({ users, role, course, allowed, inline }) => {
   const usernameRef = useRef(null);
   const realNameRef = useRef(null);
   const roleDescriptionRef = useRef(null);
@@ -80,19 +82,6 @@ const EnrollButton = ({ users, role, course, current_user, allowed, inline }) =>
     }));
   };
 
-  const unenroll = (userId) => {
-    const user = getFiltered(users, { id: userId, role })[0];
-    const courseId = course.slug;
-    const userObject = { user_id: userId, role };
-
-    const onConfirm = () => {
-      // Post the user deletion request to the server
-      dispatch(removeUser(courseId, { user: userObject }));
-    };
-    const confirmMessage = I18n.t('users.remove_confirmation', { username: user.username });
-    return dispatch(initiateConfirm({ confirmMessage, onConfirm }));
-  };
-
   const stop = (e) => {
     return e.stopPropagation();
   };
@@ -105,19 +94,6 @@ const EnrollButton = ({ users, role, course, current_user, allowed, inline }) =>
   // except for the Facilitator role
   if (course.flags.event_sync && role !== INSTRUCTOR_ROLE) { return null; }
 
-  const usersList = users.map((user) => {
-    let removeButton;
-    if (role !== INSTRUCTOR_ROLE || users.length >= 2 || current_user.admin) {
-      removeButton = (
-        <button className="button border plus" aria-label="Remove user" onClick={() => unenroll(user.id)}>-</button>
-      );
-    }
-    return (
-      <tr key={`${user.id}_enrollment`}>
-        <td>{user.username}{removeButton}</td>
-      </tr>
-    );
-  });
 
   const enrollParam = '?enroll=';
   const enrollUrl = window.location.origin + courseLinkParams() + enrollParam + course.passcode;
@@ -154,26 +130,48 @@ const EnrollButton = ({ users, role, course, current_user, allowed, inline }) =>
   // @allowed controls its presence in Edit Details mode on Overview
   if (role === STUDENT_ROLE || allowed) {
     // Instructor-specific extra fields
-    let realNameInput;
-    let roleDescriptionInput;
-    if (role === INSTRUCTOR_ROLE) {
-      realNameInput = <input type="text" ref={realNameRef} placeholder={I18n.t('users.name')} />;
-      roleDescriptionInput = <input type="text" ref={roleDescriptionRef} placeholder={I18n.t('users.role.description')} />;
-    }
+
 
     editRows.push(
       <tr className="edit" key="add_students">
         <td>
           <form onSubmit={enroll}>
-            <input type="text" ref={usernameRef} placeholder={I18n.t('users.username_placeholder')} />
-            {realNameInput}
-            {roleDescriptionInput}
-            <button className="button border" type="submit">{CourseUtils.i18n('enroll', course.string_prefix)}</button>
+            <select id="select-beast" multiple ref={usernameRef} placeholder={I18n.t('users.username_placeholder')} autoComplete="off" style={{ marginBottom: '10px' }}>
+              {users.map(user => <option value={user.username} key={user.id}>{user.username}</option>)}
+            </select>
+            <button className="button border" type="submit" style={{ marginTop: '8px' }}>{CourseUtils.i18n('enroll', course.string_prefix)}</button>
           </form>
         </td>
       </tr>
     );
   }
+
+  const tomSelectRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => {
+        const element = document.getElementById('select-beast');
+        if (element && !tomSelectRef.current) {
+          tomSelectRef.current = new TomSelect('#select-beast', {
+            maxItems: null
+          });
+        }
+      }, 150);
+    }
+
+    if (!isOpen && tomSelectRef.current) {
+      tomSelectRef.current.destroy();
+      tomSelectRef.current = null;
+    }
+
+    return () => {
+      if (tomSelectRef.current) {
+        tomSelectRef.current.destroy();
+        tomSelectRef.current = null;
+      }
+    };
+  }, [isOpen]);
 
   let buttonClass = 'button';
   buttonClass += inline ? ' border plus' : ' dark';
@@ -200,7 +198,6 @@ const EnrollButton = ({ users, role, course, current_user, allowed, inline }) =>
       <Popover
         is_open={isOpen}
         edit_row={editRows}
-        rows={usersList}
       />
     </div>
   );
