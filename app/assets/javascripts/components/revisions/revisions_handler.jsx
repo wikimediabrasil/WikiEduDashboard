@@ -19,8 +19,6 @@ const RevisionHandler = ({ course, courseScopedLimit }) => {
 
   const revisionsDisplayed = useSelector(state => state.revisions.revisionsDisplayed);
   const revisionsDisplayedCourseSpecific = useSelector(state => state.revisions.revisionsDisplayedCourseSpecific);
-  const courseScopedLimitReached = useSelector(state => state.revisions.courseScopedLimitReached);
-  const limitReached = useSelector(state => state.revisions.limitReached);
   const courseSpecificAssessmentsLoaded = useSelector(state => state.revisions.courseSpecificAssessmentsLoaded);
   const wikidataLabels = useSelector(state => state.wikidataLabels.labels);
   const courseScopedRevisionsLoaded = useSelector(state => state.revisions.courseScopedRevisionsLoaded);
@@ -92,22 +90,10 @@ const RevisionHandler = ({ course, courseScopedLimit }) => {
     dispatch(sortRevisions(e.value));
   };
 
-  // We disable show more button if there is a request which is still resolving
-  // by keeping track of revisionsLoaded and courseScopedRevisionsLoaded
-  const showMore = () => {
-    if (isCourseScoped) {
-      dispatch(fetchCourseScopedRevisions(course, courseScopedLimit + 100));
-    } else {
-      dispatch(fetchRevisions(course));
-    }
-  };
 
   // Boolean to indicate whether the revisions in the current section (all scoped or course scoped are loaded)
   const loaded = (!isCourseScoped && revisionsLoaded) || (isCourseScoped && courseScopedRevisionsLoaded);
   const metaDataLoading = (!isCourseScoped ? (!referencesLoaded || !assessmentsLoaded) : (!courseSpecificReferencesLoaded || !courseSpecificAssessmentsLoaded));
-  const showMoreButton = ((!isCourseScoped && !limitReached) || (isCourseScoped && !courseScopedLimitReached)) ? (
-    <div><button className="button ghost stacked right" onClick={showMore}>{I18n.t('revisions.see_more')}</button></div>
-  ) : null;
 
   // we only fetch articles data for a max of 500 articles(for course specific revisions).
   // If there are more than 500 articles, the toggle button is not shown
@@ -172,7 +158,7 @@ const RevisionHandler = ({ course, courseScopedLimit }) => {
         />
       </div>
       {!loaded && <Loading />}
-      {loaded && showMoreButton}
+      {/* {loaded && showMoreButton} */}
       {loaded && metaDataLoading && <ProgressIndicator message={getLoadingMessage()} />}
     </div>
   );

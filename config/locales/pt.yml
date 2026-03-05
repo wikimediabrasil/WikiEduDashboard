@@ -196,6 +196,9 @@ pt:
     no_available: Não há nenhum artigo disponível
     next: Seguinte
     previous: Anterior
+    start: Início
+    end: Fim
+    page_info: "Página %{current} de %{total_pages}, mostrando %{count} registros de %{total}"
     article_title: Título do Artigo
     assigned_to: Atribuído a
     character_doc: A soma do número de carateres adicionados a artigos por editores

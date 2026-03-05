@@ -6,10 +6,23 @@ import CourseUtils from '../../utils/course_utils.js';
 import ArticleUtils from '../../utils/article_utils.js';
 
 const RevisionPagination = ({ totalItems, itemsPerPage, currentPage, onPageChange, totalPages }) => {
-  const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
+  const maxPages = 10;
+  const startSection = Math.max(1, currentPage - Math.floor(maxPages / 2));
+  const endSection = Math.min(totalPages, startSection + maxPages - 1);
+  const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1).filter(number => number >= startSection && number <= endSection);
   return (
     <>
       <div className="pagination" style={{ margin: '5px 10px' }}>
+        <a
+          className={`first_page ${currentPage === 1 ? 'disabled' : ''}`}
+          onClick={(e) => {
+            e.preventDefault();
+            if (currentPage !== 1) onPageChange(1);
+          }}
+          href="#"
+        >
+          {I18n.t('articles.start')}
+        </a>
         <a
           className={`previous_page ${currentPage === 1 ? 'disabled' : ''}`}
           onClick={(e) => {
@@ -50,6 +63,16 @@ const RevisionPagination = ({ totalItems, itemsPerPage, currentPage, onPageChang
           href="#"
         >
           {I18n.t('articles.next')}
+        </a>
+        <a
+          className={`last_page ${currentPage === totalPages ? 'disabled' : ''}`}
+          onClick={(e) => {
+            e.preventDefault();
+            if (currentPage !== totalPages) onPageChange(totalPages);
+          }}
+          href="#"
+        >
+          {I18n.t('articles.end')}
         </a>
       </div>
       <div className="page-entries-info" style={{ textAlign: 'center', color: '#666', fontSize: '14px', marginTop: '0' }}>
