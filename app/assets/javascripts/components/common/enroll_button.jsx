@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch } from 'react-redux';
 
@@ -23,18 +23,84 @@ const EnrollButton = ({ users, role, course, current_user, allowed, inline }) =>
   const dispatch = useDispatch();
   const { course_school, course_title } = useParams();
 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [searchError, setSearchError] = useState(false);
+
   useEffect(() => {
-    if (!usernameRef.current || !usernameRef.current.value) { return; }
-    const username = usernameRef.current.value;
+    if (searchTerm.length < 2) {
+      setSearchResults([]);
+      setShowDropdown(false);
+      setSearchError(false);
+      return;
+    }
+    setSearchError(false);
+    setShowDropdown(false);
+    const timeoutId = setTimeout(() => {
+      const courseSlug = course.slug;
+      fetch(`/courses/${courseSlug}/available_users.json?search=${encodeURIComponent(searchTerm)}`)
+        .then((response) => {
+          if (!response.ok) { throw new Error('Network response was not ok'); }
+          return response.json();
+        })
+        .then((data) => {
+          setSearchResults(data);
+          setShowDropdown(data.length > 0);
+          setSearchError(false);
+        })
+        .catch((error) => {
+          // eslint-disable-next-line no-console
+          console.error('Error fetching available users:', error);
+          setSearchResults([]);
+          setShowDropdown(false);
+          setSearchError(true);
+        });
+    }, 300);
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm, course.slug, dispatch]);
+
+  const selectUserFromDropdown = (user) => {
+    // Cuando selecciona del dropdown, poner el username en el input
+    setSearchTerm(user.username);
+    setSearchResults([]);
+    setShowDropdown(false);
+
+    // Focus en el input para que pueda hacer submit
+    if (usernameRef.current) {
+      usernameRef.current.focus();
+    }
+  };
+
+  useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (showDropdown && !event.target.closest('.autocomplete-container')) {
+      setShowDropdown(false);
+    }
+  };
+
+  document.addEventListener('mousedown', handleClickOutside);
+
+  return () => {
+    document.removeEventListener('mousedown', handleClickOutside);
+  };
+}, [showDropdown]);
+
+  const checkEnrollmentSuccess = useRef(null);
+
+  useEffect(() => {
+    if (!checkEnrollmentSuccess.current) { return; }
+    const username = checkEnrollmentSuccess.current;
     if (getFiltered(users, { username, role }).length > 0) {
       dispatch(addNotification({
         message: I18n.t('users.enrolled_success', { username }),
         closable: true,
         type: 'success'
       }));
-      usernameRef.current.value = '';
+      setSearchTerm('');
+      checkEnrollmentSuccess.current = null;
     }
-  }, [users]);
+  }, [users, role, dispatch]);
 
   const getKey = () => {
     return `add_user_role_${role}`;
@@ -44,7 +110,7 @@ const EnrollButton = ({ users, role, course, current_user, allowed, inline }) =>
 
   const enroll = (e) => {
     e.preventDefault();
-    const username = usernameRef.current.value;
+    const username = searchTerm.trim();
     if (!username) { return; }
     const courseId = course.slug;
     // Optional fields
@@ -63,6 +129,8 @@ const EnrollButton = ({ users, role, course, current_user, allowed, inline }) =>
     };
 
     const onConfirm = () => {
+      // Mark that we're checking for this user's enrollment
+      checkEnrollmentSuccess.current = username;
       // Post the new user enrollment to the server
       dispatch(addUser(courseId, { user: userObject }));
     };
@@ -129,7 +197,7 @@ const EnrollButton = ({ users, role, course, current_user, allowed, inline }) =>
     let requestedAccountsLink;
     if (!Features.wikiEd) {
       const massEnrollmentUrl = `/mass_enrollment/${course.slug}`;
-      massEnrollmentLink = <p><a href={massEnrollmentUrl}>Add multiple users at once.</a></p>;
+      massEnrollmentLink = <p><a href={massEnrollmentUrl}>{I18n.t('courses.mass_enrollment')}</a></p>;
     }
     if (!Features.wikiEd) {
       const requestedAccountsUrl = `/requested_accounts/${course.slug}`;
@@ -165,7 +233,74 @@ const EnrollButton = ({ users, role, course, current_user, allowed, inline }) =>
       <tr className="edit" key="add_students">
         <td>
           <form onSubmit={enroll}>
-            <input type="text" ref={usernameRef} placeholder={I18n.t('users.username_placeholder')} />
+            <div className="autocomplete-container" style={{ position: 'relative', marginBottom: '10px' }}>
+              <input
+                ref={usernameRef}
+                type="text"
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                placeholder={I18n.t('users.username_placeholder')}
+                style={{ width: '100%', padding: '8px' }}
+                onFocus={() => {
+                  if (searchResults.length > 0) {
+                    setShowDropdown(true);
+                  }
+                }}
+              />
+              {searchError && (
+                <span style={{
+                  position: 'absolute',
+                  right: '10px',
+                  top: '10px',
+                  color: '#d33'
+                }}
+                >
+                  {I18n.t('users.search_error')}
+                </span>
+              )}
+              {showDropdown && searchResults.length > 0 && (
+                <ul style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  right: 0,
+                  backgroundColor: 'white',
+                  border: '1px solid #ccc',
+                  borderTop: 'none',
+                  maxHeight: '200px',
+                  overflowY: 'auto',
+                  margin: 0,
+                  padding: 0,
+                  listStyle: 'none',
+                  zIndex: 1000,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                }}
+                >
+                  {searchResults.map(user => (
+                    <li
+                      key={user.id}
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        selectUserFromDropdown(user);
+                      }}
+                      style={{
+                        padding: '8px 12px',
+                        cursor: 'pointer',
+                        borderBottom: '1px solid #f0f0f0'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = '#f5f5f5';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = 'white';
+                      }}
+                    >
+                      {user.username}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
             {realNameInput}
             {roleDescriptionInput}
             <button className="button border" type="submit">{CourseUtils.i18n('enroll', course.string_prefix)}</button>

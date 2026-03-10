@@ -867,6 +867,7 @@ en:
     published: "Your course has been published! Students may enroll in the course by visiting the following URL:"
     rating_feedback: "Predicted rating for the article is:"
     requested_accounts: Requested accounts
+    mass_enrollment: Add multiple users at once.
     requested_accounts_alert:
       one: "%{count} requested account pending."
       other: "%{count} requested accounts pending."
@@ -1746,6 +1747,10 @@ en:
     ungreeted: Ungreeted
     username: Username
     username_placeholder: Username
+    search_placeholder: "Search for available users..."
+    searching: "Searching..."
+    search_error: "Error searching for users. Please try again."
+    no_results: "No users found"
     useremail_placeholder: Email
     userpasscode_placeholder: Passcode
     words_added: Words Added<br>(article | user | draft)
