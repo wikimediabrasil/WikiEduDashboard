@@ -110,6 +110,20 @@ class CoursesController < ApplicationController
     set_course
   end
 
+  def available_users
+    set_course
+    if params[:search].present? && params[:search].length >= 2
+      search_term = "%#{params[:search].downcase}%"
+      assigned_user_ids = @course.courses_users.pluck(:user_id)
+      @available_users = User.where.not(id: assigned_user_ids)
+                              .where('LOWER(username) LIKE ?', search_term)
+                              .order(:username)
+                              .limit(100)
+    else
+      @available_users = []
+    end
+  end
+
   def assignments
     set_course
   end
