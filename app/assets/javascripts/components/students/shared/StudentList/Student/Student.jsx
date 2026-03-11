@@ -20,6 +20,10 @@ import TrainingProgressDescription from '@components/students/components/Article
 import {
   fetchTrainingModuleExercisesByUser
 } from '~/app/assets/javascripts/actions/exercises_actions';
+import { STUDENT_ROLE } from '@constants/user_roles';
+import { removeUser } from '@actions/user_actions';
+import { initiateConfirm } from '@actions/confirm_actions';
+
 
 const Student = createReactClass({
   displayName: 'Student',
@@ -32,7 +36,9 @@ const Student = createReactClass({
     fetchTrainingStatus: PropTypes.func.isRequired,
     minimalView: PropTypes.bool,
     student: PropTypes.object.isRequired,
-    openStudentDetailsView: PropTypes.func.isRequired
+    openStudentDetailsView: PropTypes.func.isRequired,
+    removeUser: PropTypes.func.isRequired,
+    initiateConfirm: PropTypes.func.isRequired
   },
 
   setUploadFilters(selectedFilters) {
@@ -51,6 +57,21 @@ const Student = createReactClass({
   _shouldShowRealName() {
     if (!this.props.student.real_name) { return false; }
     return this.props.current_user.isAdvancedRole;
+  },
+
+  unenroll(studentId) {
+    const { student, course, removeUser: removeUserAction, initiateConfirm: initiateConfirmAction } = this.props;
+
+    const userObject = { user_id: studentId, role: STUDENT_ROLE };
+    const courseId = course.slug;
+
+    const onConfirm = () => {
+      removeUserAction(courseId, { user: userObject });
+    };
+
+    const confirmMessage = I18n.t('users.remove_confirmation', { username: student.username });
+
+    return initiateConfirmAction({ confirmMessage, onConfirm });
   },
 
   render() {
@@ -148,6 +169,9 @@ const Student = createReactClass({
             {student.total_uploads || 0}
           </Link>
         </td>
+        <td>
+          <button className="button border plus" aria-label="Remove user" onClick={() => this.unenroll(student.id)}>-</button>
+        </td>
       </tr>
     );
   }
@@ -157,7 +181,9 @@ const Student = createReactClass({
 const mapDispatchToProps = {
   setUploadFilters,
   fetchTrainingStatus,
-  fetchExercises: fetchTrainingModuleExercisesByUser
+  fetchExercises: fetchTrainingModuleExercisesByUser,
+  removeUser,
+  initiateConfirm
 };
 
 const component = withRouter(Student);

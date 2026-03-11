@@ -747,7 +747,7 @@ en:
     end: End
     ended: The course has ended.
     enroll: Enroll
-    enrollment: Add/Remove Students
+    enrollment: Add Students
     enrollment_edits_enabled: Enrollment edits enabled
     enrollment_edits_enabled_tooltip: >
       If enabled, the dashboard will post a template to the userpage and talk page of
@@ -1719,6 +1719,7 @@ en:
         success_message: "%{prefix} successfully added to the Watchlist."
         error_message: "Failed to add %{prefix} to the Watchlist. Please try again later."
     total_uploads: "Total Uploads"
+    remove_student: "Remove Student"
     training_complete:
       one: "is up-to-date with training"
       other: "are up-to-date with training"

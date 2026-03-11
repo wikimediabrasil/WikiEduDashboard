@@ -53,6 +53,11 @@ const studentListKeys = (course) => {
       desktop_only: true,
       sortable: true,
       info_key: 'users.uploads_doc'
+    },
+    remove_student: {
+      label: I18n.t('users.remove_student'),
+      desktop_only: true,
+      sortable: false,
     }
   };
 };

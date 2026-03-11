@@ -690,7 +690,7 @@ es:
     end: Fin
     ended: El curso ha terminado.
     enroll: Inscribirse
-    enrollment: Añadir o retirar estudiantes
+    enrollment: Añadir estudiantes
     courses_enrolled: Cursos matriculados
     error:
       exists: Ese curso ya existe. Intenta de nuevo con un título, escuela o período
@@ -1265,6 +1265,7 @@ es:
     references_count: Referencias añadidas
     training_modules: Módulo de capacitación
     remove_confirmation: ¿Confirmas que quieres quitar a %{username}?
+    remove_student: "Quitar estudiante"
     request_confirmation: ¿Confirmas que quieres solicitar esta cuenta?
     requested_account_status:
       success_message: 'Éxito: %{result_description}'
