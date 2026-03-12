@@ -10,13 +10,11 @@ import CourseUtils from '~/app/assets/javascripts/utils/course_utils.js';
 import { addNotification } from '~/app/assets/javascripts/actions/notification_actions.js';
 import { initiateConfirm } from '~/app/assets/javascripts/actions/confirm_actions';
 import { getFiltered } from '~/app/assets/javascripts/utils/model_utils';
-// import { addUser, removeUser } from '~/app/assets/javascripts/actions/user_actions';
 import { addUser } from '~/app/assets/javascripts/actions/user_actions';
 import useExpandablePopover from '../../hooks/useExpandablePopover';
 import { useParams } from 'react-router-dom';
 import { INSTRUCTOR_ROLE, STUDENT_ROLE } from '../../constants/user_roles';
 
-// const EnrollButton = ({ users, role, course, current_user, allowed, inline }) => {
 const EnrollButton = ({ users, role, course, allowed, inline }) => {
   const usernameRef = useRef(null);
   const realNameRef = useRef(null);
@@ -58,8 +56,6 @@ const EnrollButton = ({ users, role, course, allowed, inline }) => {
           setSearchError(false);
         })
         .catch((error) => {
-          // eslint-disable-next-line no-console
-          console.error('Error fetching available users:', error);
           setSearchResults([]);
           setShowDropdown(false);
           setSearchError(true);
@@ -137,9 +133,7 @@ const EnrollButton = ({ users, role, course, allowed, inline }) => {
     };
 
     const onConfirm = () => {
-      // Mark that we're checking for this user's enrollment
       checkEnrollmentSuccess.current = username;
-      // Post the new user enrollment to the server
       dispatch(addUser(courseId, { user: userObject }));
     };
     const confirmMessage = I18n.t('users.enroll_confirmation', { username });
@@ -156,18 +150,6 @@ const EnrollButton = ({ users, role, course, allowed, inline }) => {
     }));
   };
 
-  // const unenroll = (userId) => {
-  //   const user = getFiltered(users, { id: userId, role })[0];
-  //   const courseId = course.slug;
-  //   const userObject = { user_id: userId, role };
-
-  //   const onConfirm = () => {
-  //     // Post the user deletion request to the server
-  //     dispatch(removeUser(courseId, { user: userObject }));
-  //   };
-  //   const confirmMessage = I18n.t('users.remove_confirmation', { username: user.username });
-  //   return dispatch(initiateConfirm({ confirmMessage, onConfirm }));
-  // };
 
   const stop = (e) => {
     return e.stopPropagation();
@@ -181,19 +163,7 @@ const EnrollButton = ({ users, role, course, allowed, inline }) => {
   // except for the Facilitator role
   if (course.flags.event_sync && role !== INSTRUCTOR_ROLE) { return null; }
 
-  // const usersList = users.map((user) => {
-  //   let removeButton;
-  //   if (role !== INSTRUCTOR_ROLE || users.length >= 2 || current_user.admin) {
-  //     removeButton = (
-  //       <button className="button border plus" aria-label="Remove user" onClick={() => unenroll(user.id)}>-</button>
-  //     );
-  //   }
-  //   return (
-  //     <tr key={`${user.id}_enrollment`}>
-  //       <td>{user.username}{removeButton}</td>
-  //     </tr>
-  //   );
-  // });
+  
 
   const enrollParam = '?enroll=';
   const enrollUrl = window.location.origin + courseLinkParams() + enrollParam + course.passcode;
