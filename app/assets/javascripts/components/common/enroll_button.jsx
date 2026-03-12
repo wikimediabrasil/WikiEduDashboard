@@ -55,7 +55,7 @@ const EnrollButton = ({ users, role, course, allowed, inline }) => {
           setShowDropdown(data.length > 0);
           setSearchError(false);
         })
-        .catch((error) => {
+        .catch(() => {
           setSearchResults([]);
           setShowDropdown(false);
           setSearchError(true);
@@ -163,7 +163,6 @@ const EnrollButton = ({ users, role, course, allowed, inline }) => {
   // except for the Facilitator role
   if (course.flags.event_sync && role !== INSTRUCTOR_ROLE) { return null; }
 
-  
 
   const enrollParam = '?enroll=';
   const enrollUrl = window.location.origin + courseLinkParams() + enrollParam + course.passcode;

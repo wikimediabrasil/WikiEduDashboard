@@ -56,7 +56,7 @@ const studentListKeys = (course, current_user) => {
     }
   };
 
-  if (current_user.admin) {
+  if (current_user && current_user.admin) {
     keys.remove_student = {
       label: I18n.t('courses.actions'),
       desktop_only: true,
