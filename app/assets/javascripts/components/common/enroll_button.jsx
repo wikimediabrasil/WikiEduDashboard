@@ -29,8 +29,14 @@ const EnrollButton = ({ users, role, course, allowed, inline }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [searchError, setSearchError] = useState(false);
+  const isSelectionFromDropdown = useRef(false);
 
   useEffect(() => {
+    if (isSelectionFromDropdown.current) {
+      isSelectionFromDropdown.current = false;
+      return;
+    }
+
     if (searchTerm.length < 2) {
       setSearchResults([]);
       setShowDropdown(false);
@@ -63,12 +69,12 @@ const EnrollButton = ({ users, role, course, allowed, inline }) => {
   }, [searchTerm, course.slug, dispatch]);
 
   const selectUserFromDropdown = (user) => {
-    // Cuando selecciona del dropdown, poner el username en el input
+    isSelectionFromDropdown.current = true;
+
     setSearchTerm(user.username);
     setSearchResults([]);
     setShowDropdown(false);
 
-    // Focus en el input para que pueda hacer submit
     if (usernameRef.current) {
       usernameRef.current.focus();
     }
@@ -243,11 +249,6 @@ const EnrollButton = ({ users, role, course, allowed, inline }) => {
                 onChange={e => setSearchTerm(e.target.value)}
                 placeholder={I18n.t('users.username_placeholder')}
                 style={{ width: '100%', padding: '8px' }}
-                onFocus={() => {
-                  if (searchResults.length > 0) {
-                    setShowDropdown(true);
-                  }
-                }}
               />
               {searchError && (
                 <span style={{

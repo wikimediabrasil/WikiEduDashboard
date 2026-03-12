@@ -16,10 +16,10 @@ const wordsAddedKey = {
   info_key: 'users.word_count_doc'
 };
 
-const studentListKeys = (course) => {
+const studentListKeys = (course, current_user) => {
   const contentAddedKey = course.home_wiki_bytes_per_word ? wordsAddedKey : charactersAddedKey(course.home_wiki.project);
 
-  return {
+  const keys = {
     username: {
       label: I18n.t('users.name'),
       desktop_only: false,
@@ -53,13 +53,18 @@ const studentListKeys = (course) => {
       desktop_only: true,
       sortable: true,
       info_key: 'users.uploads_doc'
-    },
-    remove_student: {
-      label: I18n.t('users.remove_student'),
-      desktop_only: true,
-      sortable: false,
     }
   };
+
+  if (current_user.admin) {
+    keys.remove_student = {
+      label: I18n.t('courses.actions'),
+      desktop_only: true,
+      sortable: false,
+    };
+  }
+
+  return keys;
 };
 
 export default studentListKeys;

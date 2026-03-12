@@ -132,6 +132,15 @@ const Student = createReactClass({
 
     const uploadsLink = `/courses/${course.slug}/uploads`;
 
+    let removeButton;
+    if (current_user.admin) {
+      removeButton = (
+        <td>
+          <button className="button border plus" aria-label="Remove user" onClick={() => this.unenroll(student.id)}>-</button>
+        </td>
+      );
+    }
+
     return (
       <tr className="students">
         <td onClick={this.openStudentDetailsView} style={{ minWidth: '250px' }}>
@@ -169,9 +178,7 @@ const Student = createReactClass({
             {student.total_uploads || 0}
           </Link>
         </td>
-        <td>
-          <button className="button border plus" aria-label="Remove user" onClick={() => this.unenroll(student.id)}>-</button>
-        </td>
+        {removeButton}
       </tr>
     );
   }

@@ -38,7 +38,7 @@ export const StudentList = ({ assignments, course, current_user, editAssignments
     />
   ));
 
-  const keys = studentListKeys(course);
+  const keys = studentListKeys(course, current_user);
   if (!showRecent(course)) delete keys.recent_revisions;
   if (sort.key && keys[sort.key]) keys[sort.key].order = (sort.sortKey) ? 'asc' : 'desc';
 
