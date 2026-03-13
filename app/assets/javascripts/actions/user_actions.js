@@ -1,8 +1,10 @@
 import API from '../utils/api.js';
-import { RECEIVE_USERS, ADD_USER, REMOVE_USER, SORT_USERS, API_FAIL, DONE_REFRESHING_DATA } from '../constants';
+import { RECEIVE_USERS, ADD_USER, REMOVE_USER, SORT_USERS, API_FAIL, DONE_REFRESHING_DATA, SET_USERS_PAGE, SET_USERS_LOADING } from '../constants';
 
-export const fetchUsers = (courseSlug, refresh = false) => (dispatch) => {
-  return API.fetch(courseSlug, 'users')
+export const fetchUsers = (courseSlug, page = 1, perPage = 25, refresh = false) => (dispatch) => {
+  const url = `/courses/${courseSlug}/users.json?page=${page}&per_page=${perPage}`;
+  return fetch(url, { credentials: 'include' })
+    .then(res => res.json())
     .then((data) => {
       dispatch({ type: RECEIVE_USERS, data });
       if (refresh) {
@@ -11,6 +13,15 @@ export const fetchUsers = (courseSlug, refresh = false) => (dispatch) => {
     })
     .catch(data => dispatch({ type: API_FAIL, data }));
 };
+
+export const changeUsersPage = (courseSlug, page) => (dispatch, getState) => {
+  const { perPage } = getState().users.pagination;
+  dispatch({ type: SET_USERS_LOADING, loading: true });
+  dispatch({ type: SET_USERS_PAGE, page });
+  return dispatch(fetchUsers(courseSlug, page, perPage));
+};
+
+export const setUsersPage = page => ({ type: SET_USERS_PAGE, page });
 
 export const addUser = (courseSlug, user) => (dispatch) => {
   return API.modify('user', courseSlug, user, true)

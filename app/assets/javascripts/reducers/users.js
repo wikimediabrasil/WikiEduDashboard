@@ -1,4 +1,4 @@
-import { RECEIVE_USERS, SORT_USERS, ADD_USER, REMOVE_USER } from '../constants';
+import { RECEIVE_USERS, SORT_USERS, ADD_USER, REMOVE_USER, SET_USERS_PAGE, SET_USERS_LOADING, USERS_PER_PAGE_DEFAULT } from '../constants';
 import { sortByKey, transformUsers } from '../utils/model_utils';
 
 const initialState = {
@@ -8,7 +8,17 @@ const initialState = {
     key: null,
   },
   isLoaded: false,
-  lastRequestTimestamp: 0 // UNIX timestamp of last request - in milliseconds
+  loading: false,
+  lastRequestTimestamp: 0, // UNIX timestamp of last request - in milliseconds
+
+  pagination: {
+    currentPage: 1,
+    perPage: USERS_PER_PAGE_DEFAULT,
+    totalEntries: 0,
+    totalPages: 1,
+    previousPage: null,
+    nextPage: null,
+  }
 };
 
 const SORT_DESCENDING = {
@@ -38,20 +48,61 @@ export default function users(state = initialState, action) {
       // Sort the 'user_list' array based on the 'sort_key'
       user_list = sortByKey(user_list, sort_key, isReversed, SORT_DESCENDING[sort_key]);
 
+      // Transform pagination from snake_case to camelCase
+      const paginationData = action.data.course.pagination;
+      const pagination = paginationData ? {
+        currentPage: paginationData.current_page,
+        perPage: paginationData.per_page,
+        totalEntries: paginationData.total_entries,
+        totalPages: paginationData.total_pages,
+        previousPage: paginationData.previous_page,
+        nextPage: paginationData.next_page
+      } : state.pagination;
+
     return {
       ...state,
       users: user_list.newModels, // Update 'users' with the sorted user list.
       isLoaded: true,
-      lastRequestTimestamp: Date.now()
+      loading: false,
+      lastRequestTimestamp: Date.now(),
+      pagination // Use transformed pagination
     };
   }
+    case SET_USERS_PAGE: {
+      return {
+        ...state,
+        pagination: {
+          ...state.pagination,
+          currentPage: action.page,
+        }
+      };
+    }
+    case SET_USERS_LOADING: {
+      return {
+        ...state,
+        loading: action.loading,
+      };
+    }
     case ADD_USER:
-    case REMOVE_USER:
+    case REMOVE_USER: {
+      // Transform pagination from snake_case to camelCase if present
+      const paginationData = action.data.course.pagination;
+      const pagination = paginationData ? {
+        currentPage: paginationData.current_page,
+        perPage: paginationData.per_page,
+        totalEntries: paginationData.total_entries,
+        totalPages: paginationData.total_pages,
+        previousPage: paginationData.previous_page,
+        nextPage: paginationData.next_page
+      } : state.pagination;
+
       return {
         ...state,
         users: action.data.course.users,
-        isLoaded: true
+        isLoaded: true,
+        pagination
       };
+    }
 
     case SORT_USERS: {
       const transformedUsers = transformUsers(state.users);

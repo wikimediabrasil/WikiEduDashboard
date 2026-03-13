@@ -108,6 +108,7 @@ class CoursesController < ApplicationController
 
   def users
     set_course
+    set_user_pagination
   end
 
   def available_users
@@ -281,6 +282,9 @@ class CoursesController < ApplicationController
   ##################
 
   private
+
+  USERS_PER_PAGE_DEFAULT = 25
+  USERS_PER_PAGE_MAX = 50
 
   def set_course
     @course = find_course_by_slug(params[:slug])
@@ -494,6 +498,15 @@ class CoursesController < ApplicationController
 
   def set_limit
     @limit = params[:limit]
+  end
+
+  def set_user_pagination
+    @users_page = params[:page]&.to_i || 1
+    @users_page = 1 if @users_page < 1
+
+    @users_per_page = params[:per_page]&.to_i || USERS_PER_PAGE_DEFAULT
+    @users_per_page = USERS_PER_PAGE_MAX if @users_per_page > USERS_PER_PAGE_MAX
+    @users_per_page = 1 if @users_per_page < 1
   end
 
   # If the user could make an edit to the course, this verifies that

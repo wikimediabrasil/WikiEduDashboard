@@ -8,6 +8,7 @@ import CourseDateUtils from '../utils/course_date_utils.js';
 import DateCalculator from '../utils/date_calculator';
 
 const getUsers = state => state.users.users;
+const getUsersPagination = state => state.users.pagination;
 const getCurrentUserFromHtml = state => state.currentUserFromHtml;
 const getCourseCampaigns = state => state.campaigns.campaigns;
 const getAllCampaigns = state => state.campaigns.all_campaigns;
@@ -41,6 +42,26 @@ export const getInstructorUsers = createSelector(
 
 export const getStudentUsers = createSelector(
   [getUsers], users => getFiltered(users, { role: STUDENT_ROLE })
+);
+
+export const getUserPagination = createSelector(
+  [getUsersPagination], pagination => pagination
+);
+
+export const getCurrentUsersPage = createSelector(
+  [getUsersPagination], pagination => pagination.currentPage
+);
+
+export const getTotalUsersPages = createSelector(
+  [getUsersPagination], pagination => pagination.totalPages
+);
+
+export const hasPreviousUsersPage = createSelector(
+  [getUsersPagination], pagination => pagination.previousPage !== null
+);
+
+export const hasNextUsersPage = createSelector(
+  [getUsersPagination], pagination => pagination.nextPage !== null
 );
 
 export const getStudentCount = createSelector(

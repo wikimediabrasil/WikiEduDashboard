@@ -2,6 +2,7 @@
   text-align center
   margin 30px 10px
   display flex
+  justify-content center
   list-style none
   cursor pointer
 
@@ -47,3 +48,113 @@
     &:hover
       color #6a6a6a
       background #e7e7e7
+
+// ========================================
+// User list pagination
+// ========================================
+
+.pagination-container
+  margin-top 20px
+  padding-top 20px
+  border-top 1px solid #ddd
+
+.pagination-info-top
+  padding 10px 0 15px
+  text-align center
+  color #666
+  font-size 14px
+  font-weight 500
+
+// Main pagination controls
+.pagination-controls
+  display flex
+  justify-content center
+  align-items center
+  gap 10px
+  padding 15px 0
+  flex-wrap wrap
+
+  .pagination-button
+    padding 8px 12px
+    min-width auto
+    border-radius 3px
+    font-size 14px
+    font-weight 600
+    background-color #676eb4
+    color #fff
+    border none
+    cursor pointer
+    transition all 0.2s ease
+
+    &:hover:not(:disabled)
+      background-color #878dcd
+
+    &:disabled
+      opacity 0.5
+      cursor not-allowed
+      background-color #e7e7e7
+      color #6a6a6a
+
+  // Page number container
+  .pagination-numbers
+    display flex
+    gap 5px
+    align-items center
+    flex-wrap wrap
+    justify-content center
+
+    .pagination-number
+      padding 6px 12px
+      min-width 40px
+      border-radius 3px
+      font-size 14px
+      font-weight 600
+      background-color transparent
+      color #676eb4
+      border 1px solid #d0d0d0
+      cursor pointer
+      transition all 0.2s ease
+
+      &:hover:not(:disabled):not(.active)
+        background-color #f5f5f5
+        border-color #676eb4
+
+      &.active
+        background-color #676eb4
+        color #fff
+        border-color #676eb4
+        cursor default
+
+      &:disabled
+        opacity 0.5
+        cursor not-allowed
+
+    .pagination-ellipsis
+      padding 6px 8px
+      color #999
+      font-weight 600
+      user-select none
+
+// Current page information (below controls)
+.pagination-info
+  padding 10px 0
+  text-align center
+  color #666
+  font-size 13px
+
+// Responsive
+@media (max-width: 768px)
+  .pagination-controls
+    gap 5px
+    
+    .pagination-button
+      padding 6px 10px
+      font-size 12px
+    
+    .pagination-numbers
+      gap 3px
+      
+      .pagination-number
+        padding 5px 10px
+        min-width 35px
+        font-size 12px
