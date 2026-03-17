@@ -3,13 +3,19 @@
 show_email_and_real_name = user_signed_in? && current_user.can_see_real_names?(course)
 show_instructor_identity = user_signed_in? && current_user.nonvisitor?(course)
 
-offset = (page - 1) * per_page
+# Check if pagination parameters are provided
+page = local_assigns[:page]
+per_page = local_assigns[:per_page]
 
 courses_users = course.courses_users
                       .includes(:user)
                       .order(created_at: :desc)
-                      .limit(per_page)
-                      .offset(offset)
+
+# Apply pagination only if page and per_page are provided
+if page && per_page
+  offset = (page - 1) * per_page
+  courses_users = courses_users.limit(per_page).offset(offset)
+end
 
 json.users courses_users do |cu|
   json.call(cu, :character_sum_ms, :character_sum_us, :character_sum_draft, :references_count,

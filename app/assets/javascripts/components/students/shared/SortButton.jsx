@@ -12,9 +12,6 @@ export const SortButton = ({ current_user, sortSelect, showOverviewFilters = tru
           isAdvancedRole && <option value="first_name">{I18n.t('users.first_name')}</option>
         }
         {
-          isAdvancedRole && <option value="last_name">{I18n.t('users.last_name')}</option>
-        }
-        {
           showOverviewFilters && (
             <>
               <option value="character_sum_ms">{I18n.t('users.characters_added_mainspace')}</option>
