@@ -7,3 +7,4 @@ export const REMOVE_USER = 'REMOVE_USER';
 export const SET_USERS_PAGE = 'SET_USERS_PAGE';
 export const USERS_PER_PAGE_DEFAULT = 25;
 export const SET_USERS_LOADING = 'SET_USERS_LOADING';
+export const SET_USERS_SORT = 'SET_USERS_SORT';

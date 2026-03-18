@@ -2,8 +2,8 @@ import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { getStudentUsers, getUserPagination } from '~/app/assets/javascripts/selectors';
-import { changeUsersPage } from '~/app/assets/javascripts/actions/user_actions';
+import { getStudentUsers, getUserPagination, getUsersSort } from '~/app/assets/javascripts/selectors';
+import { changeUsersPage, changeUsersSort } from '~/app/assets/javascripts/actions/user_actions';
 
 import StudentsSubNavigation from '@components/students/components/StudentsSubNavigation.jsx';
 import Controls from '@components/students/components/Overview/Controls/Controls.jsx';
@@ -13,12 +13,13 @@ import Loading from '@components/common/loading.jsx';
 import AddToWatchlistButton from '@components/students/components/AddToWatchlistButton.jsx';
 import Pagination from '@components/common/Pagination.jsx';
 
-const Overview = ({ course, current_user, prefix, sortUsers, notify, sortSelect }) => {
+const Overview = ({ course, current_user, prefix, notify }) => {
   const dispatch = useDispatch();
   const assignments = useSelector(state => state.assignments.assignments);
   const loadingAssignments = useSelector(state => state.assignments.loading);
   const students = useSelector(state => getStudentUsers(state));
   const pagination = useSelector(state => getUserPagination(state));
+  const serverSort = useSelector(state => getUsersSort(state));
   const loading = useSelector(state => state.users.loading);
 
   useEffect(() => {
@@ -30,6 +31,18 @@ const Overview = ({ course, current_user, prefix, sortUsers, notify, sortSelect 
   const handlePageChange = (newPage) => {
     dispatch(changeUsersPage(course.slug, newPage));
     window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to top when page changes
+  };
+
+  const handleSortChange = (e) => {
+    const sortBy = e.target.value;
+    const direction = 'desc';
+    dispatch(changeUsersSort(course.slug, sortBy, direction));
+  };
+
+  const handleColumnSort = (key) => {
+    // Toggle direction if clicking the same column, otherwise default to desc
+    const direction = (serverSort.sortBy === key && serverSort.direction === 'desc') ? 'asc' : 'desc';
+    dispatch(changeUsersSort(course.slug, key, direction));
   };
 
   return (
@@ -47,7 +60,7 @@ const Overview = ({ course, current_user, prefix, sortUsers, notify, sortSelect 
               current_user={current_user}
               students={students}
               notify={notify}
-              sortSelect={sortSelect}
+              sortSelect={handleSortChange}
             />
           ) : null
       }
@@ -66,7 +79,7 @@ const Overview = ({ course, current_user, prefix, sortUsers, notify, sortSelect 
             assignments={assignments}
             course={course}
             current_user={current_user}
-            sortUsers={sortUsers}
+            sortUsers={handleColumnSort}
             students={students}
           />
           <Pagination
@@ -85,9 +98,7 @@ const Overview = ({ course, current_user, prefix, sortUsers, notify, sortSelect 
 Overview.propTypes = {
   course: PropTypes.object.isRequired,
   current_user: PropTypes.object.isRequired,
-  prefix: PropTypes.string.isRequired,
-  sortSelect: PropTypes.func.isRequired,
-  sortUsers: PropTypes.func.isRequired
+  prefix: PropTypes.string.isRequired
 };
 
 export default (Overview);

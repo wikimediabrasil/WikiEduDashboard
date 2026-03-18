@@ -35,6 +35,11 @@ const getValidationErrors = state => state.validations.errorQueue;
 const getCourse = state => state.course;
 const getTickets = state => state.tickets;
 const getSpecialUsers = state => state.settings.specialUsers;
+const getUsersServerSort = state => state.users.serverSort;
+
+export const getUsersSort = createSelector(
+  [getUsersServerSort], serverSort => serverSort
+);
 
 export const getInstructorUsers = createSelector(
   [getUsers], users => sortBy(getFiltered(users, { role: INSTRUCTOR_ROLE }), 'enrolled_at')

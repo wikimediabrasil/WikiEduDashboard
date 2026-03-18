@@ -1,4 +1,4 @@
-import { RECEIVE_USERS, SORT_USERS, ADD_USER, REMOVE_USER, SET_USERS_PAGE, SET_USERS_LOADING, USERS_PER_PAGE_DEFAULT } from '../constants';
+import { RECEIVE_USERS, SORT_USERS, ADD_USER, REMOVE_USER, SET_USERS_PAGE, SET_USERS_SORT, SET_USERS_LOADING, USERS_PER_PAGE_DEFAULT } from '../constants';
 import { sortByKey, transformUsers } from '../utils/model_utils';
 
 const initialState = {
@@ -10,6 +10,11 @@ const initialState = {
   isLoaded: false,
   loading: false,
   lastRequestTimestamp: 0, // UNIX timestamp of last request - in milliseconds
+
+  serverSort: {
+    sortBy: 'created_at',
+    direction: 'desc',
+  },
 
   pagination: {
     currentPage: 1,
@@ -38,18 +43,23 @@ export default function users(state = initialState, action) {
       // and 'last_name' properties if 'real_name' is available by using transformUsers.
       let user_list = transformUsers(action.data.course.users);
 
-      // Get the sorting 'key' if available from Redux store or else use last_name or
-      // username as fallback if last_name not available.
-      const sort_key = state.sort.key || (!user_list.some(user => user.last_name) ? 'username' : 'last_name');
-
-      // Determine if sorting direction should be in reversed or not
-      const isReversed = (state.sort.key && !state.sort.sortKey) ? sort_key : null;
-
-      // Sort the 'user_list' array based on the 'sort_key'
-      user_list = sortByKey(user_list, sort_key, isReversed, SORT_DESCENDING[sort_key]);
-
       // Transform pagination from snake_case to camelCase
       const paginationData = action.data.course.pagination;
+
+      // Only sort client-side if server-side pagination is not active.
+      // When pagination data is present, the server handles sorting and we trust its order.
+      if (!paginationData) {
+        // Get the sorting 'key' if available from Redux store or else use last_name or
+        // username as fallback if last_name not available.
+        const sort_key = state.sort.key || (!user_list.some(user => user.last_name) ? 'username' : 'last_name');
+
+        // Determine if sorting direction should be in reversed or not
+        const isReversed = (state.sort.key && !state.sort.sortKey) ? sort_key : null;
+
+        // Sort the 'user_list' array based on the 'sort_key'
+        user_list = sortByKey(user_list, sort_key, isReversed, SORT_DESCENDING[sort_key]).newModels;
+      }
+
       const pagination = paginationData ? {
         currentPage: paginationData.current_page,
         perPage: paginationData.per_page,
@@ -61,11 +71,24 @@ export default function users(state = initialState, action) {
 
     return {
       ...state,
-      users: user_list.newModels, // Update 'users' with the sorted user list.
+      users: user_list, // Update 'users' with the sorted user list.
       isLoaded: true,
       loading: false,
       lastRequestTimestamp: Date.now(),
       pagination // Use transformed pagination
+    };
+  }
+  case SET_USERS_SORT: {
+    return {
+      ...state,
+      serverSort: {
+        sortBy: action.sortBy,
+        direction: action.direction,
+      },
+      sort: {
+        key: action.sortBy,
+        sortKey: action.direction === 'asc' ? action.sortBy : null,
+      }
     };
   }
     case SET_USERS_PAGE: {

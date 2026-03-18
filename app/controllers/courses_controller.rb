@@ -284,7 +284,7 @@ class CoursesController < ApplicationController
   private
 
   USERS_PER_PAGE_DEFAULT = 25
-  USERS_PER_PAGE_MAX = 50
+  USERS_PER_PAGE_MAX = 25
 
   def set_course
     @course = find_course_by_slug(params[:slug])
@@ -500,6 +500,10 @@ class CoursesController < ApplicationController
     @limit = params[:limit]
   end
 
+  USERS_SORT_COLUMNS = %w[
+    created_at username character_sum_ms character_sum_us
+    character_sum_draft references_count total_uploads recent_revisions
+  ].freeze
   def set_user_pagination
     @users_page = params[:page]&.to_i || 1
     @users_page = 1 if @users_page < 1
@@ -507,6 +511,10 @@ class CoursesController < ApplicationController
     @users_per_page = params[:per_page]&.to_i || USERS_PER_PAGE_DEFAULT
     @users_per_page = USERS_PER_PAGE_MAX if @users_per_page > USERS_PER_PAGE_MAX
     @users_per_page = 1 if @users_per_page < 1
+
+    raw_sort = params[:sort_by].to_s
+    @users_sort_by = USERS_SORT_COLUMNS.include?(raw_sort) ? raw_sort : 'created_at'
+    @users_sort_direction = params[:direction] == 'asc' ? 'asc' : 'desc'
   end
 
   # If the user could make an edit to the course, this verifies that

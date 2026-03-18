@@ -14,5 +14,7 @@ json.course do
   end
   json.partial! 'courses/users', course: @course,
                                 page: @users_page,
-                                per_page: @users_per_page
+                                per_page: @users_per_page,
+                                sort_by: @users_sort_by,
+                                sort_direction: @users_sort_direction
 end

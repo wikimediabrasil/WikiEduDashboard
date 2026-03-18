@@ -6,10 +6,19 @@ show_instructor_identity = user_signed_in? && current_user.nonvisitor?(course)
 # Check if pagination parameters are provided
 page = local_assigns[:page]
 per_page = local_assigns[:per_page]
+sort_by        = local_assigns[:sort_by] || 'created_at'
+sort_direction = local_assigns[:sort_direction] || 'desc'
 
-courses_users = course.courses_users
-                      .includes(:user)
-                      .order(created_at: :desc)
+if sort_by == 'username'
+  courses_users = course.courses_users
+                        .includes(:user)
+                        .joins(:user)
+                        .order("users.username #{sort_direction}")
+else
+  courses_users = course.courses_users
+                        .includes(:user)
+                        .order("courses_users.#{sort_by} #{sort_direction}")
+end
 
 # Apply pagination only if page and per_page are provided
 if page && per_page
