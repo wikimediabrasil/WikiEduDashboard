@@ -1268,6 +1268,7 @@ es:
     remove_confirmation: ¿Confirmas que quieres quitar a %{username}?
     remove_student: "Quitar estudiante"
     request_confirmation: ¿Confirmas que quieres solicitar esta cuenta?
+    removed_success: "%{username} ha sido eliminado con éxito."
     requested_account_status:
       success_message: 'Éxito: %{result_description}'
       failure_message: 'Fallo: %{result_description}'

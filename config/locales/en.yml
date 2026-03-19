@@ -1695,6 +1695,7 @@ en:
     references_count: References Added
     training_modules: Training Modules
     remove_confirmation: Are you sure you want to remove %{username}?
+    removed_success: "%{username} was removed successfully!"
     request_confirmation: Are you sure you want to request this account?
     requested_account_status:
       success_message: "Success: %{result_description}"
