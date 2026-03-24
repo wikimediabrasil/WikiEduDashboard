@@ -1661,6 +1661,8 @@ en:
     edits: edits
     edits_by: "Edits by:"
     enroll_confirmation: Are you sure you want to add %{username}?
+    enroll_bulk_confirmation: "Are you sure you want to add: %{usernames}?"
+    already_in_input: "%{username} is already in the list"
     enroll_url: "Users may join by visiting this URL:"
     enrolled_success: "%{username} was added successfully!"
     exercise_modules_completed:

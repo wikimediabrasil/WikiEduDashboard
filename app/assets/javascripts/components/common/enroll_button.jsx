@@ -35,7 +35,10 @@ const EnrollButton = ({ users, role, course, allowed, inline }) => {
       return;
     }
 
-    if (searchTerm.length < 2) {
+    // Search only on the last token after the last comma
+    const lastToken = searchTerm.split(',').pop().trim();
+
+    if (lastToken.length < 2) {
       setSearchResults([]);
       setShowDropdown(false);
       setSearchError(false);
@@ -45,7 +48,7 @@ const EnrollButton = ({ users, role, course, allowed, inline }) => {
     setShowDropdown(false);
     const timeoutId = setTimeout(() => {
       const courseSlug = course.slug;
-      fetch(`/courses/${courseSlug}/available_users.json?search=${encodeURIComponent(searchTerm)}`)
+      fetch(`/courses/${courseSlug}/available_users.json?search=${encodeURIComponent(lastToken)}`)
         .then((response) => {
           if (!response.ok) { throw new Error('Network response was not ok'); }
           return response.json();
@@ -67,7 +70,24 @@ const EnrollButton = ({ users, role, course, allowed, inline }) => {
   const selectUserFromDropdown = (user) => {
     isSelectionFromDropdown.current = true;
 
-    setSearchTerm(user.username);
+    // Preserve already-typed usernames before the last comma
+    const parts = searchTerm.split(',');
+    const existingUsernames = parts.slice(0, -1).map(u => u.trim().toLowerCase());
+
+    // Don't add if already in the input field
+    if (existingUsernames.includes(user.username.toLowerCase())) {
+      setSearchResults([]);
+      setShowDropdown(false);
+      dispatch(addNotification({
+        message: I18n.t('users.already_in_input', { username: user.username }),
+        closable: true,
+        type: 'error'
+      }));
+      return;
+    }
+
+    parts[parts.length - 1] = user.username;
+    setSearchTerm(parts.join(', '));
     setSearchResults([]);
     setShowDropdown(false);
 
@@ -90,19 +110,26 @@ const EnrollButton = ({ users, role, course, allowed, inline }) => {
   };
 }, [showDropdown]);
 
-  const checkEnrollmentSuccess = useRef(null);
+  const checkEnrollmentSuccess = useRef([]);
 
   useEffect(() => {
-    if (!checkEnrollmentSuccess.current) { return; }
-    const username = checkEnrollmentSuccess.current;
-    if (getFiltered(users, { username, role }).length > 0) {
+    if (checkEnrollmentSuccess.current.length === 0) { return; }
+    const nowEnrolled = checkEnrollmentSuccess.current.filter(
+      username => getFiltered(users, { username, role }).length > 0
+    );
+    const stillPending = checkEnrollmentSuccess.current.filter(
+      username => getFiltered(users, { username, role }).length === 0
+    );
+    nowEnrolled.forEach((username) => {
       dispatch(addNotification({
         message: I18n.t('users.enrolled_success', { username }),
         closable: true,
         type: 'success'
       }));
+    });
+    checkEnrollmentSuccess.current = stillPending;
+    if (stillPending.length === 0 && nowEnrolled.length > 0) {
       setSearchTerm('');
-      checkEnrollmentSuccess.current = null;
     }
   }, [users, role, dispatch]);
 
@@ -114,40 +141,59 @@ const EnrollButton = ({ users, role, course, allowed, inline }) => {
 
   const enroll = (e) => {
     e.preventDefault();
-    const username = searchTerm.trim();
-    if (!username) { return; }
     const courseId = course.slug;
-    // Optional fields
-    let realName;
-    let roleDescription;
-    if (realNameRef.current && roleDescriptionRef.current) {
-      realName = realNameRef.current.value;
-      roleDescription = roleDescriptionRef.current.value;
+
+    // Support multiple usernames separated by commas
+    const usernames = searchTerm.split(',').map(u => u.trim()).filter(u => u.length > 0);
+    if (usernames.length === 0) { return; }
+
+    // Single user: existing behavior unchanged
+    if (usernames.length === 1) {
+      const username = usernames[0];
+      let realName;
+      let roleDescription;
+      if (realNameRef.current && roleDescriptionRef.current) {
+        realName = realNameRef.current.value;
+        roleDescription = roleDescriptionRef.current.value;
+      }
+      const userObject = { username, role, role_description: roleDescription, real_name: realName };
+      const onConfirm = () => {
+        checkEnrollmentSuccess.current = [username];
+        dispatch(addUser(courseId, { user: userObject }));
+      };
+      const confirmMessage = I18n.t('users.enroll_confirmation', { username });
+      if (getFiltered(users, { username, role }).length === 0) {
+        return dispatch(initiateConfirm({ confirmMessage, onConfirm }));
+      }
+      return dispatch(addNotification({
+        message: I18n.t('users.already_enrolled'),
+        closable: true,
+        type: 'error'
+      }));
     }
 
-    const userObject = {
-      username,
-      role,
-      role_description: roleDescription,
-      real_name: realName
-    };
+    // Multiple users: deduplicate within the input list itself
+    const uniqueUsernames = usernames.filter(
+      (username, index, self) => self.findIndex(u => u.toLowerCase() === username.toLowerCase()) === index
+    );
+    // Filter out those already enrolled in the course
+    const newUsernames = uniqueUsernames.filter(username => getFiltered(users, { username, role }).length === 0);
+    if (newUsernames.length === 0) {
+      return dispatch(addNotification({
+        message: I18n.t('users.already_enrolled'),
+        closable: true,
+        type: 'error'
+      }));
+    }
 
     const onConfirm = () => {
-      checkEnrollmentSuccess.current = username;
-      dispatch(addUser(courseId, { user: userObject }));
+      checkEnrollmentSuccess.current = [...newUsernames];
+      newUsernames.forEach((username) => {
+        dispatch(addUser(courseId, { user: { username, role } }));
+      });
     };
-    const confirmMessage = I18n.t('users.enroll_confirmation', { username });
-
-    // If the user is not already enrolled
-    if (getFiltered(users, { username, role }).length === 0) {
-      return dispatch(initiateConfirm({ confirmMessage, onConfirm }));
-    }
-    // If the user is already enrolled
-    return dispatch(addNotification({
-      message: I18n.t('users.already_enrolled'),
-      closable: true,
-      type: 'error'
-    }));
+    const confirmMessage = I18n.t('users.enroll_bulk_confirmation', { usernames: newUsernames.join(', ') });
+    return dispatch(initiateConfirm({ confirmMessage, onConfirm }));
   };
 
 

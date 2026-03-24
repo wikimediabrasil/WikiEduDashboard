@@ -1239,6 +1239,8 @@ es:
     editors: Editores
     edits_by: 'Ediciones por:'
     enroll_confirmation: ¿Confirmas que quieres añadir a %{username}?
+    enroll_bulk_confirmation: "¿Confirmas que quieres añadir a estos usuarios: %{usernames}?"
+    already_in_input: '%{username} ya está en la lista de inscripciones.'
     enroll_url: 'Los usuarios pueden unirse visitando este URL:'
     enrolled_success: ¡%{username} añadido con éxito!
     exercises_and_trainings: Ejercicios y capacitaciones
