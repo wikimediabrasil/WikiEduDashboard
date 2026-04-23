@@ -1,73 +1,80 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ArticleUtils from '../../utils/article_utils';
+import { Link } from 'react-router-dom';
+
+const getSafeI18n = (key, fallback) => {
+  const result = I18n.t(key);
+  return result && result.startsWith('[missing') ? fallback : result;
+};
 
 const StudentStats = ({ username, stats, maxProject }) => {
+  const metricRows = [
+    {
+      label: I18n.t(`${stats.course_string_prefix}.courses_enrolled`),
+      value: stats.individual_courses_count,
+      link: `/users/${username}/course-details`
+    },
+    {
+      label: I18n.t('metrics.word_count'),
+      value: stats.individual_word_count,
+      link: `/users/${username}/stats/words`
+    },
+    {
+      label: I18n.t('metrics.references_count'),
+      value: stats.individual_references_count,
+      link: `/users/${username}/stats/references`
+    },
+    {
+      label: I18n.t(`metrics.${ArticleUtils.projectSuffix(maxProject, 'articles_edited')}`),
+      value: stats.individual_article_count,
+      link: `/users/${username}/stats/articles`
+    },
+    {
+      label: I18n.t('metrics.upload_count'),
+      value: stats.individual_upload_count,
+      link: `/users/${username}/uploads`,
+      helperValue: stats.individual_upload_usage_count,
+      helperLabel: I18n.t('metrics.upload_usages_count', { count: stats.individual_upload_usage_count })
+    }
+  ];
+
   return (
     <div className="user_stats">
-      <h5> {I18n.t('user_profiles.student_impact', { username })} </h5>
-      <div className="stat-display">
-        <div className="stat-display__stat">
-          <div className="stat-display__value">
-            {stats.individual_courses_count}
-          </div>
-          <small>
-            {I18n.t(`${stats.course_string_prefix}.courses_enrolled`)}
-          </small>
-        </div>
-        <div className="stat-display__stat tooltip-trigger">
-          <div className="stat-display__value">
-            {stats.individual_word_count}
-            <img src="/assets/images/info.svg" alt="tooltip default logo" />
-          </div>
-          <small>
-            {I18n.t('metrics.word_count')}
-          </small>
-          <div className="tooltip dark">
-            <h4> {stats.individual_word_count} </h4>
-            <p>
-              {I18n.t('user_profiles.words_added_disclaimer')}
-            </p>
-          </div>
-        </div>
-        <div className="stat-display__stat tooltip-trigger">
-          <div className="stat-display__value">
-            {stats.individual_references_count}
-            <img src="/assets/images/info.svg" alt="tooltip default logo" />
-          </div>
-          <small>
-            {I18n.t('metrics.references_count')}
-          </small>
-          <div className="tooltip dark">
-            <h4> {stats.individual_references_count} </h4>
-            <p>
-              {I18n.t('user_profiles.references_disclaimer')}
-            </p>
-          </div>
-        </div>
-        <div className="stat-display__stat">
-          <div className="stat-display__value">
-            {stats.individual_article_count}
-          </div>
-          <small>
-            {I18n.t(`metrics.${ArticleUtils.projectSuffix(maxProject, 'articles_edited')}`)}
-          </small>
-        </div>
-        <div className="stat-display__stat tooltip-trigger">
-          <div className="stat-display__value">
-            {stats.individual_upload_count}
-            <img src="/assets/images/info.svg" alt="tooltip default logo" />
-          </div>
-          <small>
-            {I18n.t('metrics.upload_count')}
-          </small>
-          <div className="tooltip dark">
-            <h4> {stats.individual_upload_usage_count} </h4>
-            <p>
-              {I18n.t('metrics.upload_usages_count', { count: stats.individual_upload_usage_count })}
-            </p>
-          </div>
-        </div>
+      <h5 className="user_stats__title">{I18n.t('user_profiles.student_impact', { username })}</h5>
+      <div className="user-stats-table__wrap">
+        <table className="user-stats-table">
+          <thead>
+            <tr>
+              <th>{getSafeI18n('metrics.metric', 'Metric')}</th>
+              <th>{getSafeI18n('metrics.value', 'Value')}</th>
+              <th>{getSafeI18n('metrics.details', 'Details')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {metricRows.map(row => (
+              <tr key={row.label}>
+                <td className="user-stats-table__metric">{row.label}</td>
+                <td className="user-stats-table__value">
+                  <span>{row.value}</span>
+                  {row.helperValue !== undefined && (
+                    <span className="user-stats-table__helper">
+                      <strong>{row.helperValue}</strong>
+                      <span>{row.helperLabel}</span>
+                    </span>
+                  )}
+                </td>
+                <td className="user-stats-table__action">
+                  <div className="user-stats-table__action-inner">
+                    <Link to={row.link} className="button border ghost small">
+                      {getSafeI18n('users.see_more', 'See more ↗')}
+                    </Link>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
@@ -75,7 +82,8 @@ const StudentStats = ({ username, stats, maxProject }) => {
 
 StudentStats.propTypes = {
   username: PropTypes.string,
-  stats: PropTypes.object
+  stats: PropTypes.object,
+  maxProject: PropTypes.string
 };
 
 export default StudentStats;

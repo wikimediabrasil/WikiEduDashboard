@@ -7,10 +7,10 @@ const ByStudentsStats = ({ username, stats, maxProject }) => {
 
   return (
     <div className="user_stats">
-      <h5>
+      {/* <h5>
         {I18n.t('user_profiles.instructors_student_impact', { username })}
-      </h5>
-      <div className="stat-display">
+      </h5> */}
+      {/* <div className="stat-display">
         <div className="stat-display__stat">
           <div className="stat-display__value">
             {stats.word_count}
@@ -72,7 +72,7 @@ const ByStudentsStats = ({ username, stats, maxProject }) => {
             </p>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };
