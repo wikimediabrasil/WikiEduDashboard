@@ -4,6 +4,11 @@ require_dependency "#{Rails.root}/lib/errors/api_error_handling"
 
 # Gets data from reference-counter Toolforge tool
 # https://toolsadmin.wikimedia.org/tools/id/reference-counter
+#
+# Uses the batch endpoint (POST /api/v1/references/{project}/{language}) so a
+# group of revisions costs one HTTP round-trip instead of N. Suppressed/deleted
+# revisions surface as per-rev `{ "num_ref": null, "error": "no content" }`
+# entries inside an otherwise-200 response.
 class ReferenceCounterApi
   include ApiErrorHandling
 
@@ -28,59 +33,74 @@ class ReferenceCounterApi
     @non_200_errors = {}
   end
 
-  # This is the main entry point.
-  # Given an array of revision ids, it returns a hash with the number of references
-  # for those revision ids.
-  # Format result example:
-  # { 'rev_id0' => { 'num_ref' => 10 }
-  #   ...
-  #   'rev_idn' => { "num_ref" => 0 }
-  # }
+  # Given an array of revision ids, returns a hash:
+  #   { 'rev_id0' => { 'num_ref' => 10 }, ... 'rev_idn' => { 'num_ref' => 0 } }
+  # Suppressed/deleted revisions return { 'num_ref' => nil } (with no 'error'
+  # key, matching the prior 403 path) and tick record_reference_counter_403 on
+  # the update service so we surface a per-update count.
   def get_number_of_references_from_revision_ids(rev_ids)
-    # Restart errors array
     @errors = []
-    results = {}
-    rev_ids.each do |rev_id|
-      results.deep_merge!({ rev_id.to_s => get_number_of_references_from_revision_id(rev_id) })
-    end
+    return {} if rev_ids.empty?
+
+    results = fetch_batch(rev_ids)
 
     log_error_batch(rev_ids)
     report_reference_counter_error_to_sentry
-    return results
+    results
   end
 
   private
 
-  # Given a revision ID, it retrieves a hash containing the reference count from the
-  # reference-counter Toolforge API.
-  # If the API response is not 200 or an error occurs, it returns nil.
-  # Any encountered errors are logged in Sentry at the batch level.
-  def get_number_of_references_from_revision_id(rev_id)
+  def fetch_batch(rev_ids)
     tries ||= RETRY_COUNT
-    response = toolforge_server.get(references_query_url(rev_id))
-    parsed_response = Oj.load(response.body)
-
-    return { 'num_ref' => parsed_response['num_ref'] } if response.status == 200
-
-    return handle_forbidden if response.status == FORBIDDEN
-
-    if response.status != 200
-      error_response = { rev_id: rev_id, content: parsed_response}
-      batch_non_200_response_log(response.status, error_response)
+    response = toolforge_server.post(batch_query_url) do |req|
+      req.body = { 'rev_ids' => rev_ids }.to_json
     end
-    # Leave the error empty if it is not a transient error.
-    return { 'num_ref' => nil } if non_transient_error? response.status
-    # Log the error and return empty hash
-    return { 'num_ref' => nil, 'error' => parsed_response }
+    parsed_response = Oj.load(response.body)
+    handle_batch_response(rev_ids, response.status, parsed_response)
   rescue StandardError => e
     tries -= 1
     retry unless tries.zero?
     @errors << e
-    return { 'num_ref' => nil, 'error' => e }
+    rev_ids.to_h { |id| [id.to_s, { 'num_ref' => nil, 'error' => e }] }
   end
 
-  # 403 responses are expected for revisions whose content has been suppressed
-  # (texthidden / revdeleted). Count them on the update service so we can
+  def handle_batch_response(rev_ids, status, parsed_response)
+    return normalize_batch_results(rev_ids, parsed_response) if status == 200
+
+    batch_non_200_response_log(status, { rev_ids:, content: parsed_response })
+
+    default = if non_transient_error?(status)
+                { 'num_ref' => nil }
+              else
+                { 'num_ref' => nil, 'error' => parsed_response }
+              end
+    rev_ids.to_h { |id| [id.to_s, default] }
+  end
+
+  def normalize_batch_results(rev_ids, parsed_response)
+    rev_ids.each_with_object({}) do |rev_id, results|
+      entry = parsed_response[rev_id.to_s]
+      results[rev_id.to_s] = transform_entry(entry)
+    end
+  end
+
+  # Per-rev entry shape from the batch endpoint:
+  #   { 'num_ref' => N }                                  # normal
+  #   { 'num_ref' => nil, 'error' => 'no content' }       # suppressed/deleted
+  #   nil                                                 # missing from response
+  def transform_entry(entry)
+    return { 'num_ref' => nil } if entry.nil?
+    return handle_forbidden if suppressed_content?(entry)
+    { 'num_ref' => entry['num_ref'] }
+  end
+
+  def suppressed_content?(entry)
+    entry['num_ref'].nil? && entry['error'] == 'no content'
+  end
+
+  # Suppressed-content revs are expected for revisions whose content has been
+  # hidden (texthidden / revdeleted). Count them on the update service so we
   # surface a total per course update, and skip Sentry reporting.
   def handle_forbidden
     @update_service&.record_reference_counter_403
@@ -133,14 +153,14 @@ class ReferenceCounterApi
   class InvalidProjectError < StandardError
   end
 
-  def references_query_url(rev_id)
-    "/api/v1/references/#{@project_code}/#{@language_code}/#{rev_id}"
+  def batch_query_url
+    "/api/v1/references/#{@project_code}/#{@language_code}"
   end
 
-  # A single-revision lookup has no reason to take longer than this. Without
-  # timeouts, a silent server leaves the worker blocked in IO#wait_readable
-  # indefinitely — Faraday::TimeoutError is already in TYPICAL_ERRORS and the
-  # 5-retry rescue below will handle transient failures gracefully.
+  # A batch lookup has no reason to take longer than this. Without timeouts,
+  # a silent server leaves the worker blocked in IO#wait_readable indefinitely
+  # — Faraday::TimeoutError is already in TYPICAL_ERRORS and the 5-retry
+  # rescue below will handle transient failures gracefully.
   OPEN_TIMEOUT = 30
   REQUEST_TIMEOUT = 60
 

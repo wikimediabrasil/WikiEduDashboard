@@ -87,29 +87,33 @@ describe RevisionScoreImporter do
       end
     end
 
-    it 'propagates error if fetching revision scores fails' do
+    it 'propagates error to all revs when scoring batch fails' do
       VCR.use_cassette 'revision_scores/revision_score_fails' do
-        stub_request(:any, /reference-counter\.toolforge\.org.*662106477/)
+        stub_request(:post, %r{reference-counter\.toolforge\.org/api/v1/references/wikipedia/en})
           .to_raise(Errno::ECONNREFUSED)
 
         revisions = described_class.new.get_revision_scores(array_revisions)
-        expect(revisions[0].error).to eq(false)
-        expect(revisions[1].error).to eq(true)
-        expect(revisions[2].error).to eq(false)
-        expect(revisions[3].error).to eq(false)
+        expect(revisions.all?(&:error)).to be true
       end
     end
 
-    it 'propagates error if fetching parent revision scores fails' do
+    it 'propagates error to revs whose parent-revision-score batch fails' do
       VCR.use_cassette 'revision_scores/parent_revision_score_fails' do
-        stub_request(:any, /reference-counter\.toolforge\.org.*708291784/)
+        # Distinguish the parent-revision-score batch by a parent rev_id
+        # appearing in the POST body.
+        stub_request(:post, %r{reference-counter\.toolforge\.org/api/v1/references/wikipedia/en})
+          .with(body: hash_including('rev_ids' => array_including(708291784)))
           .to_raise(Errno::ECONNREFUSED)
 
         revisions = described_class.new.get_revision_scores(array_revisions)
+        # rev[0] is a new article (no parent fetch); rev[3]'s parent isn't
+        # returned by the wiki API (it's a deleted revision), so it has no
+        # parent fetch either.
         expect(revisions[0].error).to eq(false)
-        expect(revisions[1].error).to eq(false)
-        expect(revisions[2].error).to eq(true)
         expect(revisions[3].error).to eq(false)
+        # rev[1] and rev[2] each had their parent in the failing batch.
+        expect(revisions[1].error).to eq(true)
+        expect(revisions[2].error).to eq(true)
       end
     end
 

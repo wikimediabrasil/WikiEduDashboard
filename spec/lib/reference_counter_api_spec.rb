@@ -93,7 +93,7 @@ describe ReferenceCounterApi do
          project_code: 'wiktionary',
          language_code: 'es',
          rev_ids: [5006940, 5006942, 5006946],
-         error_count: 3
+         error_count: 1
      }
     )
     response = reference_counter_api.get_number_of_references_from_revision_ids rev_ids
@@ -120,11 +120,16 @@ describe ReferenceCounterApi do
 
     let(:subject) { described_class.new(en_wikipedia, update_service) }
 
-    it 'records 403s on the update service and does not send them to Sentry' do
-      stub_request(:get, %r{https://reference-counter.toolforge.org/api/v1/references/wikipedia/en/\d+})
-        .to_return(status: 403,
-                   body: '{"description":"mwapi error: permissiondenied"}',
-                   headers: { 'Content-Type': 'application/json' })
+    it 'records suppressed-content revs on the update service and does not send them to Sentry' do
+      stub_request(:post, 'https://reference-counter.toolforge.org/api/v1/references/wikipedia/en')
+        .to_return(
+          status: 200,
+          body: lambda do |request|
+            rev_ids = JSON.parse(request.body).fetch('rev_ids', [])
+            rev_ids.to_h { |id| [id.to_s, { 'num_ref' => nil, 'error' => 'no content' }] }.to_json
+          end,
+          headers: { 'Content-Type': 'application/json' }
+        )
 
       expect(update_service).to receive(:record_reference_counter_403)
         .exactly(failing_ids.size).times
