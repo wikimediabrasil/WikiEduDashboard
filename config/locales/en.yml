@@ -1800,6 +1800,19 @@ en:
     detailed_impact: "Detailed Impact"
     words_added_per_article: "Words Added per Article"
     references_added_per_article: "References Added per Article"
+    articles_edited_detail: "Articles Edited"
+    no_articles_edited: "This user has no data to display in this section yet."
+    summary_articles: "Articles"
+    summary_words: "Words"
+    summary_references: "References"
+    type: "Type"
+    status_new: "New"
+    status_edited: "Edited"
+    language_not_available: "N/A"
+    column_metric: "Metric"
+    column_value: "Value"
+    column_details: "Details"
+    see_more: "See more ↗"
     student_impact: Total impact made by %{username} as a student
     instructor_impact: Total impact made by %{username} as an instructor
     instructors_student_impact: Total impact made by %{username}'s students

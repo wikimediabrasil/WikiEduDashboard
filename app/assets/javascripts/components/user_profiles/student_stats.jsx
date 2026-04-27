@@ -3,11 +3,6 @@ import PropTypes from 'prop-types';
 import ArticleUtils from '../../utils/article_utils';
 import { Link } from 'react-router-dom';
 
-const getSafeI18n = (key, fallback) => {
-  const result = I18n.t(key);
-  return result && result.startsWith('[missing') ? fallback : result;
-};
-
 const StudentStats = ({ username, stats, maxProject }) => {
   const metricRows = [
     {
@@ -46,9 +41,9 @@ const StudentStats = ({ username, stats, maxProject }) => {
         <table className="user-stats-table">
           <thead>
             <tr>
-              <th>{getSafeI18n('metrics.metric', 'Metric')}</th>
-              <th>{getSafeI18n('metrics.value', 'Value')}</th>
-              <th>{getSafeI18n('metrics.details', 'Details')}</th>
+              <th>{I18n.t('user_profiles.column_metric')}</th>
+              <th>{I18n.t('user_profiles.column_value')}</th>
+              <th>{I18n.t('user_profiles.column_details')}</th>
             </tr>
           </thead>
           <tbody>
@@ -57,17 +52,19 @@ const StudentStats = ({ username, stats, maxProject }) => {
                 <td className="user-stats-table__metric">{row.label}</td>
                 <td className="user-stats-table__value">
                   <span>{row.value}</span>
+                  {/* Oculto a pedido: no mostrar "total usages across languages" debajo del conteo de uploads.
                   {row.helperValue !== undefined && (
                     <span className="user-stats-table__helper">
                       <strong>{row.helperValue}</strong>
                       <span>{row.helperLabel}</span>
                     </span>
                   )}
+                  */}
                 </td>
                 <td className="user-stats-table__action">
                   <div className="user-stats-table__action-inner">
                     <Link to={row.link} className="button border ghost small">
-                      {getSafeI18n('users.see_more', 'See more ↗')}
+                      {I18n.t('user_profiles.see_more')}
                     </Link>
                   </div>
                 </td>

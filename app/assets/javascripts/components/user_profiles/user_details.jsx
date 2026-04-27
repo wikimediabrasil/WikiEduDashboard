@@ -4,23 +4,6 @@ import { Link, useParams } from 'react-router-dom';
 import API from '../../utils/api.js';
 import Loading from '../common/loading.jsx';
 
-const getSafeI18n = (key, fallback) => {
-  const result = I18n.t(key);
-  return result && result.startsWith('[missing') ? fallback : result;
-};
-
-const metricTitles = {
-  articles: 'Detailed Articles',
-  words: 'Words Added by Article',
-  references: 'References Added by Article'
-};
-
-const metricLabels = {
-  articles: 'Articles',
-  words: 'Words',
-  references: 'References'
-};
-
 const columnsByMetric = {
   articles: ['article', 'language', 'type', 'view'],
   words: ['article', 'language', 'words', 'view'],
@@ -47,20 +30,25 @@ const UserDetails = ({ username }) => {
     return <Loading />;
   }
 
-  let title = getSafeI18n('user_profiles.detailed_impact', 'Detailed Impact');
-  if (metric === 'words') title = getSafeI18n('user_profiles.words_added_per_article', 'Words Added per Article');
-  if (metric === 'references') title = getSafeI18n('user_profiles.references_added_per_article', 'References Added per Article');
-  if (metric === 'articles') title = getSafeI18n('user_profiles.articles_edited_detail', metricTitles.articles);
+  let title = I18n.t('user_profiles.detailed_impact');
+  if (metric === 'words') title = I18n.t('user_profiles.words_added_per_article');
+  if (metric === 'references') title = I18n.t('user_profiles.references_added_per_article');
+  if (metric === 'articles') title = I18n.t('user_profiles.articles_edited_detail');
 
-  const summaryLabel = metricLabels[metric] || metricLabels.articles;
+  const summaryLabels = {
+    articles: I18n.t('user_profiles.summary_articles'),
+    words: I18n.t('user_profiles.summary_words'),
+    references: I18n.t('user_profiles.summary_references')
+  };
+  const summaryLabel = summaryLabels[metric] || summaryLabels.articles;
   const visibleColumns = columnsByMetric[metric] || columnsByMetric.articles;
   const renderHeaderCell = (column) => {
-    if (column === 'article') return getSafeI18n('articles.article_title', 'Article');
-    if (column === 'language') return getSafeI18n('articles.language', 'Language');
+    if (column === 'article') return I18n.t('articles.article_title');
+    if (column === 'language') return I18n.t('articles.language');
     if (column === 'words') return I18n.t('metrics.word_count');
     if (column === 'references') return I18n.t('metrics.references_count');
-    if (column === 'type') return getSafeI18n('articles.new_article', 'Type');
-    return getSafeI18n('articles.view', 'View Article');
+    if (column === 'type') return I18n.t('user_profiles.type');
+    return I18n.t('articles.view');
   };
 
   const renderBodyCell = (article, column) => {
@@ -73,7 +61,7 @@ const UserDetails = ({ username }) => {
     }
 
     if (column === 'language') {
-      return <td className="user-details-table__value">{article.language || article.wiki_language || 'N/A'}</td>;
+      return <td className="user-details-table__value">{article.language || article.wiki_language || I18n.t('user_profiles.language_not_available')}</td>;
     }
 
     if (column === 'words') return <td className="user-details-table__value">{article.word_count || 0}</td>;
@@ -82,8 +70,8 @@ const UserDetails = ({ username }) => {
       return (
         <td className="user-details-table__value">
           {article.new_article
-            ? getSafeI18n('articles.created', 'New')
-            : getSafeI18n('articles.edited', 'Edited')}
+            ? I18n.t('user_profiles.status_new')
+            : I18n.t('user_profiles.status_edited')}
         </td>
       );
     }
@@ -91,7 +79,7 @@ const UserDetails = ({ username }) => {
     return (
       <td className="table-link-cell">
         <a href={article.url} target="_blank" rel="noopener noreferrer">
-          {getSafeI18n('articles.view', 'View Article')}
+          {I18n.t('articles.view')}
         </a>
       </td>
     );
@@ -101,13 +89,13 @@ const UserDetails = ({ username }) => {
     <div className="user-articles">
       <div className="user-articles__navigation">
         <Link to={`/users/${username}`} className="button ghost small">
-          ← {I18n.t('users.back_to_profile') || 'Back to Profile'}
+          ← {I18n.t('users.back_to_profile')}
         </Link>
       </div>
       {coursesData.length === 0 ? (
         <div className="user-articles__empty-state">
           <h3>{title}</h3>
-          <p>{getSafeI18n('user_profiles.no_articles_edited', 'This user has no data to display in this section yet.')}</p>
+          <p>{I18n.t('user_profiles.no_articles_edited')}</p>
         </div>
       ) : (
         <>
@@ -115,10 +103,10 @@ const UserDetails = ({ username }) => {
             <h3>{title}</h3>
             <div className="user-articles__downloads">
               <button type="button" className="button border ghost small">
-                {getSafeI18n('downloads.csv', 'Download CSV')}
+                {I18n.t('downloads.csv')}
               </button>
               <button type="button" className="button border ghost small">
-                {getSafeI18n('downloads.json', 'Download JSON')}
+                {I18n.t('downloads.json')}
               </button>
             </div>
           </div>
@@ -173,7 +161,7 @@ const UserDetails = ({ username }) => {
           </div>
           <div className="user-articles__footer">
             <a href={`https://en.wikipedia.org/wiki/Special:Contributions/${username}`} target="_blank" rel="noopener noreferrer" className="button dark">
-              {getSafeI18n('users.contributions_more', 'View More Contributions')}
+              {I18n.t('users.contributions_more')}
             </a>
           </div>
         </>
