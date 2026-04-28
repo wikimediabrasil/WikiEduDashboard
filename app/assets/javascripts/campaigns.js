@@ -1,6 +1,6 @@
 import './utils/editable';
 
-window.onload = () => {
+document.addEventListener('DOMContentLoaded', () => {
   const createCampaignButton = document.querySelector('.create-campaign-button');
   const createModalWrapper = document.querySelector('.create-modal-wrapper');
   const wizardPanel = document.querySelector('.wizard__panel');
@@ -15,32 +15,63 @@ window.onload = () => {
     }
   });
 
-  $('.campaign-details').on('editable:edit', (e) => {
-    const $popContainer = $(e.target).find('.pop__container');
-    const $popButton = $(e.target).find('.plus');
+  const campaignDetailsElements = document.querySelectorAll('.campaign-details');
+  let clickOutsideHandler = null;
 
-    // add listener to show/hide the popup, removing any existing listener
-    $popButton.show().off('click').on('click', () => {
-      $popContainer.find('.pop').toggleClass('open');
+  campaignDetailsElements.forEach((campaignDetails) => {
+    campaignDetails.addEventListener('editable:edit', (e) => {
+      const target = e.target;
+      const popContainer = target.querySelector('.pop__container');
+      const popButton = target.querySelector('.plus');
 
-      // allow popup to be closed when clicking outside the popup, again removing any existing listener
-      $(document).off('click.campaign-popover').on('click.campaign-popover', (cp) => {
-        if (!$(cp.target).parents('.pop__container').length) {
-          $popContainer.find('.pop').removeClass('open');
-        }
-      });
+      if (popButton) {
+        popButton.style.display = 'block';
+        popButton.onclick = () => {
+          const pop = popContainer?.querySelector('.pop');
+          if (pop) {
+            pop.classList.toggle('open');
+          }
+
+          if (clickOutsideHandler) {
+            document.removeEventListener('click', clickOutsideHandler);
+          }
+
+          clickOutsideHandler = (clickEvent) => {
+            if (popContainer && !popContainer.contains(clickEvent.target)) {
+              const popElement = popContainer.querySelector('.pop');
+              if (popElement) {
+                popElement.classList.remove('open');
+              }
+            }
+          };
+
+          document.addEventListener('click', clickOutsideHandler);
+        };
+      }
+
+      const saveButton = campaignDetails.querySelector('.rails_editable-save');
+      if (saveButton) {
+        saveButton.onclick = () => {
+          const form = document.getElementById('edit_campaign_details');
+          if (form) {
+            form.dispatchEvent(new Event('submit', { bubbles: true }));
+          }
+        };
+      }
     });
 
-    // campaign details form submission
-    $('.campaign-details .rails_editable-save').on('click', () => {
-      $('#edit_campaign_details').trigger('submit');
-    });
-  });
+    campaignDetails.addEventListener('editable:read', (e) => {
+      const target = e.target;
+      const plusButton = target.querySelector('.plus');
+      const popContainer = target.querySelector('.pop__container');
 
-  // close out the popup and hide pop button if existing edit mode
-  $('.campaign-details').on('editable:read', (e) => {
-    $(e.target).find('.plus').hide();
-    $(e.target).find('.pop__container').removeClass('open');
+      if (plusButton) {
+        plusButton.style.display = 'none';
+      }
+      if (popContainer) {
+        popContainer.classList.remove('open');
+      }
+    });
   });
 
   document.querySelector('.remove-organizer-form')?.addEventListener('submit', (e) => {
@@ -95,4 +126,14 @@ window.onload = () => {
   if (createModalWrapper?.classList.contains('show-create-modal')) {
     createCampaignButton.click();
   }
-};
+
+  // Advanced Search Toggle
+  const toggleAdvancedSearchBtn = document.getElementById('toggle_advanced_search');
+  const advancedSearchFields = document.getElementById('advanced_search_fields');
+
+  if (toggleAdvancedSearchBtn && advancedSearchFields) {
+    toggleAdvancedSearchBtn.addEventListener('click', () => {
+      advancedSearchFields.classList.toggle('hidden');
+    });
+  }
+});
