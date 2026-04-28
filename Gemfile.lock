@@ -31,9 +31,9 @@ GIT
 
 GIT
   remote: https://github.com/WikiEducationFoundation/wikidata-diff-analyzer
-  revision: a8a725529df95560e3c911ab58103817423a3bc2
+  revision: 683c88e6744f6c95cc4653dd4a0df4e32a092c65
   specs:
-    wikidata-diff-analyzer (2.1.0)
+    wikidata-diff-analyzer (2.2.0)
       json (~> 2.1)
       mediawiki_api
 

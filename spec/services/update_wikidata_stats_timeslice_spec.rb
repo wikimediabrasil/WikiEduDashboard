@@ -72,12 +72,13 @@ describe UpdateWikidataStatsTimeslice do
           .and_raise(MediawikiApi::HttpError, '')
         expect(updater).to receive(:log_error).once
         updater.update_revisions_with_stats(revisions)
-        expect(revision1.summary).to be_nil
-        expect(revision1.error).to eq(true)
-        expect(revision2.summary).to be_nil
-        expect(revision2.error).to eq(true)
-        expect(unscoped_revision.summary).to be_nil
-        expect(unscoped_revision.error).to be_nil
+        # Non-scoped revisions are now also analyzed (so merge_to on
+        # now-redirected source items can still be classified — see #6813),
+        # so an analyzer outage marks them all with error.
+        revisions.each do |rev|
+          expect(rev.summary).to be_nil
+          expect(rev.error).to eq(true)
+        end
       end
     end
   end
