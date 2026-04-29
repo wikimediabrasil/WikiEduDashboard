@@ -14,9 +14,8 @@
         %li
           = message.first
 
-.container.campaign_main
-  %section.overview.container
-    = render 'courses/header_stats', presenter: @presenter
+.container
+  %section.overview.container#overview-campaign-details
     .primary
       = form_for(@campaign, url: campaign_path(@campaign.slug), html: { id: 'edit_campaign_description', class: 'module campaign-description rails_editable' }) do
         .section-header
@@ -25,19 +24,20 @@
               = t('campaign.campaign')
             = @campaign.title
           .controls
-            %button.button.dark.rails_editable-edit
+            %button.button.dark.rails_editable-edit{ 'data-form-id' => 'edit_campaign_description' }
               = t('editable.edit_description')
         .module__data.rails_editable-field
           %p.rails_editable-content
             = preserve @campaign.description
           = text_area(:campaign, :description, class: 'rails_editable-input', required: true, maxlength: 65535)
+
     .sidebar
       .module.campaign-details.rails_editable{class: @open_details ? 'rails_editable-editing' : ''}
         .section-header
           %h3
             = t('application.details')
           .controls
-            %button.button.dark.rails_editable-edit
+            %button.button.dark.rails_editable-edit{ 'data-form-id' => 'edit_campaign_details' }
               = t('editable.edit_details')
         .module__data.extra-line-height
           %div
@@ -104,7 +104,7 @@
               = text_field(:campaign, :default_passcode, required: false, class: 'rails_editable-input')
 
             .campaign-use-dates.form-group.rails_editable-field
-              - use_dates = @campaign.start || @campaign.end
+              - use_dates = @campaign.start || @campaign.end || @campaign.errors[:start].any? || @campaign.errors[:end].any?
               %label
                 = check_box_tag(:use_dates, '1', use_dates)
                 = t('campaign.use_start_end_dates')
@@ -134,7 +134,7 @@
             .tooltip.dark
               = t('campaign.program_template_tooltip')
           .controls
-            %button.button.dark.rails_editable-edit
+            %button.button.dark.rails_editable-edit{ 'data-form-id' => 'edit_campaign_template' }
               = t('editable.edit_template')
         .module__data.rails_editable-field
           %p.rails_editable-content
@@ -150,6 +150,7 @@
           = form_tag("/requested_accounts_campaigns/#{@campaign.slug}/disable_account_requests", method: :put, class: 'campaign-create') do
             %button.button.dark
               = t('campaign.disable_account_requests')
+
       = form_for(@campaign, url: campaign_path(@campaign.slug), method: :delete, html: { id: 'delete_campaign_form', class: 'campaign-delete', 'data-title' => @campaign.title }) do
         %button.button.danger
           = t('campaign.delete_campaign')

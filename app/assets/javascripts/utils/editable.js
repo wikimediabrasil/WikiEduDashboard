@@ -65,8 +65,14 @@ document.addEventListener('DOMContentLoaded', () => {
     cancelBtn.textContent = I18n.t('editable.cancel');
 
     const saveBtn = document.createElement('button');
+    saveBtn.type = 'submit';
+    const formId = button.getAttribute('data-form-id');
+    if (formId) {
+      saveBtn.setAttribute('form', formId);
+    }
     saveBtn.className = 'rails_editable rails_editable-save button dark';
     saveBtn.textContent = I18n.t('editable.save');
+
 
     buttonContainer.appendChild(cancelBtn);
     buttonContainer.appendChild(saveBtn);
@@ -80,10 +86,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const text = content.textContent.trim();
       content.style.display = 'none';
       input.value = text;
-      if (input.type === 'textarea') {
+      if (input.tagName === 'TEXTAREA') {
         input.style.height = '400px';
       }
-      input.style.display = '';
+      input.style.setProperty('display', 'block', 'important');
     });
 
     cancelBtn.addEventListener('click', () => {

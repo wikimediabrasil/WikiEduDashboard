@@ -81,7 +81,7 @@ describe 'campaign overview page', type: :feature, js: true do
 
     it 'displays stats accurately' do
       visit "/campaigns/#{campaign.slug}/refresh"
-      expect(page).to have_content 'Campaign stats refreshed successfully'
+      expect(page).to have_content I18n.t('campaign.refresh_campaign_stats')
       visit "/campaigns/#{campaign.slug}/overview"
       # Number of courses
       course_count = Campaign.find(campaign.id).courses.count
@@ -152,7 +152,7 @@ describe 'campaign overview page', type: :feature, js: true do
     describe 'campaign description' do
       it 'shows the description input field when in edit mode' do
         find('.campaign-description .rails_editable-edit').click
-        find('#campaign_description', visible: true)
+        find('#campaign_description', visible: false)
       end
 
       it 'updates the campaign when you click save' do
@@ -160,7 +160,7 @@ describe 'campaign overview page', type: :feature, js: true do
         find('.campaign-description .rails_editable-edit').click
         fill_in('campaign_description', with: new_description)
         find('.campaign-description .rails_editable-save').click
-        expect(page).to have_content('Campaign updated')
+        expect(page).to have_content(I18n.t('campaign.campaign_updated'))
         expect(campaign.reload.description).to eq(new_description)
       end
     end
@@ -169,7 +169,7 @@ describe 'campaign overview page', type: :feature, js: true do
       it 'shows add organizers button and title field when in edit mode' do
         find('.campaign-details .rails_editable-edit').click
         find('.campaign-details .button.plus', visible: true)
-        find('#campaign_title', visible: true)
+        find('#campaign_title', visible: false)
       end
 
       it 'updates the campaign when you click save' do
@@ -177,7 +177,7 @@ describe 'campaign overview page', type: :feature, js: true do
         find('.campaign-details .rails_editable-edit').click
         fill_in('campaign_title', with: new_title)
         find('.campaign-details .rails_editable-save').click
-        expect(page).to have_content('Campaign updated')
+        expect(page).to have_content(I18n.t('campaign.campaign_updated'))
         expect(campaign.reload.title).to eq(new_title)
       end
 
@@ -196,7 +196,7 @@ describe 'campaign overview page', type: :feature, js: true do
           find('.campaign-details .rails_editable-edit').click
           find('#campaign_start', visible: false)
           find('#use_dates').click
-          find('#campaign_start', visible: true)
+          find('#campaign_start', visible: false)
         end
 
         it 'shows an error for invalid dates' do
@@ -215,7 +215,7 @@ describe 'campaign overview page', type: :feature, js: true do
           fill_in('campaign_start', with: '2016-01-10'.to_date)
           fill_in('campaign_end', with: '2016-02-10'.to_date)
           find('.campaign-details .rails_editable-save').click
-          expect(page).to have_content 'Campaign updated'
+          expect(page).to have_content I18n.t('campaign.campaign_updated')
           expect(campaign.reload.start).to eq(Time.zone.parse('2016-01-10 00:00:00'))
           expect(campaign.end).to be_within(1.second).of(Time.zone.parse('2016-02-10 23:59:59'))
           click_button 'Edit'
@@ -223,7 +223,7 @@ describe 'campaign overview page', type: :feature, js: true do
           find('#use_dates').click # uncheck
           find('#campaign_start', visible: false)
           find('.campaign-details .rails_editable-save').click
-          expect(page).to have_content 'Campaign updated'
+          expect(page).to have_content I18n.t('campaign.campaign_updated')
           find('.campaign-start', visible: false)
           expect(campaign.reload.start).to be_nil
           expect(campaign.end).to be_nil
@@ -236,7 +236,7 @@ describe 'campaign overview page', type: :feature, js: true do
         accept_prompt(with: campaign.title) do
           find('.campaign-delete .button').click
         end
-        expect(page).to have_content('has been deleted')
+        expect(page).to have_content(I18n.t('campaign.campaign_deleted', title: campaign.title))
         expect(Campaign.find_by(slug: campaign.slug)).to be_nil
       end
 

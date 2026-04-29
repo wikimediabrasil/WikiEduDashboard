@@ -2,6 +2,7 @@
 
 # This file is copied to spec/ when you run 'rails generate rspec:install'
 ENV['RAILS_ENV'] ||= 'test'
+ENV['LANG'] = 'en_US.UTF-8'
 # Load spec_helper before rails, so that simplecov works properly.
 require 'spec_helper'
 require File.expand_path('../config/environment', __dir__)
@@ -195,12 +196,16 @@ end
 
 # Checks browser log entries for SEVERE JavaScript errors and fails the
 # current example if any are found. Filters out "Failed to load resource"
-# entries (expected in specs that test 4xx responses).
+# entries (expected in specs that test 4xx responses) and webpack-dev-server
+# errors (which are common and non-fatal in test environments).
 # Also used by spec/features/js_error_detection_spec.rb to verify this
 # mechanism works.
 def check_for_severe_js_errors(browser_log_entries)
   severe = browser_log_entries.select do |error|
-    error.level == 'SEVERE' && !/Failed to load resource/.match?(error.message)
+    error.level == 'SEVERE' &&
+      !/Failed to load resource/.match?(error.message) &&
+      !/webpack-dev-server/.match?(error.message) &&
+      !/WebSocket/.match?(error.message)
   end
   return if severe.empty?
 

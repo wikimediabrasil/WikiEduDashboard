@@ -15,14 +15,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  const campaignDetailsElements = document.querySelectorAll('.campaign-details');
+  const campaignDetailsElements = document.querySelectorAll('.campaign-details, .campaign-description');
   let clickOutsideHandler = null;
 
   campaignDetailsElements.forEach((campaignDetails) => {
     campaignDetails.addEventListener('editable:edit', (e) => {
-      const target = e.target;
-      const popContainer = target.querySelector('.pop__container');
-      const popButton = target.querySelector('.plus');
+      const form = e.target;
+      const popContainer = form.querySelector('.pop__container');
+      const popButton = form.querySelector('.plus');
 
       if (popButton) {
         popButton.style.display = 'block';
@@ -46,16 +46,6 @@ document.addEventListener('DOMContentLoaded', () => {
           };
 
           document.addEventListener('click', clickOutsideHandler);
-        };
-      }
-
-      const saveButton = campaignDetails.querySelector('.rails_editable-save');
-      if (saveButton) {
-        saveButton.onclick = () => {
-          const form = document.getElementById('edit_campaign_details');
-          if (form) {
-            form.dispatchEvent(new Event('submit', { bubbles: true }));
-          }
         };
       }
     });

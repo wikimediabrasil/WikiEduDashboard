@@ -158,7 +158,7 @@ class CampaignsController < ApplicationController
       @editable = true
       # If one of the Details fields was invalid, passing instance variable
       # used to show the Details form in 'edit mode'
-      @open_details = (@campaign.errors.messages.keys & DETAILS_FIELDS).empty?
+      @open_details = (@campaign.errors.messages.keys & DETAILS_FIELDS).any?
       render :edit
     end
   end

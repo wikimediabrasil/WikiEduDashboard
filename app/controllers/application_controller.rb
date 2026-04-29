@@ -133,6 +133,13 @@ class ApplicationController < ActionController::Base
   private
 
   def set_locale
+    # Force English in test environment unless a locale is explicitly requested
+    if Rails.env.test?
+      preferred_locale = params[:locale] || current_user&.locale || I18n.default_locale
+      I18n.locale = I18n.available_locales.include?(preferred_locale.to_sym) ? preferred_locale : I18n.default_locale
+      return
+    end
+
     # Saved user locale takes precedence over language preferences from HTTP headers.
     preferred_locale_from_user
     # Param takes precedence over saved user local
