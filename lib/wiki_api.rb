@@ -116,15 +116,13 @@ class WikiApi
   rescue StandardError => e
     raise if caller_handles&.call(e)
     tries -= 1
-    # Continue for typical errors so that the request can be retried, but wait
-    # a short bit in the case of 429 — too many request — errors.
     if too_many_requests?(e)
       @update_service&.record_too_many_requests
-      sleep 1
+      sleep retry_delay_for(e)
     end
     retry unless tries.zero?
     log_error(e, update_service: @update_service,
-              sentry_extra: { action:, query:, api_url: @api_url },
+              sentry_extra: rate_limit_sentry_extra(e).merge(action:, query:, api_url: @api_url),
               sentry_tags: rate_limit_sentry_tags(e))
     return nil
   end
@@ -132,6 +130,34 @@ class WikiApi
   def rate_limit_sentry_tags(error)
     return unless too_many_requests?(error)
     { http_status: 429, host: URI(@api_url).host }
+  end
+
+  # Per Wikimedia's rate-limit policy: honor Retry-After when present, else
+  # back off ≥5 s. https://www.mediawiki.org/wiki/Wikimedia_APIs/Rate_limits
+  DEFAULT_RETRY_AFTER_SECONDS = 5
+  # Cap to prevent a misbehaving server from hanging a worker for hours.
+  MAX_RETRY_AFTER_SECONDS = 60
+
+  def retry_delay_for(error)
+    seconds = retry_after_seconds(error) || DEFAULT_RETRY_AFTER_SECONDS
+    seconds.clamp(0, MAX_RETRY_AFTER_SECONDS)
+  end
+
+  # Returns the integer seconds requested by the server's Retry-After header,
+  # or nil if the header is absent / unparseable / the gem version in use
+  # doesn't expose the response on HttpError. Wikimedia uses delay-seconds;
+  # HTTP-date form (RFC 7231) is not parsed.
+  def retry_after_seconds(error)
+    return nil unless error.respond_to?(:response) && error.response
+    raw = error.response.headers['Retry-After']
+    Integer(raw) if raw.present?
+  rescue ArgumentError, TypeError
+    nil
+  end
+
+  def rate_limit_sentry_extra(error)
+    raw = retry_after_seconds(error)
+    raw ? { retry_after: raw } : {}
   end
 
   def api_client
