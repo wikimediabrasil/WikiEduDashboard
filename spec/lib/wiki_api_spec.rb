@@ -84,6 +84,29 @@ describe WikiApi do
       expect(update_service).to receive(:record_too_many_requests).exactly(3).times
       described_class.new(nil, update_service).query(titles: 'X')
     end
+
+    it 'tags Sentry with http_status and host when the final error is a 429' do
+      allow(Sentry).to receive(:capture_exception)
+      allow_any_instance_of(MediawikiApi::Client).to receive(:send)
+        .and_raise(MediawikiApi::HttpError.new(429))
+      allow_any_instance_of(described_class).to receive(:sleep)
+      described_class.new.query(titles: 'X')
+      expect(Sentry).to have_received(:capture_exception).with(
+        anything,
+        hash_including(tags: hash_including(http_status: 429, host: 'en.wikipedia.org'))
+      )
+    end
+
+    it 'does not add http_status tag when the final error is not a 429' do
+      allow(Sentry).to receive(:capture_exception)
+      allow_any_instance_of(MediawikiApi::Client).to receive(:send)
+        .and_raise(MediawikiApi::ApiError)
+      described_class.new.query(titles: 'X')
+      expect(Sentry).to have_received(:capture_exception).with(
+        anything,
+        hash_excluding(tags: hash_including(:http_status))
+      )
+    end
   end
 
   describe '#get_page_content' do

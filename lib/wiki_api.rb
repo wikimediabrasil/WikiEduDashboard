@@ -124,8 +124,14 @@ class WikiApi
     end
     retry unless tries.zero?
     log_error(e, update_service: @update_service,
-              sentry_extra: { action:, query:, api_url: @api_url })
+              sentry_extra: { action:, query:, api_url: @api_url },
+              sentry_tags: rate_limit_sentry_tags(e))
     return nil
+  end
+
+  def rate_limit_sentry_tags(error)
+    return unless too_many_requests?(error)
+    { http_status: 429, host: URI(@api_url).host }
   end
 
   def api_client
