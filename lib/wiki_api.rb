@@ -118,7 +118,10 @@ class WikiApi
     tries -= 1
     # Continue for typical errors so that the request can be retried, but wait
     # a short bit in the case of 429 — too many request — errors.
-    sleep 1 if too_many_requests?(e)
+    if too_many_requests?(e)
+      @update_service&.record_too_many_requests
+      sleep 1
+    end
     retry unless tries.zero?
     log_error(e, update_service: @update_service,
               sentry_extra: { action:, query:, api_url: @api_url })

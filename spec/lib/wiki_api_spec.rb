@@ -73,6 +73,17 @@ describe WikiApi do
       expect(result).to be_nil
       expect(call_count).to eq(3)
     end
+
+    it 'ticks update_service.record_too_many_requests for each 429 observed' do
+      update_service = double('UpdateService', record_too_many_requests: nil)
+      allow_any_instance_of(MediawikiApi::Client).to receive(:send)
+        .and_raise(MediawikiApi::HttpError.new(429))
+      allow_any_instance_of(described_class).to receive(:sleep)
+      expect_any_instance_of(described_class).to receive(:log_error).once
+      # 3 tries → 3 observed 429s
+      expect(update_service).to receive(:record_too_many_requests).exactly(3).times
+      described_class.new(nil, update_service).query(titles: 'X')
+    end
   end
 
   describe '#get_page_content' do
