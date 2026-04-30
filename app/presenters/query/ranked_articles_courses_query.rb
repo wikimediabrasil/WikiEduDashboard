@@ -91,8 +91,13 @@ class Query::RankedArticlesCoursesQuery
   def apply_text_filters(query)
     q = query
 
-    q = q.joins(:article).where('articles.title LIKE ?', "%#{@article_title}%") if @article_title.present?
-    q = q.joins(:course).where('courses.title LIKE ?', "%#{@course_title}%") if @course_title.present?
+    if @article_title.present?
+      q = q.joins(:article).where('articles.title LIKE ?', "%#{@article_title}%")
+    end
+    if @course_title.present?
+      like = "%#{@course_title}%"
+      q = q.joins(:course).where('courses.title LIKE ?', like)
+    end
 
     if @school.present?
       school_list = Array(@school).reject(&:blank?)

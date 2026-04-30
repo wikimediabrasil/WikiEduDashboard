@@ -136,7 +136,8 @@ class ApplicationController < ActionController::Base
     # Force English in test environment unless a locale is explicitly requested
     if Rails.env.test?
       preferred_locale = params[:locale] || current_user&.locale || I18n.default_locale
-      I18n.locale = I18n.available_locales.include?(preferred_locale.to_sym) ? preferred_locale : I18n.default_locale
+      locale_valid = I18n.available_locales.include?(preferred_locale.to_sym)
+      I18n.locale = locale_valid ? preferred_locale : I18n.default_locale
       return
     end
 
