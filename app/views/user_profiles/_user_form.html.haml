@@ -47,8 +47,11 @@
                   #icon
                     %p &#x2709;
               .rails_editable-field
-                %p.rails_editable-content
-                  = @user.email
+                - if current_user == @user || current_user&.admin?
+                  %p.rails_editable-content
+                    = @user.email
+                - else
+                  %p.rails_editable-content
                 = text_area(:email, :email, class: 'rails_editable-input', placeholder: t("users.useremail_placeholder"))
 
           .section
