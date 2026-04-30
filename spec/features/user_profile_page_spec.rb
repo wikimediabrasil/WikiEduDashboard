@@ -21,7 +21,11 @@ describe 'user profile pages', type: :feature, js: true do
     expect(page).to have_button 'Save'
     expect(page).to have_button 'Cancel'
     expect(page).to have_no_button 'Edit Details'
-    fill_in 'Email', with: 'tester@wikiedu.org'
+    # Wait for JS to make the field visible
+    using_wait_time 5 do
+      expect(page).to have_css('#email_email', visible: true)
+    end
+    fill_in 'email_email', with: 'tester@wikiedu.org'
     fill_in 'user_profile_bio', with: 'Wikipedian from Seattle'
     click_button 'Save'
     expect(page).to have_button 'Edit Details'

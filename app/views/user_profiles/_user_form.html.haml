@@ -46,11 +46,10 @@
                 - if @user.email.present?
                   #icon
                     %p &#x2709;
-                .rails_editable-field
-                  - if @user.email.present?
-                    %p.rails_editable-content
-                      = @user.email
-                  = text_area(:email, :email, class: 'rails_editable-input', placeholder: t("users.useremail_placeholder"))
+              .rails_editable-field
+                %p.rails_editable-content
+                  = @user.email
+                = text_area(:email, :email, class: 'rails_editable-input', placeholder: t("users.useremail_placeholder"))
 
           .section
             #user_location
