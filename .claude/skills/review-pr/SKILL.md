@@ -160,15 +160,30 @@ same weight as bugs found in code review.
 ## Phase 4: Exploratory specs and demo
 
 For PRs with user-facing changes, write exploratory feature specs
-that exercise the new functionality. This serves two purposes:
-verifying the feature works and giving the reviewer a visual demo.
-(The reviewer can skip this if the PR is trivial, but the default is
-to write them.)
+that exercise the new functionality. Exploratory specs serve three
+purposes: verifying the feature works, giving the reviewer a visual
+demo, and — when code-reading has surfaced a suspected behavior
+change — converting that reasoned finding into reproducible fact. A
+spec that exercises the contrasting cases (before/after,
+affected/unaffected) turns an argument about code paths into a
+demonstration the author can rerun. When a spec serves this third
+purpose, consider including it in the review comment (or linking to
+it) so the finding is harder to dismiss. (The reviewer can skip the
+exploratory spec entirely if the PR is trivial, but the default is
+to write one.)
 
 1. Read the changed views, controllers, and presenters to understand
    what the feature does.
 2. Write a temporary spec file (`spec/features/<descriptive>_spec.rb`)
    with focused examples covering the key user flows and edge cases.
+   **Seed with production-realistic data shapes**, not minimal or
+   arbitrary values: a spec that passes against integer seeds like
+   `1000` can hide a bug that only fires against the comma-formatted
+   strings production actually stores. This matters most when the PR
+   touches input types, validation, serialization, or display
+   formatting. Sources for realistic shapes: existing factories and
+   fixtures, `db/seeds.rb`, other specs that exercise the same model,
+   or — if none of those is conclusive — ask the reviewer.
 3. Run the specs headless first to get them passing:
    ```bash
    bin/feature-spec spec/features/<file>_spec.rb
@@ -184,8 +199,10 @@ to write them.)
 The exploratory spec can also be shared with the PR author if useful.
 
 For purely backend PRs, write unit specs instead of feature specs if
-the PR's own spec coverage is thin. For configuration-only or trivial
-changes, skip to Phase 5.
+the PR's own spec coverage is thin. The same three purposes apply,
+especially the third — a contrasting-cases unit spec is just as
+useful for pinning down a suspected behavior change. For
+configuration-only or trivial changes, skip to Phase 5.
 
 ---
 
@@ -315,6 +332,17 @@ gh pr review <number> --approve --body "..."
 gh pr review <number> --request-changes --body "..."
 gh pr review <number> --comment --body "..."
 ```
+
+After a `--request-changes` review, convert the PR to draft so it
+leaves the review queue until the author pushes fixes:
+
+```bash
+gh pr ready <number> --undo
+```
+
+Do not do this for `--comment` or `--approve` reviews. When the
+author marks the PR ready for review again, that's the signal to
+re-review.
 
 Clean up: delete any temporary exploratory spec files, then switch
 back to the previous branch:
@@ -476,10 +504,13 @@ wrong.
 **Attribution:** Every posted comment must end with an italicized
 attribution line that honestly characterizes the human involvement.
 Include: how much wall-clock time the reviewer spent, roughly how
-many interactions they had with Claude Code, and what they actually
-reviewed vs. what they approved without deep verification. The goal
-is to let the PR author calibrate how much weight to give the
-feedback. Examples:
+many interactions they had with Claude Code, what they actually
+reviewed vs. what they approved without deep verification, and — if
+local verification happened — what specifically was verified ("ran X
+locally", "reproduced Y via a new spec", "checked production
+state"). The goal is to let the PR author calibrate how much weight
+to give the feedback; named verifications calibrate more sharply
+than time and interaction counts alone. Examples:
 
 *Drafted in a Claude Code session (~30 min, ~15 interactions).
 Sage directed the triage and code review phases, verified the
