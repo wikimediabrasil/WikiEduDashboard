@@ -1260,7 +1260,8 @@ en:
     total_revisions: Total revisions
     claims: Claims
     aliases: Aliases
-    merged: Merged
+    merged: Merged to
+    merged_from: Merged from
     created: Created
     changed: Changed
     removed: Removed
