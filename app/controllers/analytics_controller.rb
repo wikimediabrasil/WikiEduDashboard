@@ -11,6 +11,7 @@ class AnalyticsController < ApplicationController
   layout 'admin'
   include CourseHelper
   before_action :require_signed_in, only: :ungreeted
+  before_action :require_admin_permissions, only: :tagged_courses_csv
 
   ########################
   # Routing entry points #
@@ -19,6 +20,7 @@ class AnalyticsController < ApplicationController
 
   def results
     if params[:monthly_report]
+      require_admin_permissions
       monthly_report
     elsif params[:campaign_intersection]
       campaign_intersection
@@ -47,7 +49,7 @@ class AnalyticsController < ApplicationController
   end
 
   def all_courses_csv
-    send_data CampaignCsvBuilder.new(nil).courses_to_csv,
+    send_data CampaignCsvBuilder.new(all_courses_scope).courses_to_csv,
               filename: "all_courses-#{Time.zone.today}.csv"
   end
 
@@ -74,6 +76,13 @@ class AnalyticsController < ApplicationController
   end
 
   private
+
+  # Mirrors #all_courses (JSON): admins see every course, including private;
+  # non-admins see only nonprivate courses.
+  def all_courses_scope
+    return CampaignCsvBuilder::AllCourses if current_user&.admin?
+    CampaignCsvBuilder::AllNonprivateCourses
+  end
 
   ###################
   # Output builders #
