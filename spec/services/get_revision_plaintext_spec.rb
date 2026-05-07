@@ -248,6 +248,15 @@ describe GetRevisionPlaintext do
     end
   end
 
+  context 'when revision content is suppressed between scheduling and fetch' do
+    it 'returns nil plain_text without raising' do
+      allow_any_instance_of(WikiApi::ArticleContent)
+        .to receive(:revision_diff).and_return(nil)
+      service = described_class.new(1351319293, en_wiki, from_rev: 1351319292)
+      expect(service.plain_text).to be_nil
+    end
+  end
+
   context 'when a phrase is added mid-sentence' do
     it 'keeps the full sentence to avoid fragments' do
       old = 'The building was constructed in 1990.'

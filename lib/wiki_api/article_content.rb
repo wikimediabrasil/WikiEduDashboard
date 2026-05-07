@@ -92,6 +92,8 @@ class WikiApi
 
     # Returns a diff table comparing two revisions.
     # Returns a hash: { diff_html:, title:, page_id: }
+    # Returns nil if either revision's content has been suppressed/deleted
+    # between scheduling and processing (compare raises missingcontent).
     def revision_diff(from_rev, to_rev)
       params = { torev: to_rev, fromrev: from_rev, difftype: 'table' }
       resp = api_client.send(:action, 'compare', params)
@@ -100,6 +102,13 @@ class WikiApi
         title: resp.data.dig('totitle'),
         page_id: resp.data.dig('toid')
       }
+    rescue MediawikiApi::ApiError => e
+      raise unless e.code == 'missingcontent'
+      Sentry.capture_message(
+        "WikiApi::ArticleContent: revision content missing for diff " \
+        "#{from_rev} -> #{to_rev}"
+      )
+      nil
     end
 
     # ---- Revision History ----

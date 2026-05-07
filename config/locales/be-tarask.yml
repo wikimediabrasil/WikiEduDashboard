@@ -468,10 +468,12 @@ be-tarask:
     upload_count: Загрузкі ў Вікісховішча
     view_count_description_wikidata: Прагляды элемэнта
     interwiki_links_added: Дададзеныя інтэрвікі
+    labels: Меткі
     references_added: Дададзена крыніцаў
     restorations_performed: Выкананыя аднаўленьні
   namespace:
     main: Асноўная прастора
+    category: Катэґорыя
   revisions:
     references: Дададзена крыніцаў
     diff_show: Паказаць
@@ -487,6 +489,7 @@ be-tarask:
   timeline:
     discard_all_changes: Адкінуць усе зьмены
   training:
+    check_answer: Спраўдзіць адказ
     loading: Ладаваньне...
   uploads:
     label: Загрузкі

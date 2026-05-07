@@ -214,7 +214,7 @@ module RequestHelpers
   # MediaWiki query requests #
   ############################
   def stub_contributors_query
-    response = String.new '{"continue":{"pccontinue":"2169951|5094","continue":"||"},
+    response = +'{"continue":{"pccontinue":"2169951|5094","continue":"||"},
                  "query":{"normalized":[{"from":"User_talk:Ragesoss","to":"User talk:Ragesoss"}],
                  "pages":{"2169951":{"pageid":2169951,"ns":3,"title":"User talk:Ragesoss",
                  "anoncontributors":17,"contributors":[{"userid":584,"name":"Danny"}]}}}}'
@@ -225,7 +225,7 @@ module RequestHelpers
 
   def stub_raw_action
     stub_request(:get, %r{.*wikipedia.org/w/index.php\?action=raw.*})
-      .to_return(status: 200, body: String.new('[[wikitext]]'), headers: {})
+      .to_return(status: 200, body: +'[[wikitext]]', headers: {})
   end
 
   def stub_info_query
@@ -573,85 +573,53 @@ module RequestHelpers
     stub_users
   end
 
-  def stub_es_wiktionary_reference_counter_response
-    # Define the response body in a hash with revision IDs as keys
-    request_body = {
-      '5006940' => { 'num_ref' => 10, 'lang' => 'es', 'project' => 'wiktionary',
-      'revid' => 5006940 },
-      '5006942' => { 'num_ref' => 4, 'lang' => 'es', 'project' => 'wiktionary',
-      'revid' => 5006942 },
-      '5006946' => { 'num_ref' => 2, 'lang' => 'es', 'project' => 'wiktionary', 'revid' => 5006946 }
-    }
-
-    # Stub the request to match the revision ID in the URL
-    stub_request(:get, %r{https://reference-counter.toolforge.org/api/v1/references/wiktionary/es/\d+})
+  def stub_reference_counter_batch_response(project:, language:, num_refs:)
+    url = "https://reference-counter.toolforge.org/api/v1/references/#{project}/#{language}"
+    stub_request(:post, url)
       .to_return(
         status: 200,
         body: lambda do |request|
-          # Extract revision ID from the URL
-          rev_id = request.uri.path.split('/').last
-          # Return the appropriate response based on the revision ID
-          { 'num_ref' => request_body[rev_id.to_s]['num_ref'] }.to_json
+          rev_ids = JSON.parse(request.body).fetch('rev_ids', [])
+          rev_ids.to_h do |rev_id|
+            [rev_id.to_s, { 'num_ref' => num_refs[rev_id.to_s] }]
+          end.to_json
         end,
         headers: { 'Content-Type' => 'application/json' }
       )
+  end
+
+  def stub_es_wiktionary_reference_counter_response
+    stub_reference_counter_batch_response(
+      project: 'wiktionary', language: 'es',
+      num_refs: { '5006940' => 10, '5006942' => 4, '5006946' => 2 }
+    )
   end
 
   def stub_es_wikipedia_reference_counter_reponse
-    request_body = {
-      '157412237' => { 'num_ref' => 111, 'lang' => 'es', 'project' => 'wikipedia',
-      'revid' => 157412237 },
-      '157417768' => { 'num_ref' => 42, 'lang' => 'es', 'project' => 'wikipedia',
-      'revid' => 157417768 }
-    }
-
-    # Stub the request to match the revision ID in the URL
-    stub_request(:get, %r{https://reference-counter.toolforge.org/api/v1/references/wikipedia/es/\d+})
-      .to_return(
-        status: 200,
-        body: lambda do |request|
-          # Extract revision ID from the URL
-          rev_id = request.uri.path.split('/').last
-          # Return the appropriate response based on the revision ID
-          { 'num_ref' => request_body[rev_id.to_s]['num_ref'] }.to_json
-        end,
-        headers: { 'Content-Type' => 'application/json' }
-      )
+    stub_reference_counter_batch_response(
+      project: 'wikipedia', language: 'es',
+      num_refs: { '157412237' => 111, '157417768' => 42 }
+    )
   end
 
   def stub_en_wikipedia_reference_counter_reponse
-    request_body = {
-      '829840090' => { 'num_ref' => 132, 'lang' => 'es', 'project' => 'wikipedia',
-      'revid' => 829840090 },
-      '829840091' => { 'num_ref' => 1, 'lang' => 'es', 'project' => 'wikipedia',
-      'revid' => 829840091 }
-    }
-
-    # Stub the request to match the revision ID in the URL
-    stub_request(:get, %r{https://reference-counter.toolforge.org/api/v1/references/wikipedia/en/\d+})
-      .to_return(
-        status: 200,
-        body: lambda do |request|
-          # Extract revision ID from the URL
-          rev_id = request.uri.path.split('/').last
-          # Return the appropriate response based on the revision ID
-          { 'num_ref' => request_body[rev_id.to_s]['num_ref'] }.to_json
-        end,
-        headers: { 'Content-Type' => 'application/json' }
-      )
+    stub_reference_counter_batch_response(
+      project: 'wikipedia', language: 'en',
+      num_refs: { '829840090' => 132, '829840091' => 1 }
+    )
   end
 
   def stub_400_wiki_reference_counter_response
-    stub_request(:get, %r{https://reference-counter.toolforge.org/api/v1/references/wikimedia/incubator/\d+})
+    stub_request(:post, 'https://reference-counter.toolforge.org/api/v1/references/wikipedia/en')
       .to_return(
         status: 400,
-        body: { 'description' => 'Language incubator is not a valid language. ' }.to_json,
+        body: { 'description' => 'Bad request.' }.to_json,
         headers: { 'Content-Type' => 'application/json' }
       )
   end
 
   def stub_403_wiki_reference_counter_response
-    stub_request(:get, %r{https://reference-counter.toolforge.org/api/v1/references/wikimedia/incubator/\d+})
+    stub_request(:post, 'https://reference-counter.toolforge.org/api/v1/references/wikipedia/en')
       .to_return(
         status: 403,
         body: { 'description' => "mwapi error: permissiondenied - You don't have permission to view\
@@ -661,7 +629,7 @@ module RequestHelpers
   end
 
   def stub_404_wiki_reference_counter_response
-    stub_request(:get, %r{https://reference-counter.toolforge.org/api/v1/references/wikimedia/incubator/\d+})
+    stub_request(:post, 'https://reference-counter.toolforge.org/api/v1/references/wikipedia/en')
       .to_return(
         status: 404,
         body: { 'description' => 'rest-nonexistent-revision -\

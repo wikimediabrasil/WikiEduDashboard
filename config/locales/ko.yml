@@ -15,6 +15,7 @@
 # Author: Revi
 # Author: SeoJeongHo
 # Author: Suleiman the Magnificent Television
+# Author: Tensama0415
 # Author: YeBoy371
 # Author: Yearning
 # Author: Ykhwong
@@ -40,6 +41,7 @@ ko:
   application:
     back: 뒤로
     cancel: 취소
+    next: 다음
     cookie_consent: 이 사이트는 로그인 유지를 위해 쿠키를 사용하며 위키백과 계정에 관한 정보를 저장합니다.
     cookie_consent_acknowledge: 이해합니다
     cookie_consent_see_more: 더 보기
@@ -67,10 +69,12 @@ ko:
     request_account: 계정 요청
     request_account_create: 계정 만들기
     search: 질문하기
-    search_results: '다음 결과: ''%{search_terms}'''
+    search_results:
+      one: '%{count} 다음 결과: ''%{search_terms}'''
+      other: '%{count} 다음 결과: ''%{search_terms}'''
     no_results: '''%{query}''의 결과를 찾을 수 없습니다'
     show_current_revision: 현재 판 표시
-    show_last_revision: 마지막 판 표시
+    show_last_revision: 마지막 편집된 판 표시
     sign_up_extended: 위키백과에 가입하기
     sign_up_wikipedia: 아니면 위키백과에 가입하세요
     sign_up_log_in_extended: 위키백과와 함께합니다
@@ -311,7 +315,7 @@ ko:
     template_name: 틀 이름
     none: 추적되는 분류가 없습니다.
     remove: 제거
-    tracked_categories: 추적된 분류, PSID, 틀
+    tracked_categories: 추적된 분류, PSID, PagePile ID, 틀
   courses:
     accounts_generation_enabled: 계정 요청 생성이 활성화되었습니다
     accounts_generation_explanation: |-
@@ -365,7 +369,7 @@ ko:
       choose_clone: 복제할 과정을 선택하십시오.
       clone_successful: 복제된 과정의 세부사항 업데이트하기
       course_private: 비공개 프로그램 (관리자와 조력자만 볼 수 있음)
-      course_term_placeholder: 학기
+      course_term_placeholder: 학기 (연도 포함)
       course_types:
         edit_a_thon_name: 에디터톤
       end_date: 종료일
@@ -431,7 +435,7 @@ ko:
     instructors: 지침
     instructor_message: 이것은 참여자들이 사용하는 것과 같은 문서 편집 인터페이스이다. 진행자는 참여자들이 사용하는 것과 같은
       방식으로 편집할 수 있지만, 참여자들의 편집 활동만 추적되고, 진행자의 보조 도움은 제외되어 계산될 것이다.
-    invitation: '%{title} 에 참여하도록 초대되었습니다. 이 과정에 참여하려면 위키백과 계정에 로그인해야 합니다.'
+    invitation: '%{title} 에 참여하도록 초대되었습니다. 참여하려면 위키백과 계정에 로그인해야 합니다.'
     invitation_username_advice: 아직 위키백과 계정이 없다면 지금 하나 등록하십시오. 사용자 이름은 원하는 경우 익명 처리하거나
       개인 식별 처리시킬 수 있습니다. (공유 계정은 허용되지 않음)
     join: 가입하기
@@ -450,7 +454,7 @@ ko:
     new_account_email_placeholder: name@example.org
     new_account_info: 계정을 요청하려면 이메일 주소와 원하는 사용자 이름을 입력하십시오. 비밀번호는 계정이 만들어질 때 이메일로
       전달됩니다.
-    new_account_info_admin: 학생의 계정을 요청하려면 이메일 주소와 원하는 사용자 이름을 입력하십시오. 비밀번호는 계정이 만들어질
+    new_account_info_admin: 새 편집자 계정을 만들려면 이메일 주소와 원하는 사용자 이름을 입력하십시오. 비밀번호는 계정이 만들어질
       때 이메일로 전달됩니다.
     new_account_username: 요청된 사용자 이름
     new_account_username_invalid: 유효한 사용자 이름이 아닙니다.
@@ -934,8 +938,8 @@ ko:
     instructors_student_impact: '%{username} 진행자의 프로그램 참여자들의 활동내역'
     disclaimer: 입력한 정보는 공개됩니다.
     bio_placeholder: 자기소개 추가 (선택 사항)
-    location_placeholder: 당신의 위치 추가 (선택사항)
-    institution_placeholder: 기관 이름 (선택사항)
+    location_placeholder: 당신의 위치 추가 (선택 사항)
+    institution_placeholder: 기관 이름 (선택 사항)
   wiki_edits:
     notify_overdue:
       header: 제출 기간이 지난 교육 과제가 있습니다.
@@ -1000,8 +1004,8 @@ ko:
     add_available_article_wikidata: 사용 가능한 항목으로 추가
     article_finder: 문서 검색기
     article_finder_wikidata: 항목 파인더
-    article_quality: 문서 품질(0-100)
-    article_quality_wikidata: 항목 품질(0-100)
+    article_quality: 문서 품질 (0-100)
+    article_quality_wikidata: 항목 품질 (0-100)
     average_views: 일일 평균 조회수
     category_search: 분류 검색
     fetched_articles_wikidata: 찾은 항목
@@ -1047,5 +1051,8 @@ ko:
   question_groups:
     edit_question_group: 질문 그룹 편집
   form_search:
+    search: 검색
+    advanced_search: 고급 검색
+    clear: 지우기
     program_date: 프로그램 날짜
 ...

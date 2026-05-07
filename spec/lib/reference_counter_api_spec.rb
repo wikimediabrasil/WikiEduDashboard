@@ -8,14 +8,20 @@ describe ReferenceCounterApi do
 
   let(:en_wikipedia) { Wiki.get_or_create(language: 'en', project: 'wikipedia') }
   let(:es_wiktionary) { Wiki.get_or_create(language: 'es', project: 'wiktionary') }
-  let(:not_supported) { Wiki.get_or_create(language: 'incubator', project: 'wikimedia') }
+  let(:commons) { Wiki.get_or_create(language: 'commons', project: 'wikimedia') }
   let(:wikidata) { Wiki.get_or_create(language: nil, project: 'wikidata') }
   let(:deleted_rev_ids) { [708326238] }
   let(:rev_ids) { [5006940, 5006942, 5006946] }
 
-  it 'raises InvalidProjectError if using wikidata project' do
+  it 'raises InvalidProjectError for wikidata' do
     expect do
       described_class.new(wikidata)
+    end.to raise_error(described_class::InvalidProjectError)
+  end
+
+  it 'raises InvalidProjectError for wikimedia projects (commons, meta, etc.)' do
+    expect do
+      described_class.new(commons)
     end.to raise_error(described_class::InvalidProjectError)
   end
 
@@ -45,7 +51,7 @@ describe ReferenceCounterApi do
 
     it 'if response is 400 bad request' do
       stub_400_wiki_reference_counter_response
-      ref_counter_api = described_class.new(not_supported)
+      ref_counter_api = described_class.new(en_wikipedia)
       response = ref_counter_api.get_number_of_references_from_revision_ids rev_ids
       expect(response.dig('5006940', 'num_ref')).to be_nil
       expect(response.dig('5006940').key?('error')).to eq(false)
@@ -57,7 +63,7 @@ describe ReferenceCounterApi do
 
     it 'if response is 403 forbidden' do
       stub_403_wiki_reference_counter_response
-      ref_counter_api = described_class.new(not_supported)
+      ref_counter_api = described_class.new(en_wikipedia)
       response = ref_counter_api.get_number_of_references_from_revision_ids rev_ids
       expect(response.dig('5006940', 'num_ref')).to be_nil
       expect(response.dig('5006940').key?('error')).to eq(false)
@@ -69,7 +75,7 @@ describe ReferenceCounterApi do
 
     it 'if response is 404 not found' do
       stub_404_wiki_reference_counter_response
-      ref_counter_api = described_class.new(not_supported)
+      ref_counter_api = described_class.new(en_wikipedia)
       response = ref_counter_api.get_number_of_references_from_revision_ids rev_ids
       expect(response.dig('5006940', 'num_ref')).to be_nil
       expect(response.dig('5006940').key?('error')).to eq(false)
@@ -93,7 +99,7 @@ describe ReferenceCounterApi do
          project_code: 'wiktionary',
          language_code: 'es',
          rev_ids: [5006940, 5006942, 5006946],
-         error_count: 3
+         error_count: 1
      }
     )
     response = reference_counter_api.get_number_of_references_from_revision_ids rev_ids
@@ -120,11 +126,16 @@ describe ReferenceCounterApi do
 
     let(:subject) { described_class.new(en_wikipedia, update_service) }
 
-    it 'records 403s on the update service and does not send them to Sentry' do
-      stub_request(:get, %r{https://reference-counter.toolforge.org/api/v1/references/wikipedia/en/\d+})
-        .to_return(status: 403,
-                   body: '{"description":"mwapi error: permissiondenied"}',
-                   headers: { 'Content-Type': 'application/json' })
+    it 'records suppressed-content revs on the update service and does not send them to Sentry' do
+      stub_request(:post, 'https://reference-counter.toolforge.org/api/v1/references/wikipedia/en')
+        .to_return(
+          status: 200,
+          body: lambda do |request|
+            rev_ids = JSON.parse(request.body).fetch('rev_ids', [])
+            rev_ids.to_h { |id| [id.to_s, { 'num_ref' => nil, 'error' => 'no content' }] }.to_json
+          end,
+          headers: { 'Content-Type': 'application/json' }
+        )
 
       expect(update_service).to receive(:record_reference_counter_403)
         .exactly(failing_ids.size).times
@@ -146,4 +157,18 @@ describe ReferenceCounterApi do
     end
   end
 
+  # Without these, a silent toolforge server blocks the worker indefinitely.
+  describe 'toolforge_server connection' do
+    let(:conn) { described_class.new(en_wikipedia).send(:toolforge_server) }
+
+    it 'has a finite request timeout' do
+      expect(conn.options.timeout).to eq(described_class::REQUEST_TIMEOUT)
+      expect(conn.options.timeout).to be > 0
+    end
+
+    it 'has a finite open_timeout' do
+      expect(conn.options.open_timeout).to eq(described_class::OPEN_TIMEOUT)
+      expect(conn.options.open_timeout).to be > 0
+    end
+  end
 end

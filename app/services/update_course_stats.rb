@@ -125,6 +125,7 @@ class UpdateCourseStats
                                'sentry_tag_uuid' => sentry_tag_uuid,
                                'error_count' => error_count,
                                'reference_counter_403_count' => reference_counter_403_count,
+                               'too_many_requests_count' => too_many_requests_count,
                                'processed' => @processed,
                                'reprocessed' => @reprocessed)
   end

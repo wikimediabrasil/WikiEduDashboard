@@ -40,6 +40,7 @@
 # Author: Putnik
 # Author: Redredsonia
 # Author: Romanko Mikhail
+# Author: Shabe
 # Author: Shaleych
 # Author: SmartNart12
 # Author: Tanzun
@@ -69,7 +70,7 @@ ru:
     back: Назад
     cancel: Отмена
     cookie_consent: Этот сайт использует куки-файлы для вашего входа в систему и хранит
-      информацию, относящуюся к вашей учетной записи в Википедии.
+      информацию, относящуюся к вашей учётной записи в Википедии.
     cookie_consent_acknowledge: Понимаю
     cookie_consent_see_more: Узнать больше.
     create_accounts: Создайте учётную запись в Википедии

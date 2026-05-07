@@ -163,6 +163,31 @@ describe WikiApi::ArticleContent do
       expect(result[:title]).to eq('Test Article')
       expect(result[:page_id]).to eq(42)
     end
+
+    it 'returns nil when the revision content is missing' do
+      api_client = double('api_client')
+      allow_any_instance_of(WikiApi).to receive(:api_client).and_return(api_client)
+      err_response = double('response', data: { 'code' => 'missingcontent',
+                                                 'info' => 'Missing content for revision ID 200.' })
+      allow(api_client).to receive(:send)
+        .with(:action, 'compare', { torev: 200, fromrev: 100, difftype: 'table' })
+        .and_raise(MediawikiApi::ApiError.new(err_response))
+
+      expect(Sentry).to receive(:capture_message)
+        .with(/revision content missing for diff 100 -> 200/)
+      expect(subject.revision_diff(100, 200)).to be_nil
+    end
+
+    it 're-raises ApiErrors with other codes' do
+      api_client = double('api_client')
+      allow_any_instance_of(WikiApi).to receive(:api_client).and_return(api_client)
+      err_response = double('response', data: { 'code' => 'somethingelse', 'info' => 'oops' })
+      allow(api_client).to receive(:send)
+        .with(:action, 'compare', { torev: 200, fromrev: 100, difftype: 'table' })
+        .and_raise(MediawikiApi::ApiError.new(err_response))
+
+      expect { subject.revision_diff(100, 200) }.to raise_error(MediawikiApi::ApiError)
+    end
   end
 
   describe '#revision_history' do

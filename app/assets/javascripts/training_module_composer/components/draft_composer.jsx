@@ -5,6 +5,7 @@ import ModuleMetadataForm from './module_metadata_form.jsx';
 import SlideSidebar from './slide_sidebar.jsx';
 import SlideEditor from './slide_editor.jsx';
 import PasteImportModal from './paste_import_modal.jsx';
+import DraftPreview from './draft_preview.jsx';
 import { slugifyTitle } from '../utils/slugify.js';
 
 const emptySlide = () => ({ slug: '', title: '', content: '' });
@@ -19,6 +20,7 @@ const DraftComposer = () => {
   const [error, setError] = useState(null);
   const [status, setStatus] = useState(null);
   const [pasteOpen, setPasteOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [sidebarEditMode, setSidebarEditMode] = useState(false);
   const [existingSlugs, setExistingSlugs] = useState(null);
 
@@ -163,6 +165,14 @@ const DraftComposer = () => {
           <button type="button" className="button" onClick={() => setPasteOpen(true)}>
             Paste content
           </button>
+          <button
+            type="button"
+            className="button"
+            onClick={() => setPreviewOpen(true)}
+            disabled={!draft.slides.length}
+          >
+            Preview
+          </button>
           <a className="button" href={exportUrl(slug)}>Export zip</a>
         </div>
       </header>
@@ -228,6 +238,14 @@ const DraftComposer = () => {
           hasExistingSlides={draft.slides.length}
           onApply={applyPastedSlides}
           onClose={() => setPasteOpen(false)}
+        />
+      )}
+
+      {previewOpen && (
+        <DraftPreview
+          slides={draft.slides}
+          draftName={draft.name}
+          onClose={() => setPreviewOpen(false)}
         />
       )}
     </div>

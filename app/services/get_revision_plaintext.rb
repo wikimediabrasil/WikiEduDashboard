@@ -37,6 +37,7 @@ class GetRevisionPlaintext
       # wikitext and combine it into one string,
       # then send that through Wikipedia's parser to get HTML
       fetch_diff_table
+      return if @diff_table.nil?
       generate_wikitext_from_diff_table
       fetch_parsed_changed_wikitext
     end
@@ -58,6 +59,7 @@ class GetRevisionPlaintext
   # https://en.wikipedia.org/w/api.php?action=compare&torev=1315427810&fromrev=1315426424&difftype=table
   def fetch_diff_table
     result = @article_content.revision_diff(@from_rev, @mw_rev_id)
+    return if result.nil?
     @article_title = result[:title]
     @mw_page_id = result[:page_id]
     @diff_table = result[:diff_html]
