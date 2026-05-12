@@ -4,6 +4,7 @@
 # Author: Alex00728
 # Author: Apzp79
 # Author: Asdfqwer51
+# Author: Bisang
 # Author: Codenstory
 # Author: Ellif
 # Author: Gongsoonyee
@@ -110,7 +111,7 @@ ko:
     log_in: 위키백과에 로그인하기
     sign_up: 위키백과에 등록하기
     sign_up_help: 대시보드를 사용하려면 위키백과에 로그인하여 사용자 계정에 권한을 제공해야 합니다. 기존의 위키백과 계정으로 로그인하거나
-      새 계정을 만들 수 있습니다.
+      새 계정을 만들 수 있습니다. 계정은 만들 수 없는 경우, dashboard@wikiedu.org로 문의하세요.
   alerts:
     alert_label: 경보
   activity:
@@ -368,7 +369,7 @@ ko:
       assignment_start_placeholder: YYYY-MM-DD
       choose_clone: 복제할 과정을 선택하십시오.
       clone_successful: 복제된 과정의 세부사항 업데이트하기
-      course_private: 비공개 프로그램 (관리자와 조력자만 볼 수 있음)
+      course_private: 비공개 프로그램 (관리자와 진행자만 볼 수 있음)
       course_term_placeholder: 학기 (연도 포함)
       course_types:
         edit_a_thon_name: 에디터톤
@@ -453,7 +454,7 @@ ko:
     new_account_email: 이메일 주소
     new_account_email_placeholder: name@example.org
     new_account_info: 계정을 요청하려면 이메일 주소와 원하는 사용자 이름을 입력하십시오. 비밀번호는 계정이 만들어질 때 이메일로
-      전달됩니다.
+      진행자 중 한명에게 전달됩니다.
     new_account_info_admin: 새 편집자 계정을 만들려면 이메일 주소와 원하는 사용자 이름을 입력하십시오. 비밀번호는 계정이 만들어질
       때 이메일로 전달됩니다.
     new_account_username: 요청된 사용자 이름
@@ -461,8 +462,8 @@ ko:
     new_account_username_placeholder: 위키 편집자 123
     new_account_username_taken: 이 사용자 이름은 이미 사용 중입니다. 다른 이름을 선택해 주십시오.
     new_account_submit: 계정 요청
-    new_account_submitted: 계정 요청이 제출되었습니다. 이 프로그램의 Facilitator는 지금 계정 생성을 마무리할 것입니다.
-      계정이 생성되면 이메일을 통해 새로운 계정의 비밀번호를 받게 됩니다.
+    new_account_submitted: 계정 요청이 제출되었습니다. 이 프로그램의 진행자는 지금 계정 생성을 마무리할 것입니다. 계정이 생성되면
+      이메일을 통해 새로운 계정의 비밀번호를 받게 됩니다.
     new_account_submitted_admin: 계정 요청이 생성되었습니다. 학생들이 자신의 받은 편지함을 확인하여 새로운 비밀번호를 받도록
       지시해 주십시오
     nocourses: 어떤 과정에도 참여하고 있지 않습니다.
@@ -520,7 +521,7 @@ ko:
     view_page: 코스 문서 보기
     view_wiki: 위키백과에서 보기
     volunteer:
-      other: 지원자
+      other: 자원봉사자
     wiki_edits_enabled: 위키 편집 사용
     wiki_staff: 위키 교육 직원
     withdrawn: 과제를 제출하지 않았습니다
@@ -664,6 +665,8 @@ ko:
     word_count: 단어 추가됨
     word_count_average: 평균 단어 개수
     general: 일반
+    merged: 로 병합됨
+    merged_from: 에서 병합됨
     removed: 제거됨
     labels: 레이블
     no_data: 데이터 없음
@@ -800,7 +803,7 @@ ko:
     due_default: 다음 주까지
     empty_week_1: 시작하려면,
     empty_week_3: 또는
-    empty_week_4: 미리 지정된 과제부터 시작하세요.
+    empty_week_4: 타임라인을 만드려면 과제 마법사를 사용하세요.
     first_week_title: 첫 활동적인 주
     gradeable_value: 값
     grading_header: '점수 (총: %{total})'
@@ -959,8 +962,8 @@ ko:
     start_date_before_end_date: 시작 날짜는 끝 날짜보다 앞서야 합니다.
     unsupported_browser:
       header: 지원되지 않는 브라우저입니다. :-(
-      explanation: 대시보드와 호환되지 않는 브라우저를 사용하고 있습니다. 이 사이트는 인터넷 익스플로러 버전 11 이상, 최신 버전의
-        크롬과 파이어폭스, 그 밖의 현대의 브라우저에서 잘 동작합니다.
+      explanation: 대시보드와 호환되지 않는 브라우저를 사용하고 있습니다. 이 사이트는 크롬, 엣지와 파이어폭스, 그 밖의 현대의 브라우저에서
+        잘 동작합니다.
     download_here: 파일을 다운로드하려면 여기를 클릭하세요
   error_401:
     explanation: 이 요청을 실행할 수 있도록 인증되지 않았습니다. 이 문제가 에러라고 생각되면, 이 게시판의 유지자에게 연락해서 문제를

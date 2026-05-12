@@ -95,9 +95,6 @@ class AnalyticsController < ApplicationController
 
     {
       all: wikis_with_counts,
-      by_project: wikis_with_counts.group_by { |w| w[:project] },
-      by_language: group_by_language(wikis_with_counts),
-      top_wikis: wikis_with_counts.first(10),
       summary: build_wiki_summary(wikis_with_counts)
     }
   end
@@ -108,11 +105,6 @@ class AnalyticsController < ApplicationController
       { wiki: wiki, domain: wiki.domain, language: wiki.language,
         project: wiki.project, course_count: course_counts[wiki.id] || 0 }
     end
-  end
-
-  def group_by_language(wikis_with_counts)
-    wikis_with_counts.group_by { |w| w[:language] }
-                     .select { |lang, wikis| lang.present? && wikis.size > 1 }
   end
 
   def build_wiki_summary(wikis_with_counts)

@@ -54,25 +54,16 @@ class RevisionScoreApiHandler
   def complete_score(score)
     completed_score = {}
 
-    # If the score already has error is key is because some API request failed some way
+    # If the score already has error key is because some API request failed some way
     completed_score['error'] = score.key?('error')
 
-    # Fetch the value for 'wp10' and 'prediction', or default to nil if not present.
-    completed_score['wp10'] = score.fetch('wp10', nil)
-    completed_score['prediction'] = score.fetch('prediction', nil)
     # Fetch the value for 'deleted, or default to 'false if not present.
     completed_score['deleted'] = score.fetch('deleted', false)
 
-    # Ensure 'features' has the correct value (a hash).
-    # For Wikidata, 'features' has to contain the LiftWing features.
+    # features field has to contain the reference-counter scores if
+    # different from nil. Otherwise, it should be the empty hash.
     completed_score['features'] =
-      if @wiki.project == 'wikidata'
-        score.fetch('features', {})
-      else
-        # For other wikis, 'features' has to contain the reference-counter scores if
-        # different from nil. Otherwise, it should be the empty hash.
-        score.fetch('num_ref').nil? ? {} : { 'num_ref' => score['num_ref'] }
-      end
+      score.fetch('num_ref').nil? ? {} : { 'num_ref' => score['num_ref'] }
 
     completed_score
   end

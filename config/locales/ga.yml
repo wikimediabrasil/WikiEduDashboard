@@ -1442,7 +1442,8 @@ ga:
     total_revisions: Athbhreithnithe iomlána
     claims: Éilimh
     aliases: Leasainmneacha
-    merged: Cumaiscthe
+    merged: Cumaiscthe le
+    merged_from: Cumaiscthe ó
     created: Cruthaithe
     changed: Athraithe
     removed: Bainte
