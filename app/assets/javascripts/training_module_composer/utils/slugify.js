@@ -11,6 +11,10 @@ export const slugifyTitle = (title) => {
     .normalize('NFKD')
     .replace(COMBINING_MARKS, '')
     .toLowerCase()
+    // TODO: This ASCII-only regex silently strips all non-Latin characters.
+    // For training modules with non-Latin titles (Arabic, Hindi, CJK, etc.)
+    // the slug becomes empty or just hyphens. Consider using \p{L}\p{N} with
+    // the 'u' flag instead if file-system-safe ASCII slugs are not required.
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
 };
