@@ -109,10 +109,9 @@ module.exports = (env) => {
       }),
 
       // generates a RTL version of the emitted CSS files
-      // this is done only in production/coverage
-      (env.production || env.coverage) && (new RtlCssPlugin({
-        filename: 'stylesheets/rtl-[name].[fullhash].css'
-      })),
+      new RtlCssPlugin({
+        filename: env.development ? 'stylesheets/rtl-[name].css' : 'stylesheets/rtl-[name].[fullhash].css'
+      }),
 
       new WebpackManifestPlugin({
         fileName: 'javascripts/manifest.json',
