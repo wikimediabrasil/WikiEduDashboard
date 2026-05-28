@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import DiffViewer from '@components/revisions/diff_viewer.jsx';
 
 // Helpers
+import RevisionStatus from './RevisionStatus';
 import CourseUtils from '~/app/assets/javascripts/utils/course_utils';
 import { formatDateWithTime } from '../../../../../utils/date_utils';
 import { getArticleUrl, getDiffUrl } from '../../../../../utils/wiki_utils';
@@ -15,8 +16,9 @@ export const RevisionRow = ({ course, index, revision, revisions, selectedIndex,
   const formattedTitle = CourseUtils.formattedArticleTitle(article, course.home_wiki, label);
   const articleUrl = getArticleUrl(revision.wiki, formattedTitle);
   const revisionDate = formatDateWithTime(revision.timestamp);
+  const rowClass = revision.reverted ? 'revision-row revision-row--reverted' : 'revision-row';
   return (
-    <tr key={revision.id}>
+    <tr key={revision.id} className={rowClass}>
       <td>
         <p className="name">
           <a href={articleUrl} target="_blank">{formattedTitle}</a>
@@ -24,6 +26,9 @@ export const RevisionRow = ({ course, index, revision, revisions, selectedIndex,
       </td>
       <td className="desktop-only-tc date"><a href={getDiffUrl(revision)} target="_blank">{revisionDate}</a></td>
       <td className="desktop-only-tc">{revision.sizediff}</td>
+      <td className="desktop-only-tc">
+        <RevisionStatus revision={revision} />
+      </td>
       <td className="desktop-only-tc">
         <DiffViewer
           revision={revision}

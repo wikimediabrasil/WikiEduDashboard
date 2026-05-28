@@ -59,6 +59,24 @@ const Student = createReactClass({
       showRecent, student
     } = this.props;
 
+    // Compute accepted / reverted counts from the per-user live MW revisions
+    const allRevisions = (this.props.userRevisions && this.props.userRevisions[student.username]) || [];
+    const userRevisions = allRevisions;
+    const revertedCount = userRevisions.filter(r => r.reverted).length;
+    const acceptedCount = userRevisions.filter((r) => {
+      if (r.reverted) return false;
+      const hours = (Date.now() - new Date(r.timestamp).getTime()) / (1000 * 60 * 60);
+      return hours >= 48;
+    }).length;
+
+    // Acceptance rate: only computed over resolved edits (accepted + reverted)
+    const resolvedCount = acceptedCount + revertedCount;
+    const acceptanceRate = resolvedCount > 0 ? Math.round((acceptedCount / resolvedCount) * 100) : null;
+    const rateColor = acceptanceRate === null ? '#888'
+      : acceptanceRate >= 80 ? '#155724'
+      : acceptanceRate >= 50 ? '#856404'
+      : '#721c24';
+
     const editsLink = course.wikis.length > 1
     ? student.global_contribution_url
     : student.contribution_url;
@@ -138,6 +156,20 @@ const Student = createReactClass({
         <td className="desktop-only-tc" onClick={this.openStudentDetailsView}>
           {student.references_count}
         </td>
+        {userRevisions.length > 0 ? (
+          <td className="desktop-only-tc community-status-cell" onClick={this.openStudentDetailsView}>
+            <div className="community-status-score" style={{ color: rateColor }}>
+              {acceptanceRate !== null ? `${acceptanceRate}%` : '—'}
+            </div>
+            <div className="community-status-counts">
+              <span className="count-accepted">{acceptedCount}✓</span>
+              {' · '}
+              <span className="count-reverted">{revertedCount}✗</span>
+            </div>
+          </td>
+        ) : (
+          <td className="desktop-only-tc" />
+        )}
         <td className="desktop-only-tc">
           <Link
             to={uploadsLink}
@@ -154,6 +186,10 @@ const Student = createReactClass({
 }
 );
 
+const mapStateToProps = state => ({
+  userRevisions: state.userRevisions
+});
+
 const mapDispatchToProps = {
   setUploadFilters,
   fetchTrainingStatus,
@@ -161,4 +197,4 @@ const mapDispatchToProps = {
 };
 
 const component = withRouter(Student);
-export default connect(null, mapDispatchToProps)(component);
+export default connect(mapStateToProps, mapDispatchToProps)(component);

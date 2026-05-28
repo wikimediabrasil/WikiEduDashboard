@@ -54,6 +54,7 @@ export const StudentRevisionsList = ({ course, student, wikidataLabels, userRevi
       toggleDrawer={toggleDrawer}
       student={student}
       uploadsLink={uploadsLink}
+      userRevisions={userRevisions}
     />,
     <StudentDrawer
       key={`${student.id}-drawer`}
@@ -69,7 +70,13 @@ export const StudentRevisionsList = ({ course, student, wikidataLabels, userRevi
   const {
     recent_revisions, character_sum_ms, references_count, total_uploads
   } = studentListKeys(course);
-  const keys = { recent_revisions, character_sum_ms, references_count, total_uploads };
+  const community_status = {
+    label: I18n.t('revisions.community_status'),
+    desktop_only: true,
+    sortable: false,
+    info_key: 'revisions.community_status_doc'
+  };
+  const keys = { recent_revisions, character_sum_ms, references_count, community_status, total_uploads };
 
   const filterLabel = <b>Namespace Filter:</b>;
   const filterRevisions = (

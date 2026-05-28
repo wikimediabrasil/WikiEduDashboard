@@ -17,7 +17,9 @@ export default function userRevisions(state = initialState, action) {
           title: rev.title,
           language: action.wiki.language,
           project: action.wiki.project
-        }
+        },
+        tags: rev.tags || [],
+        reverted: (rev.tags || []).includes('mw-reverted')
       }));
 
       return {

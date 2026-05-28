@@ -48,6 +48,12 @@ const studentListKeys = (course) => {
       sortable: true,
       info_key: `metrics.${ArticleUtils.projectSuffix(course.home_wiki.project, 'references_doc')}`
     },
+    community_status: {
+      label: I18n.t('revisions.community_status'),
+      desktop_only: true,
+      sortable: false,
+      info_key: 'revisions.community_status_doc'
+    },
     total_uploads: {
       label: I18n.t('users.total_uploads'),
       desktop_only: true,

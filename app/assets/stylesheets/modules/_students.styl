@@ -108,3 +108,66 @@
   float none
   margin 0 10px
   position static
+
+// ─── Revision quality status badges ──────────────────────────────────────────
+.revision-status
+  display inline-block
+  font-size 0.75rem
+  font-weight 600
+  letter-spacing 0.02em
+  padding 2px 8px
+  border-radius 999px
+  white-space nowrap
+  cursor default
+
+  &--accepted
+    background-color #d4edda
+    color #155724
+    border 1px solid #c3e6cb
+
+  &--reverted
+    background-color #f8d7da
+    color #721c24
+    border 1px solid #f5c6cb
+
+  &--pending
+    background-color #fff3cd
+    color #856404
+    border 1px solid #ffc107
+
+// ─── Community status cell (collapsed student row) ───────────────────────────
+// Primary: large bold percentage, secondary: small accepted✓ · reverted✗ counts
+.community-status-cell
+  cursor default
+
+.community-status-score
+  font-size 1.1rem
+  font-weight 800
+  line-height 1.1
+  letter-spacing -0.01em
+  text-align center
+  width 100%
+
+.community-status-counts
+  font-size 0.72rem
+  margin-top 3px
+  white-space nowrap
+  color #555
+  text-align center
+  width 100%
+
+  .count-accepted
+    color #155724
+    font-weight 600
+
+  .count-reverted
+    color #721c24
+    font-weight 600
+
+// ─── Revision rows in the expanded drawer ────────────────────────────────────
+.revision-row--reverted
+  border-left 3px solid #dc3545
+  background-color rgba(220, 53, 69, 0.05)
+  td:first-child
+    padding-left 8px
+

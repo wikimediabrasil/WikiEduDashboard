@@ -1375,6 +1375,16 @@ en:
     show_all: Show All
     show_course_specific: Show Course Specific
     show_only_new_editors: Show Only New Editors
+    status: Status
+    community_status: "Accepted / Reverted"
+    community_status_doc: "Shows how many edits were accepted by the community vs. reverted. Accepted means the edit survived without being undone. Reverted means another editor undid the change."
+    status_accepted: Accepted
+    status_accepted_tooltip: "This edit has been accepted by the community (not reverted)"
+    status_reverted: Reverted
+    status_reverted_tooltip: "This edit was reverted by another editor"
+    status_pending: Pending
+    status_pending_tooltip: "This edit is recent and may still be reviewed by the community"
+    acceptance_rate_tooltip: "Percentage of resolved edits accepted by the community (not counting pending edits)"
 
   resources:
     label: Resources

@@ -119,7 +119,7 @@ const fetchAllRevisions = async (API_URL, days, usernames, wiki, course_start, l
       format: 'json',
       list: 'usercontribs',
       ucuser: usernameChunk.join('|'),
-      ucprop: 'ids|title|sizediff|timestamp',
+      ucprop: 'ids|title|sizediff|timestamp|tags',
       uclimit: 50,
       ucend,
       ucstart: formatISO(toDate(last_date)),
@@ -159,6 +159,10 @@ const fetchRevisionsFromWiki = async (days, wiki, usernames, course_start, last_
     revision.revisor = revision.user;
     revision.date = revision.timestamp;
     revision.mw_page_id = revision.pageid;
+
+    // Contest scoring: detect if the edit was reverted by the community
+    revision.tags = revision.tags || [];
+    revision.reverted = revision.tags.includes('mw-reverted');
   }
   return { revisions, wiki, exitNext };
 };
@@ -251,7 +255,7 @@ export const fetchLatestRevisionsForUser = async (username, wiki) => {
     format: 'json',
     list: 'usercontribs',
     ucuser: username,
-    ucprop: 'ids|title|timestamp|sizediff'
+    ucprop: 'ids|title|timestamp|sizediff|tags'
   };
 
   const response = await request(`${API_URL}?${stringify(params)}&origin=*`);
