@@ -35,7 +35,7 @@ export const StudentRevisionRow = ({ course, isOpen, toggleDrawer, student, uplo
       <td className="desktop-only-tc">
         {student.references_count}
       </td>
-      <td className="desktop-only-tc" style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+      <td className="desktop-only-tc" style={{ textAlign: 'center' }}>
         <div style={{ color: rateColor, fontSize: '1.1rem', fontWeight: 800, lineHeight: 1.2 }}>
           {acceptanceRate !== null ? `${acceptanceRate}%` : '—'}
         </div>
