@@ -178,6 +178,10 @@ Rails.application.routes.draw do
         constraints: { slug: /.*/ }
     get 'courses/:slug/alerts.json' => 'courses#alerts',
         constraints: { slug: /.*/ }
+    get  'courses/*course_id/revision_acceptances' => 'revision_acceptances#index'
+    post 'courses/*course_id/revision_acceptances' => 'revision_acceptances#create'
+    delete 'courses/*course_id/revision_acceptances/:ra_id' => 'revision_acceptances#destroy'
+
     get 'courses/:school/:titleterm(/:_subpage(/:_subsubpage(/:_subsubsubpage)))' => 'courses#show',
         :as => 'show',
         constraints: {
@@ -251,7 +255,12 @@ Rails.application.routes.draw do
   get 'articles/details' => 'articles#details'
   post 'articles/status' => 'articles#update_tracked_status'
 
-  resources :courses_users, only: [:index]
+  resources :courses_users, only: [:index] do
+    member do
+      put :accept
+      delete :accept, action: :unaccept
+    end
+  end
   resources :alerts, only: [:create] do
     member do
       get 'resolve'

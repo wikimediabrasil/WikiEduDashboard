@@ -127,6 +127,7 @@ export const SelectedStudent = ({
       <StudentRevisionsList
         key={`student-revisions-${selected.id}`}
         course={course}
+        current_user={current_user}
         student={selected}
         wikidataLabels={wikidataLabels}
         userRevisions={userRevisions}

@@ -13,7 +13,7 @@ import studentListKeys from '@components/students/shared/StudentList/student_lis
 import { useDispatch } from 'react-redux';
 import { fetchUserRevisions } from '@actions/user_revisions_actions';
 
-export const StudentRevisionsList = ({ course, student, wikidataLabels, userRevisions }) => {
+export const StudentRevisionsList = ({ course, current_user, student, wikidataLabels, userRevisions }) => {
   const dispatch = useDispatch();
   const [isOpen, setIsOpen] = useState(false);
   const [namespace, setNamespace] = useState('all');
@@ -60,6 +60,7 @@ export const StudentRevisionsList = ({ course, student, wikidataLabels, userRevi
       key={`${student.id}-drawer`}
       student={student}
       course={course}
+      current_user={current_user}
       exerciseView={true}
       isOpen={isOpen}
       revisions={filteredRevisions}

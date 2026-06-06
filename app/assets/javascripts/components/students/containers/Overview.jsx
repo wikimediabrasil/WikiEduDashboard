@@ -15,6 +15,8 @@ const Overview = ({ course, current_user, prefix, sortUsers, notify, sortSelect 
   const assignments = useSelector(state => state.assignments.assignments);
   const loadingAssignments = useSelector(state => state.assignments.loading);
   const students = useSelector(state => getStudentUsers(state));
+  const revisionAcceptances = useSelector(state => state.revisionAcceptances);
+  const userRevisions = useSelector(state => state.userRevisions);
 
   useEffect(() => {
     // sets the title of this tab
@@ -56,6 +58,8 @@ const Overview = ({ course, current_user, prefix, sortUsers, notify, sortSelect 
           current_user={current_user}
           sortUsers={sortUsers}
           students={students}
+          revisionAcceptances={revisionAcceptances}
+          userRevisions={userRevisions}
         />)}
     </div>
   );

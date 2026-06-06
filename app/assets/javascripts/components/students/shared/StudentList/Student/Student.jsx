@@ -20,6 +20,10 @@ import TrainingProgressDescription from '@components/students/components/Article
 import {
   fetchTrainingModuleExercisesByUser
 } from '~/app/assets/javascripts/actions/exercises_actions';
+import {
+  acceptStudentContributions,
+  unacceptStudentContributions
+} from '~/app/assets/javascripts/actions/user_actions';
 
 const Student = createReactClass({
   displayName: 'Student',
@@ -32,7 +36,11 @@ const Student = createReactClass({
     fetchTrainingStatus: PropTypes.func.isRequired,
     minimalView: PropTypes.bool,
     student: PropTypes.object.isRequired,
-    openStudentDetailsView: PropTypes.func.isRequired
+    openStudentDetailsView: PropTypes.func.isRequired,
+    acceptStudentContributions: PropTypes.func.isRequired,
+    unacceptStudentContributions: PropTypes.func.isRequired,
+    revisionAcceptances: PropTypes.object,
+    userRevisions: PropTypes.object
   },
 
   setUploadFilters(selectedFilters) {
@@ -56,26 +64,36 @@ const Student = createReactClass({
   render() {
     const {
       assignments, course, current_user, editable,
-      showRecent, student
+      showRecent, student, revisionAcceptances, userRevisions
     } = this.props;
 
-    // Compute accepted / reverted counts from the per-user live MW revisions
-    const allRevisions = (this.props.userRevisions && this.props.userRevisions[student.username]) || [];
-    const userRevisions = allRevisions;
-    const revertedCount = userRevisions.filter(r => r.reverted).length;
-    const acceptedCount = userRevisions.filter((r) => {
-      if (r.reverted) return false;
-      const hours = (Date.now() - new Date(r.timestamp).getTime()) / (1000 * 60 * 60);
-      return hours >= 48;
-    }).length;
+    // Compute reverted count from live MW revisions (read-only from MediaWiki API)
+    const allRevisions = (userRevisions && userRevisions[student.username]) || [];
+    const revertedCount = allRevisions.filter(r => r.reverted).length;
 
-    // Acceptance rate: only computed over resolved edits (accepted + reverted)
-    const resolvedCount = acceptedCount + revertedCount;
-    const acceptanceRate = resolvedCount > 0 ? Math.round((acceptedCount / resolvedCount) * 100) : null;
-    const rateColor = acceptanceRate === null ? '#888'
-      : acceptanceRate >= 80 ? '#155724'
-      : acceptanceRate >= 50 ? '#856404'
-      : '#721c24';
+    // Calculate acceptance percentage
+    let acceptancePercentage = 0;
+    if (allRevisions.length > 0) {
+      const acceptedCount = allRevisions.filter(r => {
+        const mwRevId = r.mw_rev_id || r.revid;
+        return revisionAcceptances?.byMwRevId?.[mwRevId];
+      }).length;
+      acceptancePercentage = Math.round((acceptedCount / allRevisions.length) * 100);
+    }
+
+    // Admin acceptance state (stored in local DB via courses_users)
+    const isAdminAccepted = Boolean(student.accepted_by_id);
+
+    // Determine the 3-state status for this student
+    // Reverted > Under review (awaiting admin) > Accepted by admin
+    let contributionStatus;
+    if (revertedCount > 0) {
+      contributionStatus = 'reverted';
+    } else if (isAdminAccepted) {
+      contributionStatus = 'accepted';
+    } else {
+      contributionStatus = 'under_review';
+    }
 
     const editsLink = course.wikis.length > 1
     ? student.global_contribution_url
@@ -156,20 +174,41 @@ const Student = createReactClass({
         <td className="desktop-only-tc" onClick={this.openStudentDetailsView}>
           {student.references_count}
         </td>
-        {userRevisions.length > 0 ? (
-          <td className="desktop-only-tc community-status-cell" onClick={this.openStudentDetailsView}>
-            <div className="community-status-score" style={{ color: rateColor }}>
-              {acceptanceRate !== null ? `${acceptanceRate}%` : '—'}
+        <td className="desktop-only-tc community-status-cell" onClick={this.openStudentDetailsView}>
+          <div>
+            {contributionStatus === 'reverted' && (
+              <span
+                className="contribution-status contribution-status--reverted"
+                title={`${revertedCount} ${I18n.t('revisions.status_reverted')}`}
+              >
+                ✗ {revertedCount} {I18n.t('revisions.status_reverted')}
+              </span>
+            )}
+            {contributionStatus === 'under_review' && (
+              <span
+                className="contribution-status contribution-status--under-review"
+                title={`${acceptancePercentage}% ${I18n.t('revisions.status_under_review_tooltip')}`}
+              >
+                ◐ {acceptancePercentage}% {I18n.t('revisions.status_under_review')}
+              </span>
+            )}
+            {contributionStatus === 'accepted' && (
+              <span
+                className="contribution-status contribution-status--accepted"
+                title={I18n.t('revisions.status_admin_accepted_tooltip')}
+              >
+                ✓ {I18n.t('revisions.status_admin_accepted')}
+              </span>
+            )}
+          </div>
+          {current_user && current_user.isAdvancedRole && contributionStatus !== 'reverted' && (
+            <div className="contribution-status-action">
+              <small className="review-hint" style={{ color: '#888', fontSize: '0.75em' }}>
+                {I18n.t('revisions.review_per_revision_hint')}
+              </small>
             </div>
-            <div className="community-status-counts">
-              <span className="count-accepted">{acceptedCount}✓</span>
-              {' · '}
-              <span className="count-reverted">{revertedCount}✗</span>
-            </div>
-          </td>
-        ) : (
-          <td className="desktop-only-tc" />
-        )}
+          )}
+        </td>
         <td className="desktop-only-tc">
           <Link
             to={uploadsLink}
@@ -193,7 +232,9 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = {
   setUploadFilters,
   fetchTrainingStatus,
-  fetchExercises: fetchTrainingModuleExercisesByUser
+  fetchExercises: fetchTrainingModuleExercisesByUser,
+  acceptStudentContributions,
+  unacceptStudentContributions
 };
 
 const component = withRouter(Student);

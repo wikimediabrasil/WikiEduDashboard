@@ -6,25 +6,19 @@ import PropTypes from 'prop-types';
 import ContentAdded from '@components/students/shared/StudentList/Student/ContentAdded.jsx';
 import { setUploadFilters } from '~/app/assets/javascripts/actions/uploads_actions';
 
-const PENDING_HOURS_THRESHOLD = 24;
-
 export const StudentRevisionRow = ({ course, isOpen, toggleDrawer, student, uploadsLink, userRevisions }) => {
   const revisions = userRevisions?.[student.username] || [];
   const revertedCount = revisions.filter(r => r.reverted).length;
-  const acceptedCount = revisions.filter(r => {
-    if (r.reverted) return false;
-    const hours = (Date.now() - new Date(r.timestamp).getTime()) / (1000 * 60 * 60);
-    return hours >= PENDING_HOURS_THRESHOLD;
-  }).length;
+  const isAdminAccepted = Boolean(student.accepted_by_id);
 
-  const resolvedCount = acceptedCount + revertedCount;
-  const acceptanceRate = resolvedCount > 0
-    ? Math.round((acceptedCount / resolvedCount) * 100)
-    : null;
-  const rateColor = acceptanceRate === null ? '#888'
-    : acceptanceRate >= 80 ? '#155724'
-    : acceptanceRate >= 50 ? '#856404'
-    : '#721c24';
+  let contributionStatus;
+  if (revertedCount > 0) {
+    contributionStatus = 'reverted';
+  } else if (isAdminAccepted) {
+    contributionStatus = 'accepted';
+  } else {
+    contributionStatus = 'under_review';
+  }
 
   return (
     <tr onClick={toggleDrawer} className={`students ${isOpen ? 'open' : ''}`}>
@@ -36,18 +30,30 @@ export const StudentRevisionRow = ({ course, isOpen, toggleDrawer, student, uplo
         {student.references_count}
       </td>
       <td className="desktop-only-tc" style={{ textAlign: 'center' }}>
-        <div style={{ color: rateColor, fontSize: '1.1rem', fontWeight: 800, lineHeight: 1.2 }}>
-          {acceptanceRate !== null ? `${acceptanceRate}%` : '—'}
-        </div>
-        <div style={{ fontSize: '0.72rem', marginTop: '3px', color: '#555' }}>
-          <span style={{ color: '#155724', fontWeight: 600 }} title={I18n.t('revisions.status_accepted')}>
-            {acceptedCount}✓
+        {contributionStatus === 'reverted' && (
+          <span
+            className="contribution-status contribution-status--reverted"
+            title={`${revertedCount} ${I18n.t('revisions.status_reverted')}`}
+          >
+            ✗ {revertedCount} {I18n.t('revisions.status_reverted')}
           </span>
-          {' · '}
-          <span style={{ color: '#721c24', fontWeight: 600 }} title={I18n.t('revisions.status_reverted')}>
-            {revertedCount}✗
+        )}
+        {contributionStatus === 'under_review' && (
+          <span
+            className="contribution-status contribution-status--under-review"
+            title={I18n.t('revisions.status_under_review_tooltip')}
+          >
+            {student.recent_revisions} {I18n.t('revisions.status_under_review')}
           </span>
-        </div>
+        )}
+        {contributionStatus === 'accepted' && (
+          <span
+            className="contribution-status contribution-status--accepted"
+            title={I18n.t('revisions.status_admin_accepted_tooltip')}
+          >
+            ✓ {I18n.t('revisions.status_admin_accepted')}
+          </span>
+        )}
       </td>
       <td className="desktop-only-tc">
         <Link

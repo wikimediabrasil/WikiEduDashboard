@@ -1384,7 +1384,17 @@ en:
     status_reverted_tooltip: "This edit was reverted by another editor"
     status_pending: Pending
     status_pending_tooltip: "This edit is recent and may still be reviewed by the community"
+    status_under_review: Under review
+    status_under_review_tooltip: "This student's contributions survived community review and are awaiting organizer approval"
+    status_not_accepted: Not accepted
+    status_not_accepted_tooltip: "This student's contributions have not been accepted by the course organizer"
+    status_admin_accepted: Accepted
+    status_admin_accepted_tooltip: "This student's contributions have been accepted by the course organizer"
+    accept_contributions: Accept contributions
+    unaccept_contributions: Revoke acceptance
     acceptance_rate_tooltip: "Percentage of resolved edits accepted by the community (not counting pending edits)"
+    review_per_revision_hint: "Click to review revisions individually"
+    community_status: Community status
 
   resources:
     label: Resources

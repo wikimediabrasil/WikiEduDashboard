@@ -10,13 +10,18 @@ import CourseUtils from '~/app/assets/javascripts/utils/course_utils';
 import { formatDateWithTime } from '../../../../../utils/date_utils';
 import { getArticleUrl, getDiffUrl } from '../../../../../utils/wiki_utils';
 
-export const RevisionRow = ({ course, index, revision, revisions, selectedIndex, student, wikidataLabels, showDiff }) => {
+export const RevisionRow = ({
+  course, current_user, index, revision, revisions, selectedIndex,
+  student, wikidataLabels, showDiff, acceptance, onAccept, onUnaccept
+}) => {
   const article = revision.article;
   const label = wikidataLabels[article.title];
   const formattedTitle = CourseUtils.formattedArticleTitle(article, course.home_wiki, label);
   const articleUrl = getArticleUrl(revision.wiki, formattedTitle);
   const revisionDate = formatDateWithTime(revision.timestamp);
   const rowClass = revision.reverted ? 'revision-row revision-row--reverted' : 'revision-row';
+  const canAccept = current_user && current_user.isAdvancedRole;
+
   return (
     <tr key={revision.id} className={rowClass}>
       <td>
@@ -28,6 +33,43 @@ export const RevisionRow = ({ course, index, revision, revisions, selectedIndex,
       <td className="desktop-only-tc">{revision.sizediff}</td>
       <td className="desktop-only-tc">
         <RevisionStatus revision={revision} />
+      </td>
+      <td className="desktop-only-tc">
+        {acceptance ? (
+          <span
+            className="contribution-status contribution-status--accepted"
+            title={I18n.t('revisions.status_admin_accepted_tooltip')}
+          >
+            {I18n.t('revisions.status_admin_accepted')}
+          </span>
+        ) : (
+          !revision.reverted && (
+            <span
+              className="contribution-status contribution-status--not-accepted"
+              title={I18n.t('revisions.status_not_accepted_tooltip')}
+            >
+              {I18n.t('revisions.status_not_accepted')}
+            </span>
+          )
+        )}
+        {canAccept && !revision.reverted && (
+          <div className="contribution-status-action">
+            <button
+              className={`button small ${acceptance ? 'danger' : ''} accept-contributions-btn`}
+              onClick={onAccept}
+              disabled={!!acceptance}
+            >
+              {I18n.t('revisions.accept_contributions')}
+            </button>
+            <button
+              className={`button small danger unaccept-contributions-btn`}
+              onClick={onUnaccept}
+              disabled={!acceptance}
+            >
+              {I18n.t('revisions.unaccept_contributions')}
+            </button>
+          </div>
+        )}
       </td>
       <td className="desktop-only-tc">
         <DiffViewer
@@ -46,7 +88,11 @@ export const RevisionRow = ({ course, index, revision, revisions, selectedIndex,
 
 RevisionRow.propTypes = {
   revision: PropTypes.object.isRequired,
-  index: PropTypes.number.isRequired
+  index: PropTypes.number.isRequired,
+  current_user: PropTypes.object,
+  acceptance: PropTypes.object,
+  onAccept: PropTypes.func,
+  onUnaccept: PropTypes.func
 };
 
 export default RevisionRow;
