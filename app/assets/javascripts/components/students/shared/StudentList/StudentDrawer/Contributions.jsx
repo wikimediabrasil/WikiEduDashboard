@@ -58,7 +58,7 @@ export const Contributions = ({
           <th className="desktop-only-tc">{I18n.t('metrics.date_time')}</th>
           <th className="desktop-only-tc">{I18n.t('metrics.char_added')}</th>
           <th className="desktop-only-tc">{I18n.t('revisions.status')}</th>
-          <th className="desktop-only-tc">{I18n.t('revisions.community_status')}</th>
+          <th className="desktop-only-tc">{I18n.t('revisions.admin_status')}</th>
           <th className="desktop-only-tc" />
         </tr>
       </thead>

@@ -1,8 +1,10 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 
 import { getStudentUsers } from '~/app/assets/javascripts/selectors';
+import { fetchRevisionAcceptances } from '~/app/assets/javascripts/actions/revision_acceptance_actions';
+import { fetchUserRevisions } from '~/app/assets/javascripts/actions/user_revisions_actions';
 
 import StudentsSubNavigation from '@components/students/components/StudentsSubNavigation.jsx';
 import Controls from '@components/students/components/Overview/Controls/Controls.jsx';
@@ -17,12 +19,31 @@ const Overview = ({ course, current_user, prefix, sortUsers, notify, sortSelect 
   const students = useSelector(state => getStudentUsers(state));
   const revisionAcceptances = useSelector(state => state.revisionAcceptances);
   const userRevisions = useSelector(state => state.userRevisions);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     // sets the title of this tab
     const header = I18n.t('users.sub_navigation.student_overview', { prefix });
     document.title = `${course.title} - ${header}`;
   }, []);
+
+  useEffect(() => {
+    // Load revision acceptances on page load for persistence
+    if (!revisionAcceptances.loaded) {
+      dispatch(fetchRevisionAcceptances(course.slug));
+    }
+  }, [course.slug, revisionAcceptances.loaded, dispatch]);
+
+  useEffect(() => {
+    // Load all student revisions on page load for badge calculations
+    if (!loadingAssignments && students.length > 0) {
+      students.forEach(student => {
+        if (!userRevisions[student.username]) {
+          dispatch(fetchUserRevisions(course, student));
+        }
+      });
+    }
+  }, [loadingAssignments, students, userRevisions, course, dispatch]);
 
   return (
     <div className="list__wrapper">

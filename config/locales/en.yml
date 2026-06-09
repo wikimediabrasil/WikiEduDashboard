@@ -1376,8 +1376,9 @@ en:
     show_course_specific: Show Course Specific
     show_only_new_editors: Show Only New Editors
     status: Status
-    community_status: "Accepted / Reverted"
-    community_status_doc: "Shows how many edits were accepted by the community vs. reverted. Accepted means the edit survived without being undone. Reverted means another editor undid the change."
+    status_doc: "Shows the status of student contributions (accepted, reverted, or pending by the community)"
+    admin_status: "Instructor Review"
+    admin_status_doc: "Shows the review status of student contributions by the course instructor or administrator."
     status_accepted: Accepted
     status_accepted_tooltip: "This edit has been accepted by the community (not reverted)"
     status_reverted: Reverted
@@ -1386,6 +1387,8 @@ en:
     status_pending_tooltip: "This edit is recent and may still be reviewed by the community"
     status_under_review: Under review
     status_under_review_tooltip: "This student's contributions survived community review and are awaiting organizer approval"
+    status_reviewed: Reviewed
+    status_reviewed_tooltip: "This student's contributions have been partially reviewed by the course organizer"
     status_not_accepted: Not accepted
     status_not_accepted_tooltip: "This student's contributions have not been accepted by the course organizer"
     status_admin_accepted: Accepted

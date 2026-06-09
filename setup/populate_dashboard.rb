@@ -61,7 +61,14 @@ def populate_dashboard
   example_courses = [
     'https://outreachdashboard.wmflabs.org/courses/Uffizi/WDG_-_AF_2018_Florence',
     'https://outreachdashboard.wmflabs.org/courses/QCA/Brisbane_QCA_ArtandFeminism_2018',
-    'https://dashboard.wikiedu.org/courses/Stanford_Law_School/Advanced_Legal_Research_Winter_2020_(Winter)'
+    'https://dashboard.wikiedu.org/courses/Stanford_Law_School/Advanced_Legal_Research_Winter_2020_(Winter)',
+    'https://outreachdashboard.wmflabs.org/courses/WMCO/Hidropoeticas_Ambientales_-_Hacerwiki_2026-1',
+    'https://outreachdashboard.wmflabs.org/campaigns/universidade_federal_de_s%C3%A3o_paulo/programs',
+    'https://outreachdashboard.wmflabs.org/courses/Universidade_Federal_de_S%C3%A3o_Paulo,_EFLCH,_Departamento_de_Hist%C3%B3ria/Hist%C3%B3ria_Moderna_I',
+    'https://outreachdashboard.wmflabs.org/courses/UNIFESP/Oficina_de_Literatura_Infantil',
+    'https://outreachdashboard.wmflabs.org/courses/UNIFESP/Oficina_Hist%C3%B3ria_do_Brasil_Contempor%C3%A2neo',
+    'https://outreachdashboard.wmflabs.org/courses/UNIFESP/Sess%C3%A3o_Comunit%C3%A1ria_Projeto_LER_UNIFESP',
+    
   ]
 
   example_courses.each do |url|

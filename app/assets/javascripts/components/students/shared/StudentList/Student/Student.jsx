@@ -81,16 +81,15 @@ const Student = createReactClass({
       acceptancePercentage = Math.round((acceptedCount / allRevisions.length) * 100);
     }
 
-    // Admin acceptance state (stored in local DB via courses_users)
-    const isAdminAccepted = Boolean(student.accepted_by_id);
-
-    // Determine the 3-state status for this student
-    // Reverted > Under review (awaiting admin) > Accepted by admin
+    // Determine the 4-state status for this student based on revision acceptance
+    // Reverted > Accepted (100%) > Reviewed (admin interacted but not 100%) > Under review (no interaction)
     let contributionStatus;
     if (revertedCount > 0) {
       contributionStatus = 'reverted';
-    } else if (isAdminAccepted) {
+    } else if (allRevisions.length > 0 && acceptancePercentage === 100) {
       contributionStatus = 'accepted';
+    } else if (allRevisions.length > 0 && acceptancePercentage > 0) {
+      contributionStatus = 'reviewed';
     } else {
       contributionStatus = 'under_review';
     }
@@ -190,6 +189,14 @@ const Student = createReactClass({
                 title={`${acceptancePercentage}% ${I18n.t('revisions.status_under_review_tooltip')}`}
               >
                 ◐ {acceptancePercentage}% {I18n.t('revisions.status_under_review')}
+              </span>
+            )}
+            {contributionStatus === 'reviewed' && (
+              <span
+                className="contribution-status contribution-status--reviewed"
+                title={`${acceptancePercentage}% ${I18n.t('revisions.status_reviewed_tooltip')}`}
+              >
+                ◑ {acceptancePercentage}% {I18n.t('revisions.status_reviewed')}
               </span>
             )}
             {contributionStatus === 'accepted' && (

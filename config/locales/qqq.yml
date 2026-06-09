@@ -719,14 +719,19 @@ qqq:
     show_all: Label for button to show all revisions and all editors of an article
     show_only_new_editors: Label for button to show only new editors
     status: Column header label for the edit quality status (Accepted / Reverted / Pending)
-    community_status: Column header showing the summary of accepted vs. reverted edits per student (e.g. "Accepted / Reverted")
-    community_status_doc: Tooltip explaining that accepted means the edit survived without being undone, and reverted means another editor undid the change
+    status_doc: Tooltip explaining that status shows the community acceptance state of edits (accepted, reverted, or pending)
+    admin_status: Column header showing the instructor/admin review status of student contributions
+    admin_status_doc: Tooltip explaining that admin_status shows the review status by the course instructor or administrator
     status_accepted: Label shown on an individual revision badge indicating that the edit was accepted by the community (i.e. not reverted after 48 hours)
     status_accepted_tooltip: Tooltip for the accepted status badge
     status_reverted: Label shown on an individual revision badge indicating that another editor undid this edit
     status_reverted_tooltip: Tooltip for the reverted status badge
     status_pending: Label shown on an individual revision badge for edits made less than 48 hours ago whose community acceptance is still unknown
     status_pending_tooltip: Tooltip for the pending status badge
+    status_under_review: Label shown on a student row badge indicating that the student's contributions survived community review and are awaiting organizer approval
+    status_under_review_tooltip: Tooltip for the under review status badge
+    status_reviewed: Label shown on a student row badge indicating that the student's contributions have been partially reviewed by the course organizer
+    status_reviewed_tooltip: Tooltip for the reviewed status badge
     acceptance_rate_tooltip: Tooltip for the acceptance rate percentage shown in the student row summary. Explains that pending edits are excluded from the calculation.
   settings:
     categories:

@@ -71,13 +71,13 @@ export const StudentRevisionsList = ({ course, current_user, student, wikidataLa
   const {
     recent_revisions, character_sum_ms, references_count, total_uploads
   } = studentListKeys(course);
-  const community_status = {
-    label: I18n.t('revisions.community_status'),
+  const admin_status = {
+    label: I18n.t('revisions.admin_status'),
     desktop_only: true,
     sortable: false,
-    info_key: 'revisions.community_status_doc'
+    info_key: 'revisions.admin_status_doc'
   };
-  const keys = { recent_revisions, character_sum_ms, references_count, community_status, total_uploads };
+  const keys = { recent_revisions, character_sum_ms, references_count, admin_status, total_uploads };
 
   const filterLabel = <b>Namespace Filter:</b>;
   const filterRevisions = (

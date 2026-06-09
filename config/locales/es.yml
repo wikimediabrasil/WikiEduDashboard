@@ -1062,6 +1062,10 @@ es:
     view_on_wiki: Ver diferencias en wiki
     see_more: Ver más
     show_all: Mostrar todo
+    status: Estado
+    status_doc: "Muestra el estado de las contribuciones de los estudiantes (aceptadas, revertidas o pendientes por la comunidad)"
+    admin_status: "Revisión del instructor"
+    admin_status_doc: "Muestra el estado de revisión de las contribuciones de los estudiantes por parte del instructor o administrador del curso."
   resources:
     label: Recursos
     header: Recursos y capacitación
