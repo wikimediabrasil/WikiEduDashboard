@@ -230,6 +230,11 @@ Rails.application.routes.draw do
   delete 'categories' => 'categories#remove_category'
   get 'categories/:id' => 'categories#category'
 
+  # Labels and CampaignsLabels
+  resources :labels
+  post 'campaigns/:campaign_id/labels' => 'campaigns_labels#create'
+  delete 'campaigns/:campaign_id/labels/:label_id' => 'campaigns_labels#destroy'
+
   get 'lookups/campaign(.:format)' => 'lookups#campaign'
   get 'lookups/tag(.:format)' => 'lookups#tag'
 
