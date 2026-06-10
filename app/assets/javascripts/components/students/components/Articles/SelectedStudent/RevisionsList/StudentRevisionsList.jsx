@@ -10,11 +10,12 @@ import StudentRevisionRow from './StudentRevisionRow';
 import CourseUtils from '~/app/assets/javascripts/utils/course_utils.js';
 import ArticleUtils from '~/app/assets/javascripts/utils/article_utils.js';
 import studentListKeys from '@components/students/shared/StudentList/student_list_keys.js';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { fetchUserRevisions } from '@actions/user_revisions_actions';
 
 export const StudentRevisionsList = ({ course, current_user, student, wikidataLabels, userRevisions }) => {
   const dispatch = useDispatch();
+  const revisionAcceptances = useSelector(state => state.revisionAcceptances);
   const [isOpen, setIsOpen] = useState(false);
   const [namespace, setNamespace] = useState('all');
 
@@ -55,6 +56,7 @@ export const StudentRevisionsList = ({ course, current_user, student, wikidataLa
       student={student}
       uploadsLink={uploadsLink}
       userRevisions={userRevisions}
+      revisionAcceptances={revisionAcceptances}
     />,
     <StudentDrawer
       key={`${student.id}-drawer`}

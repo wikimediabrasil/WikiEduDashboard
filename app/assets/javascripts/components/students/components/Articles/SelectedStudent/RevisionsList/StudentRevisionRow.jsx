@@ -6,16 +6,32 @@ import PropTypes from 'prop-types';
 import ContentAdded from '@components/students/shared/StudentList/Student/ContentAdded.jsx';
 import { setUploadFilters } from '~/app/assets/javascripts/actions/uploads_actions';
 
-export const StudentRevisionRow = ({ course, isOpen, toggleDrawer, student, uploadsLink, userRevisions }) => {
+export const StudentRevisionRow = ({ course, isOpen, toggleDrawer, student, uploadsLink, userRevisions, revisionAcceptances }) => {
   const revisions = userRevisions?.[student.username] || [];
-  const revertedCount = revisions.filter(r => r.reverted).length;
-  const isAdminAccepted = Boolean(student.accepted_by_id);
+  // Exclude revisions that have been accepted by admin from reverted count
+  const revertedCount = revisions.filter(r => {
+    const mwRevId = r.mw_rev_id || r.revid;
+    const isAccepted = revisionAcceptances?.byMwRevId?.[mwRevId];
+    return r.reverted && !isAccepted;  // Only count as reverted if NOT accepted by admin
+  }).length;
+
+  // Calculate acceptance percentage
+  let acceptancePercentage = 0;
+  if (revisions.length > 0) {
+    const acceptedCount = revisions.filter(r => {
+      const mwRevId = r.mw_rev_id || r.revid;
+      return revisionAcceptances?.byMwRevId?.[mwRevId];
+    }).length;
+    acceptancePercentage = Math.round((acceptedCount / revisions.length) * 100);
+  }
 
   let contributionStatus;
   if (revertedCount > 0) {
     contributionStatus = 'reverted';
-  } else if (isAdminAccepted) {
+  } else if (revisions.length > 0 && acceptancePercentage === 100) {
     contributionStatus = 'accepted';
+  } else if (revisions.length > 0 && acceptancePercentage > 0) {
+    contributionStatus = 'reviewed';
   } else {
     contributionStatus = 'under_review';
   }
@@ -78,7 +94,8 @@ StudentRevisionRow.propTypes = {
     username: PropTypes.string.isRequired
   }).isRequired,
   uploadsLink: PropTypes.string.isRequired,
-  userRevisions: PropTypes.object
+  userRevisions: PropTypes.object,
+  revisionAcceptances: PropTypes.object
 };
 
 export default StudentRevisionRow;

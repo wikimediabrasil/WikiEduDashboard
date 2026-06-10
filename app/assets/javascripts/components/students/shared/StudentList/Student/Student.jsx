@@ -68,8 +68,13 @@ const Student = createReactClass({
     } = this.props;
 
     // Compute reverted count from live MW revisions (read-only from MediaWiki API)
+    // Exclude revisions that have been accepted by admin
     const allRevisions = (userRevisions && userRevisions[student.username]) || [];
-    const revertedCount = allRevisions.filter(r => r.reverted).length;
+    const revertedCount = allRevisions.filter(r => {
+      const mwRevId = r.mw_rev_id || r.revid;
+      const isAccepted = revisionAcceptances?.byMwRevId?.[mwRevId];
+      return r.reverted && !isAccepted;  // Only count as reverted if NOT accepted by admin
+    }).length;
 
     // Calculate acceptance percentage
     let acceptancePercentage = 0;

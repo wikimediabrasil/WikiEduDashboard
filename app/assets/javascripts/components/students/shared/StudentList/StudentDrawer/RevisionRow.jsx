@@ -43,16 +43,14 @@ export const RevisionRow = ({
             {I18n.t('revisions.status_admin_accepted')}
           </span>
         ) : (
-          !revision.reverted && (
-            <span
-              className="contribution-status contribution-status--not-accepted"
-              title={I18n.t('revisions.status_not_accepted_tooltip')}
-            >
-              {I18n.t('revisions.status_not_accepted')}
-            </span>
-          )
+          <span
+            className="contribution-status contribution-status--not-accepted"
+            title={I18n.t('revisions.status_not_accepted_tooltip')}
+          >
+            {I18n.t('revisions.status_not_accepted')}
+          </span>
         )}
-        {canAccept && !revision.reverted && (
+        {canAccept && (
           <div className="contribution-status-action">
             <button
               className={`button small ${acceptance ? 'danger' : ''} accept-contributions-btn`}
