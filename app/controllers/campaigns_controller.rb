@@ -41,10 +41,11 @@ class CampaignsController < ApplicationController
     if campaign_params[:default_passcode] == 'custom'
       overrides[:default_passcode] = params[:campaign][:custom_default_passcode]
     end
-    @campaign = Campaign.create campaign_params.merge(overrides)
+    @campaign = Campaign.create campaign_params.except(:wikidata_tags).merge(overrides)
 
     if @campaign.valid?
       add_organizer_to_campaign(current_user)
+      attach_labels_to_campaign
       redirect_to overview_campaign_path(@campaign.slug)
     else
       @campaigns = Campaign.all
@@ -343,6 +344,23 @@ class CampaignsController < ApplicationController
   def campaign_params
     params.require(:campaign)
           .permit(:slug, :description, :template_description, :title, :start, :end,
-                  :default_course_type, :default_passcode)
+                  :default_course_type, :default_passcode, wikidata_tags: [])
+  end
+
+  def attach_labels_to_campaign
+    wikidata_tags = campaign_params[:wikidata_tags]
+    return if wikidata_tags.blank?
+    wikidata_tags.each do |tag_json|
+      tag_data = JSON.parse(tag_json)
+      label = Label.find_or_create_by(match: tag_data['qNumber']) do |l|
+        l.labels      = tag_data['label']
+        l.url         = tag_data['url']
+        l.description = tag_data['description']
+        l.display     = true
+      end
+      CampaignsLabels.find_or_create_by(campaign: @campaign, label: label)
+    rescue JSON::ParserError
+      next
+    end
   end
 end

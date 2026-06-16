@@ -311,6 +311,7 @@ qqq:
       Label for the input to change the title of a campaign
       {{Identical|Title}}
     use_start_end_dates: Label for checkbox to enable start and end dates for a campaign
+    wikidata_tags: Label for the Wikidata tag selector input in the campaign creation form. Allows adding multiple semantic tags linked to Wikidata entities (e.g. "Sport" → Q349).
   categories:
     name: '{{Identical|Name}}'
     category_name: '{{Identical|Category name}}'
