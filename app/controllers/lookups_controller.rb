@@ -10,7 +10,7 @@ class LookupsController < ApplicationController
   def campaign
     @model = 'campaign'
     @key = 'title'
-    @values = Campaign.all.order(created_at: :desc)
+    @values = Campaign.includes(:labels).all.order(created_at: :desc)
     render 'campaigns'
   end
 

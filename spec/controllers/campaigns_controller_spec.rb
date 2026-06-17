@@ -467,4 +467,36 @@ describe CampaignsController, type: :request do
       expect(response.status).to eq(404)
     end
   end
+
+  describe '#statistics.json' do
+    let(:campaign) { create(:campaign) }
+    let(:label) { create(:label, labels: 'test_label') }
+    before do
+      campaign.labels << label
+    end
+
+    it 'returns campaign statistics with labels' do
+      get '/campaigns/statistics.json', params: { format: :json }
+      expect(response.status).to eq(200)
+      json = JSON.parse(response.body)
+      campaign_json = json['campaigns'].find { |c| c['slug'] == campaign.slug }
+      expect(campaign_json['labels']).to include('test_label')
+    end
+  end
+
+  describe 'LookupsController campaign.json' do
+    let(:campaign) { create(:campaign) }
+    let(:label) { create(:label, labels: 'test_lookup_label') }
+    before do
+      campaign.labels << label
+    end
+
+    it 'returns campaigns lookup with labels' do
+      get '/lookups/campaign.json', params: { format: :json }
+      expect(response.status).to eq(200)
+      json = JSON.parse(response.body)
+      campaign_json = json['campaigns'].find { |c| c['slug'] == campaign.slug }
+      expect(campaign_json['labels']).to include('test_lookup_label')
+    end
+  end
 end

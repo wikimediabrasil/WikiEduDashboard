@@ -2,4 +2,5 @@
 
 json.campaigns @values do |campaign|
   json.call(campaign, :id, :title, :slug)
+  json.labels campaign.labels.pluck(:labels)
 end
