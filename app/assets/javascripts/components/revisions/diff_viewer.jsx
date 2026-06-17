@@ -28,7 +28,11 @@ const DiffViewer = createReactClass({
     setSelectedIndex: PropTypes.func,
     lastIndex: PropTypes.number,
     selectedIndex: PropTypes.number,
-    articleTitle: PropTypes.string
+    articleTitle: PropTypes.string,
+    acceptance: PropTypes.object,
+    canAccept: PropTypes.bool,
+    onAccept: PropTypes.func,
+    onUnaccept: PropTypes.func
   },
 
   getInitialState() {
@@ -201,11 +205,8 @@ const DiffViewer = createReactClass({
       return null;
     }
     return (
-      <button
-        onClick={this.showPreviousArticle}
-        className="button pull-right dark small"
-      >
-        {I18n.t('articles.previous')}
+      <button onClick={this.showPreviousArticle} className="button dark small">
+        ← {I18n.t('articles.previous')}
       </button>
     );
   },
@@ -215,7 +216,9 @@ const DiffViewer = createReactClass({
       return null;
     }
     return (
-      <button onClick={this.showNextArticle} className="pull-right margin button dark small">{I18n.t('articles.next')}</button>
+      <button onClick={this.showNextArticle} className="button dark small">
+        {I18n.t('articles.next')} →
+      </button>
     );
   },
 
@@ -310,13 +313,36 @@ const DiffViewer = createReactClass({
         <div className={className}>
           <div className="diff-viewer-header">
             <a className="button dark small" href={wikiDiffUrl} target="_blank">{I18n.t('revisions.view_on_wiki')}</a>
+            {this.props.canAccept && (() => {
+              const status = this.props.acceptance?.status;
+              const isAccepted = status === 'accepted';
+              const isInvalidated = status === 'invalidated';
+              return (
+                <span className="diff-viewer-review-actions">
+                  <button
+                    className={`button small accept-contributions-btn${isAccepted ? ' review-btn--active-valid' : ' review-btn--inactive'}`}
+                    onClick={this.props.onAccept}
+                    disabled={isAccepted}
+                  >
+                    {I18n.t('revisions.validate')}
+                  </button>
+                  <button
+                    className={`button small unaccept-contributions-btn${isInvalidated ? ' review-btn--active-invalid' : ' review-btn--inactive'}`}
+                    onClick={this.props.onUnaccept}
+                    disabled={isInvalidated}
+                  >
+                    {I18n.t('revisions.invalidate')}
+                  </button>
+                </span>
+              );
+            })()}
             <button onClick={this.hideDiff} aria-label="Close Diff Viewer" className="pull-right icon-close"/>
           </div>
-          <div className="diff-viewer-header">
-            {this.nextArticle()}
-            {this.previousArticle()}
+          <div className="diff-viewer-nav">
+            <div className="diff-viewer-nav__prev">{this.previousArticle()}</div>
+            <div className="diff-viewer-nav__title">{this.props.articleTitle}</div>
+            <div className="diff-viewer-nav__next">{this.nextArticle()}</div>
           </div>
-          <h4>{this.articleDetails()}</h4>
           <div className="diff-viewer-scrollbox-container">
             <div className="diff-viewer-scrollbox">
               <strong>{salesforceButtons}</strong>

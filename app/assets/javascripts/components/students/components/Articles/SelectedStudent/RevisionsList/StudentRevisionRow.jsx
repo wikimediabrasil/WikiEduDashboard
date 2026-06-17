@@ -8,32 +8,52 @@ import { setUploadFilters } from '~/app/assets/javascripts/actions/uploads_actio
 
 export const StudentRevisionRow = ({ course, isOpen, toggleDrawer, student, uploadsLink, userRevisions, revisionAcceptances }) => {
   const revisions = userRevisions?.[student.username] || [];
-  // Exclude revisions that have been accepted by admin from reverted count
-  const revertedCount = revisions.filter(r => {
+  const total = revisions.length;
+  const revertedCount = revisions.filter(r => r.reverted).length;
+
+  const acceptedCount = revisions.filter((r) => {
     const mwRevId = r.mw_rev_id || r.revid;
-    const isAccepted = revisionAcceptances?.byMwRevId?.[mwRevId];
-    return r.reverted && !isAccepted;  // Only count as reverted if NOT accepted by admin
+    return revisionAcceptances?.byMwRevId?.[mwRevId]?.status === 'accepted';
   }).length;
 
-  // Calculate acceptance percentage
-  let acceptancePercentage = 0;
-  if (revisions.length > 0) {
-    const acceptedCount = revisions.filter(r => {
-      const mwRevId = r.mw_rev_id || r.revid;
-      return revisionAcceptances?.byMwRevId?.[mwRevId];
-    }).length;
-    acceptancePercentage = Math.round((acceptedCount / revisions.length) * 100);
-  }
+  const invalidatedCount = revisions.filter((r) => {
+    const mwRevId = r.mw_rev_id || r.revid;
+    return revisionAcceptances?.byMwRevId?.[mwRevId]?.status === 'invalidated';
+  }).length;
 
-  let contributionStatus;
+  const reviewedCount = acceptedCount + invalidatedCount;
+  const pendingCount = total - reviewedCount - revertedCount;
+  const acceptedPct = total > 0 ? Math.round((acceptedCount / total) * 100) : 0;
+  const invalidatedPct = total > 0 ? Math.round((invalidatedCount / total) * 100) : 0;
+
+  let statusBadge;
   if (revertedCount > 0) {
-    contributionStatus = 'reverted';
-  } else if (revisions.length > 0 && acceptancePercentage === 100) {
-    contributionStatus = 'accepted';
-  } else if (revisions.length > 0 && acceptancePercentage > 0) {
-    contributionStatus = 'reviewed';
+    statusBadge = (
+      <span
+        className="contribution-status contribution-status--reverted"
+        title={`${revertedCount} ${I18n.t('revisions.status_reverted')}`}
+      >
+        {revertedCount} {I18n.t('revisions.status_reverted')}
+      </span>
+    );
+  } else if (total > 0 && reviewedCount === total) {
+    statusBadge = (
+      <span
+        className="contribution-status contribution-status--reviewed"
+        title={I18n.t('revisions.status_reviewed_tooltip')}
+      >
+        {I18n.t('revisions.status_reviewed')}
+      </span>
+    );
   } else {
-    contributionStatus = 'under_review';
+    statusBadge = (
+      <span
+        className="contribution-status contribution-status--under-review"
+        title={I18n.t('revisions.status_under_review_tooltip')}
+      >
+        {I18n.t('revisions.status_under_review')}
+      </span>
+    );
   }
 
   return (
@@ -45,30 +65,24 @@ export const StudentRevisionRow = ({ course, isOpen, toggleDrawer, student, uplo
       <td className="desktop-only-tc">
         {student.references_count}
       </td>
-      <td className="desktop-only-tc" style={{ textAlign: 'center' }}>
-        {contributionStatus === 'reverted' && (
-          <span
-            className="contribution-status contribution-status--reverted"
-            title={`${revertedCount} ${I18n.t('revisions.status_reverted')}`}
-          >
-            ✗ {revertedCount} {I18n.t('revisions.status_reverted')}
-          </span>
-        )}
-        {contributionStatus === 'under_review' && (
-          <span
-            className="contribution-status contribution-status--under-review"
-            title={I18n.t('revisions.status_under_review_tooltip')}
-          >
-            {student.recent_revisions} {I18n.t('revisions.status_under_review')}
-          </span>
-        )}
-        {contributionStatus === 'accepted' && (
-          <span
-            className="contribution-status contribution-status--accepted"
-            title={I18n.t('revisions.status_admin_accepted_tooltip')}
-          >
-            ✓ {I18n.t('revisions.status_admin_accepted')}
-          </span>
+      <td className="desktop-only-tc">
+        {statusBadge}
+        {total > 0 && (
+          <div className="review-progress">
+            <div className="review-progress__bar-track">
+              <div
+                className="review-progress__bar-fill review-progress__bar-fill--accepted"
+                style={{ width: `${acceptedPct}%` }}
+              />
+              <div
+                className="review-progress__bar-fill review-progress__bar-fill--invalidated"
+                style={{ width: `${invalidatedPct}%` }}
+              />
+            </div>
+            <div className="review-progress__label">
+              {reviewedCount}/{total} {I18n.t('revisions.reviewed')} &middot; {pendingCount} {I18n.t('revisions.pending')}
+            </div>
+          </div>
         )}
       </td>
       <td className="desktop-only-tc">

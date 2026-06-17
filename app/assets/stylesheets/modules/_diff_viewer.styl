@@ -17,6 +17,63 @@
 .diff-viewer-header
   padding 5px 0
   margin 10px
+  display flex
+  align-items center
+
+.diff-viewer-review-actions
+  flex 1
+  text-align center
+  display flex
+  justify-content center
+  gap 8px
+
+.diff-viewer-header .pull-right
+  float none !important
+  margin-left auto
+
+.review-btn--active-valid
+  background-color #1a7a4a !important
+  color white !important
+  border-color #1a7a4a !important
+  opacity 1 !important
+  cursor default
+
+.review-btn--active-invalid
+  background-color #c0392b !important
+  color white !important
+  border-color #c0392b !important
+  opacity 1 !important
+  cursor default
+
+.review-btn--inactive
+  background-color #f0f0f0 !important
+  color #888 !important
+  border-color #ccc !important
+
+.diff-viewer-nav
+  display flex
+  align-items center
+  padding 4px 10px
+  border-top 1px solid #e8e8e8
+  border-bottom 1px solid #e8e8e8
+  background-color #f8f8f8
+
+.diff-viewer-nav__prev
+  flex 0 0 auto
+
+.diff-viewer-nav__title
+  flex 1
+  text-align center
+  font-weight 600
+  font-size 0.95em
+  color #333
+  padding 0 12px
+  white-space nowrap
+  overflow hidden
+  text-overflow ellipsis
+
+.diff-viewer-nav__next
+  flex 0 0 auto
 
 .diff-viewer-scrollbox-container
   overflow-y scroll

@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import { useSelector } from 'react-redux';
+import { connect, useSelector } from 'react-redux';
 import { getCurrentUser } from '../../../../../selectors';
 
 // Components
@@ -10,12 +9,12 @@ import NoRevisionsRow from './NoRevisionsRow';
 import FullHistoryRow from './FullHistoryRow';
 
 // Actions
-import { fetchRevisionAcceptances, acceptRevision, unacceptRevision } from '../../../../../actions/revision_acceptance_actions';
+import { fetchRevisionAcceptances, acceptRevision, unacceptRevision, invalidateRevision } from '../../../../../actions/revision_acceptance_actions';
 
 export const Contributions = ({
   course, revisions, selectedIndex, student, wikidataLabels, showDiff,
   revisionAcceptances,
-  fetchRevisionAcceptances: doFetch, acceptRevision: doAccept, unacceptRevision: doUnaccept
+  fetchRevisionAcceptances: doFetch, acceptRevision: doAccept, invalidateRevision: doInvalidate
 }) => {
   const current_user = useSelector(getCurrentUser);
   useEffect(() => {
@@ -42,7 +41,7 @@ export const Contributions = ({
         wikidataLabels={wikidataLabels}
         acceptance={acceptance}
         onAccept={() => doAccept(course.slug, mwRevId, wikiId, student.id)}
-        onUnaccept={() => doUnaccept(course.slug, acceptance?.id, mwRevId)}
+        onUnaccept={() => doInvalidate(course.slug, mwRevId, wikiId, student.id)}
       />
     );
   });
@@ -58,7 +57,6 @@ export const Contributions = ({
           <th className="desktop-only-tc">{I18n.t('metrics.date_time')}</th>
           <th className="desktop-only-tc">{I18n.t('metrics.char_added')}</th>
           <th className="desktop-only-tc">{I18n.t('revisions.status')}</th>
-          <th className="desktop-only-tc">{I18n.t('revisions.admin_status')}</th>
           <th className="desktop-only-tc" />
         </tr>
       </thead>
@@ -83,7 +81,8 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = {
   fetchRevisionAcceptances,
   acceptRevision,
-  unacceptRevision
+  unacceptRevision,
+  invalidateRevision
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Contributions);

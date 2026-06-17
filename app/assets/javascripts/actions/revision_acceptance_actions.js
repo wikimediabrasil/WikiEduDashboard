@@ -22,7 +22,25 @@ export const acceptRevision = (courseSlug, mwRevId, wikiId, userId) => async (di
     const response = await request(`/courses/${courseSlug}/revision_acceptances`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mw_rev_id: mwRevId, wiki_id: wikiId, user_id: userId })
+      body: JSON.stringify({ mw_rev_id: mwRevId, wiki_id: wikiId, user_id: userId, status: 'accepted' })
+    });
+    if (!response.ok) {
+      dispatch({ type: API_FAIL, data: response });
+      return;
+    }
+    const data = await response.json();
+    dispatch({ type: ACCEPT_REVISION, acceptance: data });
+  } catch (e) {
+    dispatch({ type: API_FAIL, data: e });
+  }
+};
+
+export const invalidateRevision = (courseSlug, mwRevId, wikiId, userId) => async (dispatch) => {
+  try {
+    const response = await request(`/courses/${courseSlug}/revision_acceptances`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mw_rev_id: mwRevId, wiki_id: wikiId, user_id: userId, status: 'invalidated' })
     });
     if (!response.ok) {
       dispatch({ type: API_FAIL, data: response });

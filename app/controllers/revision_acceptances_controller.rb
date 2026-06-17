@@ -6,10 +6,11 @@ class RevisionAcceptancesController < ApplicationController
 
   # GET /courses/:course_id/revision_acceptances
   # Returns all accepted mw_rev_ids for a course so the frontend can render per-revision state
+  ACCEPTANCE_COLUMNS = %i[id mw_rev_id wiki_id user_id accepted_by_id accepted_at status].freeze
+
   def index
     course = Course.find_by!(slug: params[:course_id])
-    acceptances = RevisionAcceptance.for_course(course.id)
-                                    .select(:id, :mw_rev_id, :wiki_id, :user_id, :accepted_by_id, :accepted_at)
+    acceptances = RevisionAcceptance.for_course(course.id).select(*ACCEPTANCE_COLUMNS)
     render json: { revision_acceptances: acceptances }
   end
 
@@ -20,6 +21,14 @@ class RevisionAcceptancesController < ApplicationController
     course = Course.find_by!(slug: params[:course_id])
     raise NotPermittedError unless current_user.can_edit?(course)
 
+    acceptance = build_acceptance(course)
+    acceptance.save!
+    render json: acceptance.as_json(only: ACCEPTANCE_COLUMNS), status: :created
+  end
+
+  private
+
+  def build_acceptance(course)
     acceptance = RevisionAcceptance.find_or_initialize_by(
       mw_rev_id: params[:mw_rev_id],
       wiki_id:   params[:wiki_id],
@@ -28,11 +37,13 @@ class RevisionAcceptancesController < ApplicationController
     acceptance.assign_attributes(
       user_id:        params[:user_id],
       accepted_by_id: current_user.id,
-      accepted_at:    Time.zone.now
+      accepted_at:    Time.zone.now,
+      status:         params[:status].presence_in(%w[accepted invalidated]) || 'accepted'
     )
-    acceptance.save!
-    render json: acceptance, status: :created
+    acceptance
   end
+
+  public
 
   # DELETE /courses/:course_id/revision_acceptances/:id
   def destroy

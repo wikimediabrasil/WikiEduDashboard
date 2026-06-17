@@ -1378,7 +1378,7 @@ en:
     show_course_specific: Show Course Specific
     course_ended_notification: "This shows recent edits by enrolled users, but any edits after the 'end date' are not counted toward the stats or reflected on the Articles tab. You can use the 'Show Course Specific' filter to limit the view to activity that occurred before the end date."
     show_only_new_editors: Show Only New Editors
-    status: Status
+    status: Wiki Status
     status_doc: "Shows the status of student contributions (accepted, reverted, or pending by the community)"
     admin_status: "Instructor Review"
     admin_status_doc: "Shows the review status of student contributions by the course instructor or administrator."
@@ -1388,16 +1388,21 @@ en:
     status_reverted_tooltip: "This edit was reverted by another editor"
     status_pending: Pending
     status_pending_tooltip: "This edit is recent and may still be reviewed by the community"
-    status_under_review: Under review
-    status_under_review_tooltip: "This student's contributions survived community review and are awaiting organizer approval"
-    status_reviewed: Reviewed
-    status_reviewed_tooltip: "This student's contributions have been partially reviewed by the course organizer"
+    status_under_review: In review
+    status_under_review_tooltip: "Some contributions are still pending instructor review"
+    status_reviewed: Fully reviewed
+    status_reviewed_tooltip: "All contributions have been reviewed by the course instructor"
     status_not_accepted: Not accepted
     status_not_accepted_tooltip: "This student's contributions have not been accepted by the course organizer"
     status_admin_accepted: Accepted
     status_admin_accepted_tooltip: "This student's contributions have been accepted by the course organizer"
     accept_contributions: Accept contributions
     unaccept_contributions: Revoke acceptance
+    validate: Validate
+    invalidate: Invalidate
+    review_status: Review Status
+    reviewed: Reviewed
+    pending: Pending
     acceptance_rate_tooltip: "Percentage of resolved edits accepted by the community (not counting pending edits)"
     review_per_revision_hint: "Click to review revisions individually"
     community_status: Community status

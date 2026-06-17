@@ -34,42 +34,12 @@ export const RevisionRow = ({
       <td className="desktop-only-tc">
         <RevisionStatus revision={revision} />
       </td>
-      <td className="desktop-only-tc">
-        {acceptance ? (
-          <span
-            className="contribution-status contribution-status--accepted"
-            title={I18n.t('revisions.status_admin_accepted_tooltip')}
-          >
-            {I18n.t('revisions.status_admin_accepted')}
-          </span>
-        ) : (
-          <span
-            className="contribution-status contribution-status--not-accepted"
-            title={I18n.t('revisions.status_not_accepted_tooltip')}
-          >
-            {I18n.t('revisions.status_not_accepted')}
-          </span>
-        )}
+      <td className="desktop-only-tc revision-row__diff-cell">
         {canAccept && (
-          <div className="contribution-status-action">
-            <button
-              className={`button small ${acceptance ? 'danger' : ''} accept-contributions-btn`}
-              onClick={onAccept}
-              disabled={!!acceptance}
-            >
-              {I18n.t('revisions.accept_contributions')}
-            </button>
-            <button
-              className={`button small danger unaccept-contributions-btn`}
-              onClick={onUnaccept}
-              disabled={!acceptance}
-            >
-              {I18n.t('revisions.unaccept_contributions')}
-            </button>
-          </div>
+          <span className={`revision-review-badge${acceptance ? ' revision-review-badge--reviewed' : ' revision-review-badge--pending'}`}>
+            {acceptance ? I18n.t('revisions.reviewed') : I18n.t('revisions.pending')}
+          </span>
         )}
-      </td>
-      <td className="desktop-only-tc">
         <DiffViewer
           revision={revision}
           index={index}
@@ -78,6 +48,10 @@ export const RevisionRow = ({
           setSelectedIndex={showDiff}
           lastIndex={revisions.length}
           selectedIndex={selectedIndex}
+          acceptance={acceptance}
+          canAccept={canAccept && !revision.reverted}
+          onAccept={onAccept}
+          onUnaccept={onUnaccept}
         />
       </td>
     </tr>

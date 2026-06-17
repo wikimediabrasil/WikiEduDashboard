@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_06_200000) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_17_000000) do
   create_table "admin_course_notes", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.integer "courses_id"
     t.datetime "created_at", null: false
@@ -167,6 +167,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_06_200000) do
     t.datetime "updated_at", precision: nil
     t.index ["campaign_id"], name: "index_campaigns_courses_on_campaign_id"
     t.index ["course_id", "campaign_id"], name: "index_campaigns_courses_on_course_id_and_campaign_id", unique: true
+  end
+
+  create_table "campaigns_labels", charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
+    t.integer "campaign_id"
+    t.datetime "created_at", null: false
+    t.integer "label_id"
+    t.datetime "updated_at", null: false
+    t.index ["campaign_id", "label_id"], name: "index_campaigns_labels_on_campaign_id_and_label_id", unique: true
+    t.index ["campaign_id"], name: "index_campaigns_labels_on_campaign_id"
+    t.index ["label_id"], name: "index_campaigns_labels_on_label_id"
   end
 
   create_table "campaigns_survey_assignments", id: false, charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
@@ -367,6 +377,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_06_200000) do
     t.integer "user_id"
   end
 
+  create_table "labels", charset: "utf8mb3", collation: "utf8mb3_general_ci", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.boolean "display", default: true
+    t.string "labels"
+    t.string "match"
+    t.datetime "updated_at", null: false
+    t.string "url"
+  end
+
   create_table "lti_contexts", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.string "context_id", null: false
     t.datetime "created_at", null: false
@@ -449,6 +469,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_06_200000) do
     t.integer "course_id", null: false
     t.datetime "created_at", null: false
     t.bigint "mw_rev_id", null: false
+    t.string "status", default: "accepted", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id", null: false
     t.integer "wiki_id", null: false

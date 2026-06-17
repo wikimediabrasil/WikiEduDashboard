@@ -20,10 +20,6 @@ import TrainingProgressDescription from '@components/students/components/Article
 import {
   fetchTrainingModuleExercisesByUser
 } from '~/app/assets/javascripts/actions/exercises_actions';
-import {
-  acceptStudentContributions,
-  unacceptStudentContributions
-} from '~/app/assets/javascripts/actions/user_actions';
 
 const Student = createReactClass({
   displayName: 'Student',
@@ -37,10 +33,6 @@ const Student = createReactClass({
     minimalView: PropTypes.bool,
     student: PropTypes.object.isRequired,
     openStudentDetailsView: PropTypes.func.isRequired,
-    acceptStudentContributions: PropTypes.func.isRequired,
-    unacceptStudentContributions: PropTypes.func.isRequired,
-    revisionAcceptances: PropTypes.object,
-    userRevisions: PropTypes.object
   },
 
   setUploadFilters(selectedFilters) {
@@ -64,40 +56,8 @@ const Student = createReactClass({
   render() {
     const {
       assignments, course, current_user, editable,
-      showRecent, student, revisionAcceptances, userRevisions
+      showRecent, student
     } = this.props;
-
-    // Compute reverted count from live MW revisions (read-only from MediaWiki API)
-    // Exclude revisions that have been accepted by admin
-    const allRevisions = (userRevisions && userRevisions[student.username]) || [];
-    const revertedCount = allRevisions.filter(r => {
-      const mwRevId = r.mw_rev_id || r.revid;
-      const isAccepted = revisionAcceptances?.byMwRevId?.[mwRevId];
-      return r.reverted && !isAccepted;  // Only count as reverted if NOT accepted by admin
-    }).length;
-
-    // Calculate acceptance percentage
-    let acceptancePercentage = 0;
-    if (allRevisions.length > 0) {
-      const acceptedCount = allRevisions.filter(r => {
-        const mwRevId = r.mw_rev_id || r.revid;
-        return revisionAcceptances?.byMwRevId?.[mwRevId];
-      }).length;
-      acceptancePercentage = Math.round((acceptedCount / allRevisions.length) * 100);
-    }
-
-    // Determine the 4-state status for this student based on revision acceptance
-    // Reverted > Accepted (100%) > Reviewed (admin interacted but not 100%) > Under review (no interaction)
-    let contributionStatus;
-    if (revertedCount > 0) {
-      contributionStatus = 'reverted';
-    } else if (allRevisions.length > 0 && acceptancePercentage === 100) {
-      contributionStatus = 'accepted';
-    } else if (allRevisions.length > 0 && acceptancePercentage > 0) {
-      contributionStatus = 'reviewed';
-    } else {
-      contributionStatus = 'under_review';
-    }
 
     const editsLink = course.wikis.length > 1
     ? student.global_contribution_url
@@ -178,49 +138,6 @@ const Student = createReactClass({
         <td className="desktop-only-tc" onClick={this.openStudentDetailsView}>
           {student.references_count}
         </td>
-        <td className="desktop-only-tc community-status-cell" onClick={this.openStudentDetailsView}>
-          <div>
-            {contributionStatus === 'reverted' && (
-              <span
-                className="contribution-status contribution-status--reverted"
-                title={`${revertedCount} ${I18n.t('revisions.status_reverted')}`}
-              >
-                ✗ {revertedCount} {I18n.t('revisions.status_reverted')}
-              </span>
-            )}
-            {contributionStatus === 'under_review' && (
-              <span
-                className="contribution-status contribution-status--under-review"
-                title={`${acceptancePercentage}% ${I18n.t('revisions.status_under_review_tooltip')}`}
-              >
-                ◐ {acceptancePercentage}% {I18n.t('revisions.status_under_review')}
-              </span>
-            )}
-            {contributionStatus === 'reviewed' && (
-              <span
-                className="contribution-status contribution-status--reviewed"
-                title={`${acceptancePercentage}% ${I18n.t('revisions.status_reviewed_tooltip')}`}
-              >
-                ◑ {acceptancePercentage}% {I18n.t('revisions.status_reviewed')}
-              </span>
-            )}
-            {contributionStatus === 'accepted' && (
-              <span
-                className="contribution-status contribution-status--accepted"
-                title={I18n.t('revisions.status_admin_accepted_tooltip')}
-              >
-                ✓ {I18n.t('revisions.status_admin_accepted')}
-              </span>
-            )}
-          </div>
-          {current_user && current_user.isAdvancedRole && contributionStatus !== 'reverted' && (
-            <div className="contribution-status-action">
-              <small className="review-hint" style={{ color: '#888', fontSize: '0.75em' }}>
-                {I18n.t('revisions.review_per_revision_hint')}
-              </small>
-            </div>
-          )}
-        </td>
         <td className="desktop-only-tc">
           <Link
             to={uploadsLink}
@@ -237,16 +154,12 @@ const Student = createReactClass({
 }
 );
 
-const mapStateToProps = state => ({
-  userRevisions: state.userRevisions
-});
+const mapStateToProps = () => ({});
 
 const mapDispatchToProps = {
   setUploadFilters,
   fetchTrainingStatus,
-  fetchExercises: fetchTrainingModuleExercisesByUser,
-  acceptStudentContributions,
-  unacceptStudentContributions
+  fetchExercises: fetchTrainingModuleExercisesByUser
 };
 
 const component = withRouter(Student);
