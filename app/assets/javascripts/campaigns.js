@@ -1,9 +1,9 @@
 import './utils/editable';
+import { searchLabelOptions } from './utils/wikidata_label_search';
 
 // ── Wikidata Tags Widget ──────────────────────────────────────────────────────
-// Renders an autocomplete input that queries the Wikidata search API and lets
-// the user add multiple entity tags (chips) to the campaign creation form.
-// Each selected tag is submitted as campaign[label_ids][] hidden inputs.
+// Renders an autocomplete input that queries local labels first, then Wikidata,
+// and lets the user add multiple entity tags (chips) to the campaign creation form.
 
 class WikidataTagsWidget {
   constructor(container) {
@@ -65,12 +65,8 @@ class WikidataTagsWidget {
     this._hideDropdown();
 
     try {
-      const lang = (typeof I18n !== 'undefined' && I18n.locale) ? I18n.locale : 'en';
-      const url = `https://www.wikidata.org/w/api.php?action=wbsearchentities&format=json&origin=*&language=${lang}&search=${encodeURIComponent(query)}&limit=8&type=item`;
-      const resp = await fetch(url);
-      if (!resp.ok) { return; }
-      const data = await resp.json();
-      this._renderDropdown(data.search || []);
+      const results = await searchLabelOptions(query);
+      this._renderDropdown(results);
     } catch (_e) {
       // silently ignore network errors
     } finally {
@@ -83,19 +79,18 @@ class WikidataTagsWidget {
 
     this.dropdownEl.innerHTML = '';
     results.forEach((item) => {
-      // Skip already-selected items
-      if (this.selectedTags.some(t => t.id === item.id)) { return; }
+      if (this.selectedTags.some(t => t.id === item.match)) { return; }
 
       const li = document.createElement('li');
       li.setAttribute('role', 'option');
       li.className = 'wikidata-tags-option';
       li.innerHTML = `
-        <span class="wikidata-tags-option__label">${this._escape(item.label || item.id)}</span>
-        <span class="wikidata-tags-option__id">${this._escape(item.id)}</span>
+        <span class="wikidata-tags-option__label">${this._escape(item.label)}</span>
+        <span class="wikidata-tags-option__id">${this._escape(item.match)}</span>
         ${item.description ? `<span class="wikidata-tags-option__desc">${this._escape(item.description)}</span>` : ''}
       `;
       li.addEventListener('mousedown', (e) => {
-        e.preventDefault(); // keep focus on input
+        e.preventDefault();
         this._selectTag(item);
       });
       this.dropdownEl.appendChild(li);
@@ -107,11 +102,11 @@ class WikidataTagsWidget {
 
   _selectTag(item) {
     const tag = {
-      id:          item.id,
-      label:       item.label || item.id,
+      id:          item.match,
+      label:       item.label,
       description: item.description || '',
-      qNumber:     item.id,
-      url:         `https://www.wikidata.org/wiki/${item.id}`
+      qNumber:     item.match,
+      url:         item.url || `https://www.wikidata.org/wiki/${item.match}`
     };
     this.selectedTags.push(tag);
     this._renderChip(tag);

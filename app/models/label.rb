@@ -20,4 +20,9 @@ class Label < ApplicationRecord
 
   validates :labels, presence: true
   validates :url, presence: true
+
+  scope :matching_query, lambda { |query|
+    sanitized = sanitize_sql_like(query)
+    where('`match` LIKE :q OR labels LIKE :q', q: "%#{sanitized}%")
+  }
 end

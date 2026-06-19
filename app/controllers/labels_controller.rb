@@ -6,9 +6,14 @@ class LabelsController < ApplicationController
 
   def index
     @labels = Label.all
+    if params[:match].present?
+      @labels = @labels.where(match: params[:match].split(','))
+    elsif params[:search].present?
+      @labels = @labels.matching_query(params[:search])
+    end
     respond_to do |format|
       format.html { render plain: @labels.to_json }
-      format.json { render json: @labels }
+      format.json { render json: { labels: @labels } }
     end
   end
 

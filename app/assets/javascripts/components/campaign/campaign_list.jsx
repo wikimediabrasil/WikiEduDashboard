@@ -6,41 +6,43 @@ import List from '../common/list';
 import Loading from '../common/loading';
 import DropdownSortSelect from '../common/dropdown_sort_select';
 import SearchBar from '../common/search_bar';
-import Select from 'react-select';
-import selectStyles from '../../styles/select';
-import request from '../../utils/request';
+import LabelSearchFilter from '../common/label_search_filter';
+import { fetchLabelsByMatch } from '../../utils/wikidata_label_search';
 
 const CampaignList = ({ keys, showSearch, RowElement, headerText, userOnly, showStatistics = false }) => {
   const { all_campaigns, all_campaigns_loaded, sort } = useSelector(state => state.campaigns);
   const [searchParams, setSearchParams] = useSearchParams();
   const search = searchParams.get('search');
   const labelSearch = searchParams.get('label_search');
-  const selectedLabelStrings = labelSearch ? labelSearch.split(',') : [];
+  const selectedMatches = labelSearch ? labelSearch.split(',') : [];
 
-  const [allLabels, setAllLabels] = useState([]);
+  const [selectedTags, setSelectedTags] = useState([]);
 
   useEffect(() => {
-    request('/labels.json')
-      .then(resp => resp.json())
-      .then((data) => {
-        const labelsList = data.labels || [];
-        const labelNames = Array.from(new Set(labelsList.map(l => l.labels))).filter(Boolean);
-        labelNames.sort();
-        setAllLabels(labelNames);
-      })
-      .catch(err => console.error('Error fetching labels:', err));
-  }, []);
+    if (!labelSearch) {
+      setSelectedTags([]);
+      return;
+    }
+    const matches = labelSearch.split(',').filter(Boolean);
+    fetchLabelsByMatch(matches).then((labels) => {
+      const labelByMatch = Object.fromEntries(labels.map(label => [label.match, label]));
+      setSelectedTags(matches.map((match) => (
+        labelByMatch[match] || { match, label: match, description: '', url: '' }
+      )));
+    }).catch(err => console.error('Error fetching labels:', err));
+  }, [labelSearch]);
 
   const filteredCampaigns = all_campaigns.filter((campaign) => {
     if (showSearch) {
       if (search && !campaign.title.toLowerCase().includes(search.toLowerCase())) {
         return false;
       }
-      if (selectedLabelStrings.length > 0) {
-        const hasLabel = campaign.labels && campaign.labels.some(label =>
-          selectedLabelStrings.some(sel => sel.toLowerCase() === label.toLowerCase())
+      if (selectedMatches.length > 0) {
+        const campaignMatches = campaign.label_matches || [];
+        const hasMatch = campaignMatches.some(match =>
+          selectedMatches.some(sel => sel.toLowerCase() === match.toLowerCase())
         );
-        if (!hasLabel) {
+        if (!hasMatch) {
           return false;
         }
       }
@@ -66,29 +68,26 @@ const CampaignList = ({ keys, showSearch, RowElement, headerText, userOnly, show
     }
   }
 
-  const onClickHandler = () => {
-    const params = {};
-    if (inputRef?.current?.value) {
-      params.search = inputRef.current.value;
-    }
-    if (labelSearch) {
-      params.label_search = labelSearch;
-    }
-    setSearchParams(params);
-  };
-
-  const handleLabelSelectChange = (options) => {
-    const selected = options ? options.map(o => o.value) : [];
+  const buildSearchParams = (tags) => {
     const params = {};
     if (inputRef?.current?.value) {
       params.search = inputRef.current.value;
     } else if (search) {
       params.search = search;
     }
-    if (selected.length > 0) {
-      params.label_search = selected.join(',');
+    if (tags.length > 0) {
+      params.label_search = tags.map(tag => tag.match).join(',');
     }
-    setSearchParams(params);
+    return params;
+  };
+
+  const onClickHandler = () => {
+    setSearchParams(buildSearchParams(selectedTags));
+  };
+
+  const handleLabelChange = (tags) => {
+    setSelectedTags(tags);
+    setSearchParams(buildSearchParams(tags));
   };
 
   useEffect(() => {
@@ -110,15 +109,12 @@ const CampaignList = ({ keys, showSearch, RowElement, headerText, userOnly, show
     if (search) {
       queryParts.push(search);
     }
-    if (labelSearch) {
-      queryParts.push(`label: ${labelSearch}`);
+    if (selectedTags.length > 0) {
+      queryParts.push(`label: ${selectedTags.map(tag => tag.label).join(', ')}`);
     }
     const query = queryParts.join(', ') || ' ';
     return I18n.t('application.no_results', { query });
   };
-
-  const selectedLabels = selectedLabelStrings.map(lbl => ({ value: lbl, label: lbl }));
-  const labelOptions = allLabels.map(label => ({ value: label, label: label }));
 
   return (
     <div className="container">
@@ -140,13 +136,10 @@ const CampaignList = ({ keys, showSearch, RowElement, headerText, userOnly, show
             />
           </div>
           <div style={{ flex: '1 1 300px' }}>
-            <Select
-              isMulti
+            <LabelSearchFilter
+              selectedTags={selectedTags}
+              onChange={handleLabelChange}
               placeholder={I18n.t('campaign.search_campaigns_by_label')}
-              styles={selectStyles}
-              options={labelOptions}
-              value={selectedLabels}
-              onChange={handleLabelSelectChange}
             />
           </div>
         </div>
