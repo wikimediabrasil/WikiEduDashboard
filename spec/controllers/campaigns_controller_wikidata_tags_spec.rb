@@ -191,4 +191,72 @@ describe CampaignsController, type: :request do
       end
     end
   end
+
+  describe '#update with wikidata_tags' do
+    let(:admin) { create(:admin) }
+    let(:campaign) { create(:campaign) }
+    let(:existing_label) { create(:label, labels: 'sport', match: 'Q349') }
+
+    before do
+      allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(admin)
+      campaign.labels << existing_label
+    end
+
+    let(:sport_tag_json) do
+      {
+        qNumber:     'Q349',
+        label:       'sport',
+        url:         'https://www.wikidata.org/wiki/Q349',
+        description: 'competitive physical activity'
+      }.to_json
+    end
+
+    let(:music_tag_json) do
+      {
+        qNumber:     'Q638',
+        label:       'music',
+        url:         'https://www.wikidata.org/wiki/Q638',
+        description: 'art form whose medium is sound'
+      }.to_json
+    end
+
+    it 'replaces campaign labels when sync_wikidata_tags is set' do
+      patch campaign_path(campaign.slug), params: {
+        campaign: {
+          sync_wikidata_tags: '1',
+          wikidata_tags: [music_tag_json]
+        }
+      }
+      expect(campaign.labels.reload.map(&:match)).to eq(['Q638'])
+    end
+
+    it 'clears campaign labels when sync_wikidata_tags is set with no tags' do
+      patch campaign_path(campaign.slug), params: {
+        campaign: {
+          sync_wikidata_tags: '1',
+          wikidata_tags: []
+        }
+      }
+      expect(campaign.labels.reload).to be_empty
+    end
+
+    it 'does not change labels when sync_wikidata_tags is absent' do
+      patch campaign_path(campaign.slug), params: {
+        campaign: {
+          description: 'Updated description'
+        }
+      }
+      expect(campaign.labels.reload).to include(existing_label)
+    end
+
+    it 'adds a new label while keeping an existing one' do
+      patch campaign_path(campaign.slug), params: {
+        campaign: {
+          sync_wikidata_tags: '1',
+          wikidata_tags: [sport_tag_json, music_tag_json]
+        }
+      }
+      expect(campaign.labels.reload.map(&:match)).to contain_exactly('Q349', 'Q638')
+    end
+  end
 end

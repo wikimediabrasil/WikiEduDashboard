@@ -151,7 +151,8 @@ class CampaignsController < ApplicationController
   end
 
   def update
-    if @campaign.update(campaign_params)
+    if @campaign.update(campaign_params.except(:wikidata_tags, :sync_wikidata_tags))
+      sync_labels_from_wikidata_tags(campaign_params[:wikidata_tags]) if sync_wikidata_tags?
       flash[:notice] = t('campaign.campaign_updated')
       redirect_to overview_campaign_path(@campaign.slug)
     else
@@ -281,7 +282,7 @@ class CampaignsController < ApplicationController
   end
 
   def set_campaign
-    @campaign = Campaign.find_by(slug: params[:slug])
+    @campaign = Campaign.includes(:labels).find_by(slug: params[:slug])
     return if @campaign
     raise ActionController::RoutingError.new('Not Found'), 'Campaign does not exist'
   end
@@ -344,23 +345,34 @@ class CampaignsController < ApplicationController
   def campaign_params
     params.require(:campaign)
           .permit(:slug, :description, :template_description, :title, :start, :end,
-                  :default_course_type, :default_passcode, wikidata_tags: [])
+                  :default_course_type, :default_passcode, :sync_wikidata_tags,
+                  wikidata_tags: [])
+  end
+
+  def sync_wikidata_tags?
+    ActiveModel::Type::Boolean.new.cast(campaign_params[:sync_wikidata_tags])
   end
 
   def attach_labels_to_campaign
-    wikidata_tags = campaign_params[:wikidata_tags]
-    return if wikidata_tags.blank?
-    wikidata_tags.each do |tag_json|
+    sync_labels_from_wikidata_tags(campaign_params[:wikidata_tags])
+  end
+
+  def sync_labels_from_wikidata_tags(wikidata_tags)
+    labels = build_labels_from_wikidata_tags(wikidata_tags || [])
+    @campaign.labels = labels
+  end
+
+  def build_labels_from_wikidata_tags(wikidata_tags)
+    wikidata_tags.filter_map do |tag_json|
       tag_data = JSON.parse(tag_json)
-      label = Label.find_or_create_by(match: tag_data['qNumber']) do |l|
-        l.labels      = tag_data['label']
-        l.url         = tag_data['url']
-        l.description = tag_data['description']
-        l.display     = true
+      Label.find_or_create_by(match: tag_data['qNumber']) do |label|
+        label.labels      = tag_data['label']
+        label.url         = tag_data['url']
+        label.description = tag_data['description']
+        label.display     = true
       end
-      CampaignsLabels.find_or_create_by(campaign: @campaign, label: label)
     rescue JSON::ParserError
-      next
-    end
+      nil
+    end.uniq
   end
 end

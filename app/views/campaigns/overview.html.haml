@@ -142,6 +142,20 @@
                     = t('campaign.default_passcode')
                 %span.rails_editable-content
                   = @campaign.default_passcode
+
+            .campaign-labels.form-group
+              %label
+                = succeed ':' do
+                  = t('campaign.wikidata_tags')
+              - if @campaign.labels.any?
+                .wikidata-tags-chips
+                  - @campaign.labels.each do |label|
+                    %span.wikidata-tags-chip
+                      %a.wikidata-tags-chip__link{href: label.url, target: '_blank', rel: 'noopener', title: label.description}
+                        = label.labels
+                        %span.wikidata-tags-chip__qnum= label.match
+              - else
+                %span —
       %section#campaign_stats
       - if @campaign.template_description.present?
         = form_for(@campaign, url: campaign_path(@campaign.slug), html: { id: 'edit_campaign_template', class: 'module campaign-template-description rails_editable' }) do

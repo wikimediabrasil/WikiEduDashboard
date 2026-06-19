@@ -10,9 +10,27 @@ class WikidataTagsWidget {
     this.container = container;
     this.selectedTags = []; // { id, label, description, qNumber }
     this._debounceTimer = null;
+    this._initialTags = WikidataTagsWidget.parseInitialTags(container.dataset.initialTags);
 
     this._render();
     this._bindEvents();
+    this._initialTags.forEach((tag) => this._selectTag(tag));
+  }
+
+  static parseInitialTags(raw) {
+    if (!raw) {
+      return [];
+    }
+    try {
+      return JSON.parse(raw).map((tag) => ({
+        match: tag.qNumber,
+        label: tag.label,
+        description: tag.description || '',
+        url: tag.url || `https://www.wikidata.org/wiki/${tag.qNumber}`,
+      }));
+    } catch (_error) {
+      return [];
+    }
   }
 
   _render() {
@@ -185,8 +203,11 @@ window.onload = () => {
   });
 
   $('.campaign-details').on('editable:edit', (e) => {
-    const $popContainer = $(e.target).find('.pop__container');
-    const $popButton = $(e.target).find('.plus');
+    const detailsEl = e.target;
+    const $popContainer = $(detailsEl).find('.pop__container');
+    const $popButton = $(detailsEl).find('.plus');
+
+    initEditLabelsWidget(detailsEl);
 
     // add listener to show/hide the popup, removing any existing listener
     $popButton.show().off('click').on('click', () => {
@@ -210,6 +231,7 @@ window.onload = () => {
   $('.campaign-details').on('editable:read', (e) => {
     $(e.target).find('.plus').hide();
     $(e.target).find('.pop__container').removeClass('open');
+    resetEditLabelsWidget(e.target);
   });
 
   document.querySelector('.remove-organizer-form')?.addEventListener('submit', (e) => {
@@ -249,11 +271,27 @@ window.onload = () => {
   };
 
   let wikidataWidget = null;
+  let editLabelsWidget = null;
 
   const initWikidataWidget = () => {
-    const mountEl = document.querySelector('.campaign-wikidata-tags-mount');
+    const mountEl = document.querySelector('.create-modal-wrapper .campaign-wikidata-tags-mount');
     if (mountEl && !wikidataWidget) {
       wikidataWidget = new WikidataTagsWidget(mountEl);
+    }
+  };
+
+  const resetEditLabelsWidget = (detailsEl) => {
+    const mountEl = detailsEl?.querySelector('.campaign-wikidata-tags-mount');
+    if (mountEl) {
+      mountEl.innerHTML = '';
+    }
+    editLabelsWidget = null;
+  };
+
+  const initEditLabelsWidget = (detailsEl) => {
+    const mountEl = detailsEl?.querySelector('.campaign-wikidata-tags-mount');
+    if (mountEl) {
+      editLabelsWidget = new WikidataTagsWidget(mountEl);
     }
   };
 
