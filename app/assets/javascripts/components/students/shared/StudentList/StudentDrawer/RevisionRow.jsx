@@ -49,7 +49,7 @@ export const RevisionRow = ({
           lastIndex={revisions.length}
           selectedIndex={selectedIndex}
           acceptance={acceptance}
-          canAccept={canAccept && !revision.reverted}
+          canAccept={canAccept}
           onAccept={onAccept}
           onUnaccept={onUnaccept}
         />
