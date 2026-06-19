@@ -33,6 +33,8 @@ const Student = createReactClass({
     minimalView: PropTypes.bool,
     student: PropTypes.object.isRequired,
     openStudentDetailsView: PropTypes.func.isRequired,
+    revisionAcceptances: PropTypes.object,
+    userRevisions: PropTypes.object,
   },
 
   setUploadFilters(selectedFilters) {
@@ -56,8 +58,16 @@ const Student = createReactClass({
   render() {
     const {
       assignments, course, current_user, editable,
-      showRecent, student
+      showRecent, student, revisionAcceptances, userRevisions
     } = this.props;
+
+    const revisions = userRevisions?.[student.username] || [];
+    const total = revisions.length;
+    const acceptedCount = revisions.filter(r => revisionAcceptances?.byMwRevId?.[r.mw_rev_id || r.revid]?.status === 'accepted').length;
+    const invalidatedCount = revisions.filter(r => revisionAcceptances?.byMwRevId?.[r.mw_rev_id || r.revid]?.status === 'invalidated').length;
+    const reviewedCount = acceptedCount + invalidatedCount;
+    const acceptedPct = total > 0 ? Math.round((acceptedCount / total) * 100) : 0;
+    const invalidatedPct = total > 0 ? Math.round((invalidatedCount / total) * 100) : 0;
 
     const editsLink = course.wikis.length > 1
     ? student.global_contribution_url
@@ -137,6 +147,19 @@ const Student = createReactClass({
         </td>
         <td className="desktop-only-tc" onClick={this.openStudentDetailsView}>
           {student.references_count}
+        </td>
+        <td className="desktop-only-tc" onClick={this.openStudentDetailsView}>
+          {total > 0 ? (
+            <div className="review-progress">
+              <div className="review-progress__bar-track">
+                <div className="review-progress__bar-fill review-progress__bar-fill--accepted" style={{ width: `${acceptedPct}%` }} />
+                <div className="review-progress__bar-fill review-progress__bar-fill--invalidated" style={{ width: `${invalidatedPct}%` }} />
+              </div>
+              <div className="review-progress__label">
+                {reviewedCount}/{total} {I18n.t('revisions.reviewed')}
+              </div>
+            </div>
+          ) : '—'}
         </td>
         <td className="desktop-only-tc">
           <Link
