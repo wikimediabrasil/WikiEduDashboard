@@ -6,6 +6,7 @@ json.campaigns @campaigns do |campaign|
   )
   json.call(campaign, :id, :title, :slug)
   json.labels campaign.labels.pluck(:labels)
+  json.label_matches campaign.labels.pluck(:match)
   json.call(
     presenter,
     :course_count,

@@ -47,8 +47,25 @@ RSpec.describe LabelsController, type: :controller do
     describe 'GET #index' do
       it 'returns a successful response and lists labels' do
         label
-        get :index
+        get :index, format: :json
         expect(response).to be_successful
+        json = JSON.parse(response.body)
+        expect(json['labels'].length).to eq(1)
+      end
+
+      it 'filters labels by search query on match' do
+        label
+        get :index, params: { search: label.match }, format: :json
+        json = JSON.parse(response.body)
+        expect(json['labels'].map { |l| l['match'] }).to include(label.match)
+      end
+
+      it 'filters labels by exact match values' do
+        label
+        get :index, params: { match: label.match }, format: :json
+        json = JSON.parse(response.body)
+        expect(json['labels'].length).to eq(1)
+        expect(json['labels'].first['labels']).to eq(label.labels)
       end
     end
 

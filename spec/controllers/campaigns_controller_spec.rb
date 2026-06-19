@@ -481,6 +481,7 @@ describe CampaignsController, type: :request do
       json = JSON.parse(response.body)
       campaign_json = json['campaigns'].find { |c| c['slug'] == campaign.slug }
       expect(campaign_json['labels']).to include('test_label')
+      expect(campaign_json['label_matches']).to include(label.match)
     end
   end
 
@@ -497,6 +498,7 @@ describe CampaignsController, type: :request do
       json = JSON.parse(response.body)
       campaign_json = json['campaigns'].find { |c| c['slug'] == campaign.slug }
       expect(campaign_json['labels']).to include('test_lookup_label')
+      expect(campaign_json['label_matches']).to include(label.match)
     end
   end
 end

@@ -7,6 +7,7 @@ json.cache! ["#{Time.zone}}-explore-campaigns-#{locale}", @campaigns], expires_i
     )
     json.call(campaign, :id, :title, :slug)
     json.labels campaign.labels.pluck(:labels)
+    json.label_matches campaign.labels.pluck(:match)
     json.call(
       presenter,
       :course_count,
