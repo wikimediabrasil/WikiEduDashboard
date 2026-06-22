@@ -148,11 +148,12 @@
                 = succeed ':' do
                   = t('campaign.wikidata_tags')
               - if @campaign.labels.any?
+                - translated_labels_for(@campaign)
                 .wikidata-tags-chips
                   - @campaign.labels.each do |label|
                     %span.wikidata-tags-chip
                       %a.wikidata-tags-chip__link{href: label.url, target: '_blank', rel: 'noopener', title: label.description}
-                        = label.labels
+                        = translated_label(label)
                         %span.wikidata-tags-chip__qnum= label.match
               - else
                 %span —

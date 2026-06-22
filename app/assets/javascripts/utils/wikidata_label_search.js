@@ -50,6 +50,7 @@ export const searchWikidata = async (query) => {
     'format=json',
     'origin=*',
     `language=${lang}`,
+    `uselang=${lang}`,
     `search=${encodeURIComponent(query)}`,
     'limit=8',
     'type=item',
