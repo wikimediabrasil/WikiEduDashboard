@@ -44,7 +44,10 @@ export const StudentRevisionsList = ({ course, current_user, student, wikidataLa
   };
 
 
-  if (!userRevisions[student.id]) dispatch(fetchUserRevisions(course, student));
+  // Dispatch fetch on render if not yet in store.
+  // The action itself guards against duplicate fetches via getState() check.
+  if (!userRevisions[student.username]) dispatch(fetchUserRevisions(course, student));
+
   const filteredRevisions = getfilteredRevisions();
   const uploadsLink = `/courses/${course.slug}/uploads`;
   const elements = [
@@ -71,9 +74,9 @@ export const StudentRevisionsList = ({ course, current_user, student, wikidataLa
   ];
 
   const {
-    recent_revisions, character_sum_ms, references_count, review_status, total_uploads
+    recent_revisions, character_sum_ms, references_count, total_uploads, review_status
   } = studentListKeys(course);
-  const keys = { recent_revisions, character_sum_ms, references_count, review_status, total_uploads };
+  const keys = { recent_revisions, character_sum_ms, references_count, total_uploads, review_status };
 
   const filterLabel = <b>Namespace Filter:</b>;
   const filterRevisions = (

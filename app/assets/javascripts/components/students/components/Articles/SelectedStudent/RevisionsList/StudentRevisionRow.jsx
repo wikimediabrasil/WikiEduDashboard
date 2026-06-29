@@ -11,9 +11,9 @@ export const StudentRevisionRow = ({ course, isOpen, toggleDrawer, student, uplo
   const total = revisions.length;
   const revertedCount = revisions.filter(r => r.reverted).length;
 
-  const acceptedCount = revisions.filter((r) => {
+  const validatedCount = revisions.filter((r) => {
     const mwRevId = r.mw_rev_id || r.revid;
-    return revisionAcceptances?.byMwRevId?.[mwRevId]?.status === 'accepted';
+    return revisionAcceptances?.byMwRevId?.[mwRevId]?.status === 'validated';
   }).length;
 
   const invalidatedCount = revisions.filter((r) => {
@@ -21,9 +21,9 @@ export const StudentRevisionRow = ({ course, isOpen, toggleDrawer, student, uplo
     return revisionAcceptances?.byMwRevId?.[mwRevId]?.status === 'invalidated';
   }).length;
 
-  const reviewedCount = acceptedCount + invalidatedCount;
+  const reviewedCount = validatedCount + invalidatedCount;
   const pendingCount = total - reviewedCount - revertedCount;
-  const acceptedPct = total > 0 ? Math.round((acceptedCount / total) * 100) : 0;
+  const validatedPct = total > 0 ? Math.round((validatedCount / total) * 100) : 0;
   const invalidatedPct = total > 0 ? Math.round((invalidatedCount / total) * 100) : 0;
 
   let statusBadge;
@@ -58,21 +58,29 @@ export const StudentRevisionRow = ({ course, isOpen, toggleDrawer, student, uplo
 
   return (
     <tr onClick={toggleDrawer} className={`students ${isOpen ? 'open' : ''}`}>
-      <td className="desktop-only-tc">{student.recent_revisions}</td>
-      <td className="desktop-only-tc">
+      <td className="desktop-only-tc col-center">{student.recent_revisions}</td>
+      <td className="desktop-only-tc col-center">
         <ContentAdded course={course} student={student} />
       </td>
-      <td className="desktop-only-tc">
+      <td className="desktop-only-tc col-center">
         {student.references_count}
       </td>
-      <td className="desktop-only-tc">
+      <td className="desktop-only-tc col-center">
+        <Link
+          to={uploadsLink}
+          onClick={() => { setUploadFilters([{ value: student.username, label: student.username }]); }}
+        >
+          {student.total_uploads || 0}
+        </Link>
+      </td>
+      <td className="desktop-only-tc col-center col-review-status">
         {statusBadge}
         {total > 0 && (
           <div className="review-progress">
             <div className="review-progress__bar-track">
               <div
                 className="review-progress__bar-fill review-progress__bar-fill--accepted"
-                style={{ width: `${acceptedPct}%` }}
+                style={{ width: `${validatedPct}%` }}
               />
               <div
                 className="review-progress__bar-fill review-progress__bar-fill--invalidated"
@@ -84,14 +92,6 @@ export const StudentRevisionRow = ({ course, isOpen, toggleDrawer, student, uplo
             </div>
           </div>
         )}
-      </td>
-      <td className="desktop-only-tc">
-        <Link
-          to={uploadsLink}
-          onClick={() => { setUploadFilters([{ value: student.username, label: student.username }]); }}
-        >
-          {student.total_uploads || 0}
-        </Link>
       </td>
       <td><button className="icon icon-arrow-toggle table-expandable-indicator" /></td>
     </tr>

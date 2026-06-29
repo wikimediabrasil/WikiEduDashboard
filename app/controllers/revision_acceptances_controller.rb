@@ -38,7 +38,7 @@ class RevisionAcceptancesController < ApplicationController
       user_id:        params[:user_id],
       accepted_by_id: current_user.id,
       accepted_at:    Time.zone.now,
-      status:         params[:status].presence_in(%w[accepted invalidated]) || 'accepted'
+      status:         params[:status].presence_in(%w[validated invalidated]) || 'validated'
     )
     acceptance
   end
@@ -51,7 +51,7 @@ class RevisionAcceptancesController < ApplicationController
     course = Course.find_by!(slug: params[:course_id])
     raise NotPermittedError unless current_user.can_edit?(course)
 
-    acceptance = RevisionAcceptance.find(params[:ra_id])
+    acceptance = RevisionAcceptance.find_by!(id: params[:ra_id], course_id: course.id)
     acceptance.destroy!
     render json: { id: params[:ra_id] }
   end

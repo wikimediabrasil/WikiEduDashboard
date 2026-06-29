@@ -14,13 +14,15 @@ export const fetchUserRevisions = (course, user) => async (dispatch, getState) =
 
   try {
     const results = await Promise.all(wikiPromises);
-    // Combine all revisions from all wikis
+    // Combine all revisions from all wikis and deduplicate by revid
+    const seen = new Set();
     const allRevisions = results.flatMap(result =>
-      result.revisions.map(rev => ({
-        ...rev,
-        wiki: result.wiki
-      }))
-    );
+      result.revisions.map(rev => ({ ...rev, wiki: result.wiki }))
+    ).filter(rev => {
+      if (seen.has(rev.revid)) return false;
+      seen.add(rev.revid);
+      return true;
+    });
 
     dispatch({
       type: RECEIVE_USER_REVISIONS,

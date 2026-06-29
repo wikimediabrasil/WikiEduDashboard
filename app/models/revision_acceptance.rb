@@ -8,6 +8,7 @@ class RevisionAcceptance < ApplicationRecord
   belongs_to :wiki
 
   validates :mw_rev_id, uniqueness: { scope: %i[wiki_id course_id] }
+  validates :status, inclusion: { in: %w[validated invalidated] }
 
   scope :for_course, ->(course_id) { where(course_id:) }
 end

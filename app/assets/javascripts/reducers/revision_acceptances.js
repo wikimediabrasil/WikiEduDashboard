@@ -1,6 +1,6 @@
 import {
   RECEIVE_REVISION_ACCEPTANCES,
-  ACCEPT_REVISION,
+  UPSERT_REVISION_ACCEPTANCE,
   UNACCEPT_REVISION
 } from '../constants/revision_acceptances';
 
@@ -10,19 +10,23 @@ const initialState = { byMwRevId: {}, loaded: false };
 export default function revisionAcceptances(state = initialState, action) {
   switch (action.type) {
     case RECEIVE_REVISION_ACCEPTANCES: {
-      const byMwRevId = {};
-      action.data.forEach(a => { byMwRevId[a.mw_rev_id] = a; });
+      if (!Array.isArray(action.data)) return state;
+      const byMwRevId = Object.fromEntries(
+        action.data.filter(a => a?.mw_rev_id).map(a => [a.mw_rev_id, a])
+      );
       return { byMwRevId, loaded: true };
     }
-    case ACCEPT_REVISION:
+    // Handles both validate and invalidate — any upsert of a review record
+    case UPSERT_REVISION_ACCEPTANCE: {
+      if (!action.acceptance?.mw_rev_id) return state;
       return {
         ...state,
         byMwRevId: { ...state.byMwRevId, [action.acceptance.mw_rev_id]: action.acceptance }
       };
+    }
     case UNACCEPT_REVISION: {
-      const next = { ...state.byMwRevId };
-      delete next[action.mwRevId];
-      return { ...state, byMwRevId: next };
+      const { [action.mwRevId]: _removed, ...rest } = state.byMwRevId;
+      return { ...state, byMwRevId: rest };
     }
     default:
       return state;

@@ -109,70 +109,36 @@
   margin 0 10px
   position static
 
-// ─── Revision quality status badges ──────────────────────────────────────────
+// ─── Community status badges (RevisionStatus.jsx) ────────────────────────────
 .revision-status
   display inline-block
   font-size 0.75rem
   font-weight 600
   letter-spacing 0.02em
   padding 2px 8px
-  border-radius 999px
+  border-radius 2px
   white-space nowrap
   cursor default
 
   &--accepted
-    background-color #d4edda
-    color #155724
-    border 1px solid #c3e6cb
+    background-color #676EB4
+    color #ffffff
+    border 1px solid #676EB4
 
   &--reverted
-    background-color #f8d7da
-    color #721c24
-    border 1px solid #f5c6cb
+    background-color #f8f9fa
+    color #54595d
+    border 1px solid #a2a9b1
 
   &--pending
-    background-color #fff3cd
-    color #856404
-    border 1px solid #ffc107
-
-// Center the community_status column header to match the centered td content.
-// Higher specificity (0,2,2) than the global .table thead tr th rule (0,1,3).
-.table thead th.community_status
-  text-align center
-
-// ─── Community status cell (collapsed student row) ───────────────────────────
-// Primary: large bold percentage, secondary: small accepted✓ · reverted✗ counts
-.community-status-cell
-  cursor default
-
-.community-status-score
-  font-size 1.1rem
-  font-weight 800
-  line-height 1.1
-  letter-spacing -0.01em
-  text-align center
-  width 100%
-
-.community-status-counts
-  font-size 0.72rem
-  margin-top 3px
-  white-space nowrap
-  color #555
-  text-align center
-  width 100%
-
-  .count-accepted
-    color #155724
-    font-weight 600
-
-  .count-reverted
-    color #721c24
-    font-weight 600
+    background-color #eef0f8
+    color #3d4484
+    border 1px solid #676EB4
 
 // ─── Revision rows in the expanded drawer ────────────────────────────────────
 .revision-row--reverted
-  border-left 3px solid #dc3545
-  background-color rgba(220, 53, 69, 0.05)
+  border-left 3px solid #a2a9b1
+  background-color rgba(162, 169, 177, 0.08)
   td:first-child
     padding-left 8px
 
@@ -186,29 +152,29 @@
   white-space nowrap
 
 .contribution-status--reverted
-  background-color #fce8e8
-  color #c0392b
-  border 1px solid #e8a0a0
+  background-color #f8f9fa
+  color #54595d
+  border 1px solid #a2a9b1
 
 .contribution-status--under-review
-  background-color #f0f0f0
-  color #666666
-  border 1px solid #c0c0c0
+  background-color #eef0f8
+  color #3d4484
+  border 1px solid #676EB4
 
 .contribution-status--reviewed
-  background-color #e8f0f8
-  color #1a6a9a
-  border 1px solid #80b0d4
+  background-color #676EB4
+  color #ffffff
+  border 1px solid #676EB4
 
 .contribution-status--not-accepted
-  background-color #fce8e8
-  color #c0392b
-  border 1px solid #e8a0a0
+  background-color #f8f9fa
+  color #54595d
+  border 1px solid #a2a9b1
 
 .contribution-status--accepted
-  background-color #e8f8f0
-  color #1a7a4a
-  border 1px solid #80d4a8
+  background-color #676EB4
+  color #ffffff
+  border 1px solid #676EB4
 
 // ─── Review progress bar ─────────────────────────────────────────────────────
 .review-progress
@@ -227,11 +193,11 @@
   transition width 0.3s ease
 
 .review-progress__bar-fill--accepted
-  background-color #1a7a4a
+  background-color #676EB4
   border-radius 4px 0 0 4px
 
 .review-progress__bar-fill--invalidated
-  background-color #c0392b
+  background-color #54595d
   border-radius 0 4px 4px 0
 
 .review-progress__label
@@ -239,42 +205,156 @@
   color #888
   margin-top 2px
 
-// ─── Accept button inside the revision drawer ────────────────────────────────
-.contribution-status-action
-  margin-top 4px
+// ─── Review error banner ──────────────────────────────────────────────────────
+// Shown when validate/invalidate/clear fails (network error, session expired)
+.contributions-review-error
+  display flex
+  align-items center
+  justify-content space-between
+  background-color #fef3cd
+  color #54595d
+  border 1px solid #676EB4
+  border-left 4px solid #676EB4
+  border-radius 2px
+  padding 8px 12px
+  margin-bottom 8px
+  font-size 0.875rem
 
-.accept-contributions-btn
-  font-size 0.75em
+.contributions-review-error__close
+  background none
+  border none
+  cursor pointer
+  font-size 1rem
+  color #54595d
+  margin-left 12px
+  padding 0
+  line-height 1
+
+  &:hover
+    color #202122
+
+// ─── Contributions paginator ─────────────────────────────────────────────────
+.contributions-paginator
+  display flex
+  align-items center
+  justify-content center
+  gap 8px
+  padding 8px 0 4px
+
+.contributions-paginator__btn
+  background none
+  border 1px solid #a2a9b1
+  border-radius 2px
+  color #3366cc
+  cursor pointer
+  font-size 1.2rem
+  line-height 1
   padding 2px 8px
 
-.unaccept-contributions-btn
-  font-size 0.75em
-  padding 2px 8px
+  &:hover:not(:disabled)
+    background-color #eef0f8
+    border-color #676EB4
 
-// ─── Review badge above diff viewer button ───────────────────────────────────
-.revision-row__diff-cell
+  &:disabled
+    color #a2a9b1
+    cursor default
+
+.contributions-paginator__info
+  font-size 0.8rem
+  color #54595d
+
+// ─── Evaluation column chips ──────────────────────────────────────────────────
+// Three states: Validated (blue) | Invalidated (dark grey) | Pending review (light grey)
+// Palette: dashboard brand_primary #676EB4, greys — no green/red
+// Status column: shows the eval chip (instructor decision)
+// Evaluation column: shows the diff +/- button
+
+// ─── Column alignment — outer student list (StudentRevisionRow) ──────────────
+// list.jsx generates th class from the key name (e.g. th.recent_revisions)
+// td gets .col-center manually for symmetry with its header
+
+th.recent_revisions,
+th.character_sum_ms,
+th.references_count,
+th.total_uploads,
+th.review_status
+  text-align center !important
+
+td.col-center
   text-align center
+  vertical-align middle
 
-.revision-review-badge
-  display block
-  font-size 0.68em
+td.col-review-status
+  min-width 140px
+
+// ─── Column alignment — inner contributions table (RevisionRow) ───────────────
+.contributions-th--center
+  text-align center !important
+
+.contributions-th--status,
+.contributions-th--evaluation
+  text-align center !important
+  padding-left 8px
+  padding-right 8px
+
+.contributions-td--center
+  text-align center
+  vertical-align middle
+
+.revision-row__status-cell,
+.revision-row__eval-cell
+  vertical-align middle
+  text-align center
+  padding-left 8px
+  padding-right 8px
+
+.revision-row__status-inner
+  display flex
+  justify-content center
+  align-items center
+  width 100%
+
+.eval-chip
+  display inline-flex
+  align-items center
+  justify-content center
+  font-size 0.75rem
   font-weight 600
-  text-transform uppercase
-  letter-spacing 0.04em
-  border-radius 3px
-  padding 1px 6px
-  margin-bottom 4px
-  width fit-content
-  margin-left auto
-  margin-right auto
+  letter-spacing 0.02em
+  padding 3px 10px
+  border-radius 2px
+  white-space nowrap
+  cursor default
 
-.revision-review-badge--reviewed
-  background-color #e8f5ee
-  color #1a7a4a
-  border 1px solid #a8d5bb
+.eval-chip--validated
+  background-color #676EB4
+  color #ffffff
+  border 1px solid #676EB4
 
-.revision-review-badge--pending
-  background-color #f5f5f5
-  color #999
-  border 1px solid #ddd
+.eval-chip--invalidated
+  background-color #54595d
+  color #ffffff
+  border 1px solid #54595d
+
+.eval-chip--pending
+  background-color #eef0f8
+  color #3d4484
+  border 1px solid #676EB4
+
+// Reverted by community wiki — muted palette, strikethrough
+.eval-chip--reverted
+  background-color #f8f9fa
+  color #54595d
+  border 1px solid #a2a9b1
+  text-decoration line-through
+  opacity 0.85
+
+// Group: stacks wiki-status chip + instructor chip vertically
+.eval-chip-group
+  display flex
+  flex-direction column
+  align-items center
+  gap 4px
+
+// ─────────────────────────────────────────────────────────────────────────────
 

@@ -32,7 +32,8 @@ const DiffViewer = createReactClass({
     acceptance: PropTypes.object,
     canAccept: PropTypes.bool,
     onAccept: PropTypes.func,
-    onUnaccept: PropTypes.func
+    onUnaccept: PropTypes.func,
+    onClear: PropTypes.func
   },
 
   getInitialState() {
@@ -133,6 +134,12 @@ const DiffViewer = createReactClass({
   },
 
   wikiUrl(revision) {
+    // Files (File: namespace) are hosted on Wikimedia Commons regardless of the
+    // course wiki. Querying the diff from the course wiki returns "not available".
+    const title = revision.title || this.props.articleTitle || '';
+    if (/^File:/i.test(title)) {
+      return 'https://commons.wikimedia.org';
+    }
     return `https://${toWikiDomain(revision.wiki || this.props.article)}`;
   },
 
@@ -315,24 +322,33 @@ const DiffViewer = createReactClass({
             <a className="button dark small" href={wikiDiffUrl} target="_blank">{I18n.t('revisions.view_on_wiki')}</a>
             {this.props.canAccept && (() => {
               const status = this.props.acceptance?.status;
-              const isAccepted = status === 'accepted';
+              const isAccepted = status === 'validated';
               const isInvalidated = status === 'invalidated';
+              const hasReview = isAccepted || isInvalidated;
               return (
                 <span className="diff-viewer-review-actions">
                   <button
-                    className={`button small accept-contributions-btn${isAccepted ? ' review-btn--active-valid' : ' review-btn--inactive'}`}
-                    onClick={this.props.onAccept}
+                    className={`cdx-btn cdx-btn--progressive${isAccepted ? ' cdx-btn--active' : ''}`}
+                    onClick={() => { this.props.onAccept(); this.hideDiff(); }}
                     disabled={isAccepted}
                   >
                     {I18n.t('revisions.validate')}
                   </button>
                   <button
-                    className={`button small unaccept-contributions-btn${isInvalidated ? ' review-btn--active-invalid' : ' review-btn--inactive'}`}
-                    onClick={this.props.onUnaccept}
+                    className={`cdx-btn cdx-btn--destructive${isInvalidated ? ' cdx-btn--active' : ''}`}
+                    onClick={() => { this.props.onUnaccept(); this.hideDiff(); }}
                     disabled={isInvalidated}
                   >
                     {I18n.t('revisions.invalidate')}
                   </button>
+                  {hasReview && this.props.onClear && (
+                    <button
+                      className="cdx-btn cdx-btn--neutral"
+                      onClick={() => { this.props.onClear(); this.hideDiff(); }}
+                    >
+                      {I18n.t('revisions.clear_validation')}
+                    </button>
+                  )}
                 </span>
               );
             })()}

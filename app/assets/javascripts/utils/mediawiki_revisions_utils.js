@@ -140,6 +140,9 @@ const fetchRevisionsFromWiki = async (days, wiki, usernames, course_start, last_
   const { revisions, exitNext } = await fetchAllRevisions(API_URL, days, usernames, wiki, course_start, last_date);
   for (const revision of revisions) {
     revision.wiki = wiki;
+    // Files live on Wikimedia Commons regardless of the course wiki
+    const isFile = /^File:/i.test(revision.title || '');
+    const revPrefix = isFile ? 'https://commons.wikimedia.org' : prefix;
     const diff_params = {
       title: revision.title,
       diff: 'prev',
@@ -147,10 +150,10 @@ const fetchRevisionsFromWiki = async (days, wiki, usernames, course_start, last_
     };
 
     // url for the diff
-    revision.url = `${prefix}/w/index.php?${stringify(diff_params)}`;
+    revision.url = `${revPrefix}/w/index.php?${stringify(diff_params)}`;
 
     // main article url - we use stringify to ensure that its encoded properly
-    revision.article_url = `${prefix}/wiki/${encodeURIComponent(revision.title)}`;
+    revision.article_url = `${revPrefix}/wiki/${encodeURIComponent(revision.title)}`;
 
     // to maintain the old structure of the revision object
     revision.characters = revision.sizediff;
@@ -255,10 +258,9 @@ export const fetchLatestRevisionsForUser = async (username, wiki) => {
     format: 'json',
     list: 'usercontribs',
     ucuser: username,
-    ucprop: 'ids|title|timestamp|sizediff|tags'
+    ucprop: 'ids|title|timestamp|sizediff|tags',
+    uclimit: 500
   };
 
-  const response = await request(`${API_URL}?${stringify(params)}&origin=*`);
-  const json = await response.json();
-  return json.query.usercontribs;
+  return fetchAll(API_URL, params, 'uccontinue');
 };

@@ -732,7 +732,23 @@ qqq:
     status_under_review_tooltip: Tooltip for the under review status badge
     status_reviewed: Label shown on a student row badge indicating that the student's contributions have been partially reviewed by the course organizer
     status_reviewed_tooltip: Tooltip for the reviewed status badge
+    status_not_accepted: Label shown on a student row badge indicating that the student's contributions have not been accepted by the course organizer
+    status_not_accepted_tooltip: Tooltip for the not-accepted status badge
+    status_admin_accepted: Label shown on a student row badge indicating that the student's contributions have been accepted by the course organizer
+    status_admin_accepted_tooltip: Tooltip for the admin-accepted status badge
     acceptance_rate_tooltip: Tooltip for the acceptance rate percentage shown in the student row summary. Explains that pending edits are excluded from the calculation.
+    validate: Button label. The instructor clicks this to mark a student revision as validated/accepted.
+    invalidate: Button label. The instructor clicks this to mark a student revision as invalidated/rejected.
+    review_status: Column header label for the instructor review status of each revision (Reviewed / Pending).
+    reviewed: Label shown on a revision badge indicating the instructor has already reviewed this revision.
+    pending: Label shown on a revision badge indicating the revision has not yet been reviewed by the instructor.
+    evaluation: Column header label for the instructor evaluation column in the contributions table.
+    evaluation_validated: Chip label shown in the Status column when the instructor has validated a student revision.
+    evaluation_invalidated: Chip label shown in the Status column when the instructor has invalidated a student revision.
+    evaluation_pending_review: Chip label shown in the Status column when no instructor review has been submitted yet for a student revision.
+    clear_validation: Button label. The instructor clicks this to remove a previously submitted validation or invalidation, resetting the revision to pending review.
+    review_per_revision_hint: Hint text encouraging the instructor to open the diff viewer to review revisions individually.
+    community_status: Column header label for the community (wiki) status of a revision.
   settings:
     categories:
       salesforce: |-

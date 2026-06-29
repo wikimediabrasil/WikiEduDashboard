@@ -52,7 +52,7 @@ const Student = createReactClass({
 
   _shouldShowRealName() {
     if (!this.props.student.real_name) { return false; }
-    return this.props.current_user.isAdvancedRole;
+    return this.props.current_user?.isAdvancedRole || false;
   },
 
   render() {
@@ -63,10 +63,10 @@ const Student = createReactClass({
 
     const revisions = userRevisions?.[student.username] || [];
     const total = revisions.length;
-    const acceptedCount = revisions.filter(r => revisionAcceptances?.byMwRevId?.[r.mw_rev_id || r.revid]?.status === 'accepted').length;
+    const validatedCount = revisions.filter(r => revisionAcceptances?.byMwRevId?.[r.mw_rev_id || r.revid]?.status === 'validated').length;
     const invalidatedCount = revisions.filter(r => revisionAcceptances?.byMwRevId?.[r.mw_rev_id || r.revid]?.status === 'invalidated').length;
-    const reviewedCount = acceptedCount + invalidatedCount;
-    const acceptedPct = total > 0 ? Math.round((acceptedCount / total) * 100) : 0;
+    const reviewedCount = validatedCount + invalidatedCount;
+    const validatedPct = total > 0 ? Math.round((validatedCount / total) * 100) : 0;
     const invalidatedPct = total > 0 ? Math.round((invalidatedCount / total) * 100) : 0;
 
     const editsLink = course.wikis.length > 1
@@ -76,7 +76,7 @@ const Student = createReactClass({
     let recentRevisions;
     if (showRecent) {
       recentRevisions = (
-        <td className="desktop-only-tc" onClick={this.openStudentDetailsView} >
+        <td className="desktop-only-tc col-center" onClick={this.openStudentDetailsView}>
           {student.recent_revisions}
         </td>
       );
@@ -142,26 +142,13 @@ const Student = createReactClass({
           {reviewButton}
         </td>
         {recentRevisions}
-        <td className="desktop-only-tc" onClick={this.openStudentDetailsView}>
+        <td className="desktop-only-tc col-center" onClick={this.openStudentDetailsView}>
           <ContentAdded course={course} student={student} />
         </td>
-        <td className="desktop-only-tc" onClick={this.openStudentDetailsView}>
+        <td className="desktop-only-tc col-center" onClick={this.openStudentDetailsView}>
           {student.references_count}
         </td>
-        <td className="desktop-only-tc" onClick={this.openStudentDetailsView}>
-          {total > 0 ? (
-            <div className="review-progress">
-              <div className="review-progress__bar-track">
-                <div className="review-progress__bar-fill review-progress__bar-fill--accepted" style={{ width: `${acceptedPct}%` }} />
-                <div className="review-progress__bar-fill review-progress__bar-fill--invalidated" style={{ width: `${invalidatedPct}%` }} />
-              </div>
-              <div className="review-progress__label">
-                {reviewedCount}/{total} {I18n.t('revisions.reviewed')}
-              </div>
-            </div>
-          ) : '—'}
-        </td>
-        <td className="desktop-only-tc">
+        <td className="desktop-only-tc col-center">
           <Link
             to={uploadsLink}
             onClick={() => {
@@ -170,6 +157,19 @@ const Student = createReactClass({
           >
             {student.total_uploads || 0}
           </Link>
+        </td>
+        <td className="desktop-only-tc col-center col-review-status" onClick={this.openStudentDetailsView}>
+          {total > 0 ? (
+            <div className="review-progress">
+              <div className="review-progress__bar-track">
+                <div className="review-progress__bar-fill review-progress__bar-fill--accepted" style={{ width: `${validatedPct}%` }} />
+                <div className="review-progress__bar-fill review-progress__bar-fill--invalidated" style={{ width: `${invalidatedPct}%` }} />
+              </div>
+              <div className="review-progress__label">
+                {reviewedCount}/{total} {I18n.t('revisions.reviewed')}
+              </div>
+            </div>
+          ) : '—'}
         </td>
       </tr>
     );

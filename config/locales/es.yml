@@ -1066,6 +1066,31 @@ es:
     status_doc: "Muestra el estado de las contribuciones de los estudiantes (aceptadas, revertidas o pendientes por la comunidad)"
     admin_status: "Revisión del instructor"
     admin_status_doc: "Muestra el estado de revisión de las contribuciones de los estudiantes por parte del instructor o administrador del curso."
+    status_accepted: Aceptada
+    status_accepted_tooltip: "Esta edición fue aceptada por la comunidad (no revertida)"
+    status_reverted: Revertida
+    status_reverted_tooltip: "Esta edición fue revertida por otro editor"
+    status_pending: Pendiente
+    status_pending_tooltip: "Esta edición es reciente y puede aún ser revisada por la comunidad"
+    status_under_review: En revisión
+    status_under_review_tooltip: "Algunas contribuciones aún están pendientes de revisión por el instructor"
+    status_reviewed: Revisado completamente
+    status_reviewed_tooltip: "Todas las contribuciones han sido revisadas por el instructor del curso"
+    validate: Validar
+    invalidate: Invalidar
+    review_status: Estado de revisión
+    reviewed: Revisadas
+    pending: Pendientes
+    evaluation: Evaluación
+    evaluation_validated: Validada
+    evaluation_invalidated: Invalidada
+    evaluation_pending_review: Pendiente de revisión
+    clear_validation: Limpiar validación
+    review_per_revision_hint: "Haz clic para revisar las revisiones individualmente"
+    community_status: Estado de la comunidad
+    page_previous: Página anterior
+    page_next: Página siguiente
+    page_of: "Página %{current} de %{total}"
   resources:
     label: Recursos
     header: Recursos y capacitación

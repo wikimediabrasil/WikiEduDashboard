@@ -31,24 +31,6 @@
   float none !important
   margin-left auto
 
-.review-btn--active-valid
-  background-color #1a7a4a !important
-  color white !important
-  border-color #1a7a4a !important
-  opacity 1 !important
-  cursor default
-
-.review-btn--active-invalid
-  background-color #c0392b !important
-  color white !important
-  border-color #c0392b !important
-  opacity 1 !important
-  cursor default
-
-.review-btn--inactive
-  background-color #f0f0f0 !important
-  color #888 !important
-  border-color #ccc !important
 
 .diff-viewer-nav
   display flex
@@ -153,3 +135,93 @@
   overflow hidden
   .diffchange-inline
     background-color #f2dede
+
+// ─── Codex-style review buttons (validate / invalidate) ──────────────────────
+// Applied only to .cdx-btn — does not affect any existing button styles.
+// Palette: brand_primary #676EB4 (blue), grey #54595d, white — no green/red
+
+.cdx-btn
+  display inline-flex
+  align-items center
+  justify-content center
+  box-sizing border-box
+  min-width 5em
+  padding 6px 12px
+  font-family inherit
+  font-size 0.875rem
+  font-weight 700
+  line-height 1.42857em
+  border-radius 2px
+  border 1px solid transparent
+  cursor pointer
+  transition background-color 100ms, color 100ms, border-color 100ms, box-shadow 100ms
+  user-select none
+  white-space nowrap
+  text-decoration none
+
+// Progressive (Validate) — uses dashboard brand_primary #676EB4
+.cdx-btn--progressive
+  background-color transparent
+  color #676EB4
+  border-color #676EB4
+
+  &:hover:not(:disabled)
+    background-color #eef0f8
+    border-color #4a5294
+
+  &:active:not(:disabled)
+    background-color #d0d4f0
+    border-color #3d4484
+    color #3d4484
+
+  &.cdx-btn--active,
+  &:disabled
+    background-color #676EB4
+    color #fff
+    border-color #676EB4
+    opacity 1
+    cursor default
+
+// Destructive (Invalidate) — dashboard grey #54595d
+.cdx-btn--destructive
+  background-color transparent
+  color #54595d
+  border-color #54595d
+
+  &:hover:not(:disabled)
+    background-color #eaecf0
+    border-color #3a3f43
+
+  &:active:not(:disabled)
+    background-color #c8ccd1
+    border-color #202122
+    color #202122
+
+  &.cdx-btn--active,
+  &:disabled
+    background-color #54595d
+    color #fff
+    border-color #54595d
+    opacity 1
+    cursor default
+
+// Neutral (Clear validation) — Codex default grey
+.cdx-btn--neutral
+  background-color transparent
+  color #54595d
+  border-color #a2a9b1
+
+  &:hover:not(:disabled)
+    background-color #eaecf0
+    border-color #72777d
+
+  &:active:not(:disabled)
+    background-color #c8ccd1
+    border-color #54595d
+    color #202122
+
+  &:disabled
+    opacity 0.51
+    cursor default
+
+// ─────────────────────────────────────────────────────────────────────────────

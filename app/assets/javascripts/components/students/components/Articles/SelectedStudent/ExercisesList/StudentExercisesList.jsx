@@ -51,7 +51,7 @@ export const StudentExerciseList = (props) => {
       exerciseView={exerciseView}
       key={`drawer_${selected.id}`}
       isOpen={openKey === `drawer_${selected.id}`}
-      revisions={userRevisions[selected.id]}
+      revisions={userRevisions[selected.username]}
       trainingModules={trainingStatus[selected.id]}
       wikidataLabels={wikidataLabels}
     />
