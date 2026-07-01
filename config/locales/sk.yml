@@ -283,4 +283,6 @@ sk:
     editors: Redaktori
   form_search:
     program_date: Dátum programu
+    from: "Od"
+    to: "Do"
 ...

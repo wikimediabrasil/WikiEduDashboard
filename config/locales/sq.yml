@@ -728,4 +728,6 @@ sq:
       link: Merrni Anketën
   form_search:
     program_date: Data e Programit
+    from: "Nga"
+    to: "Deri"
 ...

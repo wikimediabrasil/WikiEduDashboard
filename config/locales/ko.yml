@@ -1984,4 +1984,6 @@ ko:
     advanced_search: 고급 검색
     clear: 지우기
     program_date: 프로그램 날짜
+    from: "부터"
+    to: "까지"
 ...

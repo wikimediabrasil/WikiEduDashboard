@@ -325,4 +325,6 @@ io:
     completed_at: Kompletigita ye la
   form_search:
     program_date: Dato di la programo
+    from: "De"
+    to: "Ad"
 ...

@@ -2184,3 +2184,5 @@ en:
     advanced_search: "Advanced Search"
     clear: "Clear"
     program_date: "Program Date"
+    from: "From"
+    to: "To"

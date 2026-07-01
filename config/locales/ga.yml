@@ -2388,4 +2388,6 @@ ga:
     advanced_search: Cuardach Casta
     clear: Glan
     program_date: Dáta an Chláir
+    from: "Ó"
+    to: "Go"
 ...

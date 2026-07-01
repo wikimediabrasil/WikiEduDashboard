@@ -2237,4 +2237,6 @@ tr:
     advanced_search: Gelişmiş Arama
     clear: Temizle
     program_date: Program Tarihi
+    from: "Başlangıç"
+    to: "Bitiş"
 ...

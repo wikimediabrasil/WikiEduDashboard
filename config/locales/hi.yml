@@ -472,4 +472,6 @@ hi:
   form_search:
     search: खोजें
     clear: खाली करें
+    from: "से"
+    to: "तक"
 ...

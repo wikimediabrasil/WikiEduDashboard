@@ -1569,4 +1569,6 @@ sr-ec:
     search: Претрага
     advanced_search: Напредна претрага
     clear: Очисти
+    from: "Од"
+    to: "До"
 ...

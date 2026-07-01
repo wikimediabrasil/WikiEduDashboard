@@ -1077,4 +1077,6 @@ fi:
     continue: Jatka
   form_search:
     program_date: Ohjelman päivämäärä
+    from: "Alkaen"
+    to: "Asti"
 ...

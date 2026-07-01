@@ -356,4 +356,6 @@ bg:
         cancel_delete: Отказ
   form_search:
     search: Търсене
+    from: "От"
+    to: "До"
 ...

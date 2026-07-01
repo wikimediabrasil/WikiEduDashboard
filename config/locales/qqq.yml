@@ -967,4 +967,6 @@ qqq:
     advanced_search: Label for advanced search toggle
     clear: Label for clear search button
     program_date: Label for program date
+    from: Label for from date in date range filter
+    to: Label for to date in date range filter
 ...

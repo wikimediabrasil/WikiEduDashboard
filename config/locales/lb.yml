@@ -841,4 +841,6 @@ lb:
     advanced_search: Erweidert Sich
     clear: Eidel maachen
     program_date: Programmdatum
+    from: "Vun"
+    to: "Bis"
 ...

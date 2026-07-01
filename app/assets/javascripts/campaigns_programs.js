@@ -36,35 +36,23 @@ document.addEventListener('DOMContentLoaded', () => {
   const currentLocale = locale.split('-')[0];
   const dateFormat = isLatin ? 'd/m/Y' : 'm/d/Y';
 
-  const setupRangePicker = (rangeSelector, startSelector, endSelector) => {
-    const startInput = document.querySelector(startSelector);
-    const endInput = document.querySelector(endSelector);
-    const startVal = startInput.value;
-    const endVal = endInput.value;
-    const defaultDate = (startVal && endVal) ? [startVal, endVal] : null;
-
-    flatpickr(rangeSelector, {
-      mode: 'range',
+  const setupDatePicker = (selector) => {
+    const input = document.querySelector(selector);
+    if (!input) return;
+    flatpickr(input, {
       altInput: true,
       altFormat: dateFormat,
       dateFormat: 'Y-m-d',
-      defaultDate,
+      defaultDate: input.value || null,
       locale: isLatin ? currentLocale : 'default',
       allowInput: true,
-      onClose(selectedDates, dateStr, instance) {
-        if (selectedDates.length === 2) {
-          startInput.value = instance.formatDate(selectedDates[0], 'Y-m-d');
-          endInput.value = instance.formatDate(selectedDates[1], 'Y-m-d');
-        } else {
-          startInput.value = '';
-          endInput.value = '';
-        }
-      }
     });
   };
 
-  setupRangePicker('#creation_date_range', '#creation_start', '#creation_end');
-  setupRangePicker('#start_date_range', '#start_date_start', '#start_date_end');
+  setupDatePicker('#creation_start');
+  setupDatePicker('#creation_end');
+  setupDatePicker('#start_date_start');
+  setupDatePicker('#start_date_end');
 
   document.querySelector('#clear_filters')?.addEventListener('click', () => {
     const form = document.getElementById('campaign_search_form');
