@@ -58,6 +58,12 @@
                 = label(:campaign, :default_course_type, t('campaign.default_course_type') + ':')
                 = select(:campaign, :default_course_type, options_for_select(['BasicCourse', 'Editathon', 'ArticleScopedProgram']), include_blank: true)
 
+              .form-group
+                %label
+                  = succeed ':' do
+                    = t('campaign.wikidata_tags')
+                .campaign-wikidata-tags-mount
+
 
           .wizard__panel__controls.wizard__form
             .right

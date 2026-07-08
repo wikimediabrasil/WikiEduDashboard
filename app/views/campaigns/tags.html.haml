@@ -1,0 +1,95 @@
+- content_for :before_title, "#{@campaign.title} Tags  — "
+
+- content_for :javascripts do
+  = hot_javascript_tag 'campaign_tags'
+
+= render 'nav'
+
+.campaign-path
+  .container
+    .campaign-tags-page
+
+      / ── Header ────────────────────────────────────────────────────────────
+      .campaign-tags-header
+        %h2= t('campaign.tags_page_title')
+        %p= t('campaign.tags_page_description')
+
+      / ── Summary stats ─────────────────────────────────────────────────────
+      .campaign-tags-summary
+        .campaign-tags-summary__item
+          %span.campaign-tags-summary__number#tags-total-labels= @labels.count
+          %span.campaign-tags-summary__label= t('campaign.tags_summary_total_tags')
+        .campaign-tags-summary__item
+          %span.campaign-tags-summary__number#tags-total-courses= @campaign.courses.count
+          %span.campaign-tags-summary__label= t('campaign.tags_summary_total_courses')
+
+      / ── Campaign tag cloud ────────────────────────────────────────────────
+      %section.campaign-tags-cloud-section
+        %h3= t('campaign.tags_cloud_campaign_title')
+        - if @campaign_labels.any?
+          - translated_labels_for(@campaign_labels)
+          .campaign-tags-cloud
+            - @campaign_labels.each do |label|
+              .campaign-tag-chip
+                %a{href: label.url, target: '_blank', rel: 'noopener', title: label.description.presence}
+                  = translated_label(label)
+                  %span.campaign-tag-chip__qnum= label.match
+        - else
+          .campaign-tags-cloud
+            %p.campaign-tags-empty= t('campaign.tags_campaign_empty')
+
+      / ── Program tag cloud ────────────────────────────────────────────────
+      %section.campaign-tags-cloud-section
+        %h3= t('campaign.tags_cloud_programs_title')
+        - if @course_labels.any?
+          - translated_labels_for(@course_labels)
+          .campaign-tags-cloud
+            - @course_labels.each do |label|
+              .campaign-tag-chip
+                %a{href: label.url, target: '_blank', rel: 'noopener', title: label.description.presence}
+                  = translated_label(label)
+                  %span.campaign-tag-chip__qnum= label.match
+        - else
+          .campaign-tags-cloud
+            %p.campaign-tags-empty= t('campaign.tags_programs_empty')
+
+      / ── Charts section (program tags only) ───────────────────────────────
+      %section.tags-charts-section{id: 'campaign-tags-charts', data: {slug: @campaign.slug}, class: @course_labels.any? ? '' : 'hidden'}
+
+        %h3= t('campaign.tags_charts_title')
+        %p.tags-charts-subtitle= t('campaign.tags_charts_subtitle')
+
+        / Tab switcher
+        .tags-chart-tabs{role: 'tablist'}
+          %button.tags-chart-tab.active{data: {target: 'tags-panel-horizontal'}, role: 'tab', 'aria-selected': 'true'}
+            %i.icon.icon-bar-chart
+            = t('campaign.tags_chart_tab_horizontal')
+          %button.tags-chart-tab{data: {target: 'tags-panel-vertical'}, role: 'tab', 'aria-selected': 'false'}
+            %i.icon.icon-bar-chart-vertical
+            = t('campaign.tags_chart_tab_vertical')
+          %button.tags-chart-tab{data: {target: 'tags-panel-doughnut'}, role: 'tab', 'aria-selected': 'false'}
+            %i.icon.icon-pie-chart
+            = t('campaign.tags_chart_tab_doughnut')
+          %button.tags-chart-tab{data: {target: 'tags-panel-polar'}, role: 'tab', 'aria-selected': 'false'}
+            %i.icon.icon-radar-chart
+            = t('campaign.tags_chart_tab_polar')
+
+        / Loading indicator (removed by JS once data arrives)
+        %p.tags-charts-loading= t('campaign.tags_charts_loading')
+
+        / Chart panels
+        #tags-panel-horizontal.tags-chart-panel.active
+          .tags-chart-canvas-wrapper
+            %canvas#tags-chart-horizontal
+
+        #tags-panel-vertical.tags-chart-panel
+          .tags-chart-canvas-wrapper
+            %canvas#tags-chart-vertical
+
+        #tags-panel-doughnut.tags-chart-panel
+          .tags-chart-canvas-wrapper.tags-chart-canvas-wrapper--doughnut
+            %canvas#tags-chart-doughnut
+
+        #tags-panel-polar.tags-chart-panel
+          .tags-chart-canvas-wrapper.tags-chart-canvas-wrapper--doughnut
+            %canvas#tags-chart-polar

@@ -203,6 +203,12 @@ Rails.application.routes.draw do
         constraints: { slug: /.*/ }
     get 'courses/:slug/tags.json' => 'courses#tags',
         constraints: { slug: /.*/ }
+    get 'courses/:slug/wikidata_labels.json' => 'courses#wikidata_labels',
+        constraints: { slug: /.*/ }
+    post 'courses/:slug/wikidata_labels' => 'courses#add_wikidata_label',
+         constraints: { slug: /.*/ }
+    delete 'courses/:slug/wikidata_labels' => 'courses#remove_wikidata_label',
+           constraints: { slug: /.*/ }
     get 'courses/:slug/timeline.json' => 'courses#timeline',
         constraints: { slug: /.*/ }
     get 'courses/:slug/uploads.json' => 'courses#uploads',
@@ -339,12 +345,18 @@ Rails.application.routes.draw do
       get 'assignments'
       get 'ores_plot'
       get 'alerts'
+      get 'tags'
       put 'add_organizer'
       put 'remove_organizer'
       put 'remove_course'
       get 'active_courses'
     end
   end
+
+  # Labels and CampaignsLabels
+  resources :labels
+  post 'campaigns/:campaign_id/labels' => 'campaigns_labels#create'
+  delete 'campaigns/:campaign_id/labels/:label_id' => 'campaigns_labels#destroy'
 
   get 'campaigns/statistics.json' => 'campaigns#statistics'
   get 'campaigns/featured_campaigns' => 'campaigns#featured_campaigns'

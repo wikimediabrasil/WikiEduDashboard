@@ -11,6 +11,8 @@ import CampaignEditable from './campaign_editable.jsx';
 import CampaignList from './campaign_list.jsx';
 import TagList from './tag_list.jsx';
 import TagEditable from './tag_editable';
+import WikidataLabelList from './wikidata_label_list.jsx';
+import WikidataLabelEditable from './wikidata_label_editable.jsx';
 import CourseTypeSelector from './course_type_selector.jsx';
 import SubmittedSelector from './submitted_selector.jsx';
 import PrivacySelector from './privacy_selector.jsx';
@@ -400,6 +402,8 @@ const Details = createReactClass({
         <div className="tags">
           <TagList course={this.props.course} />
           <TagEditable {...this.props} show={this.props.editable} />
+          <WikidataLabelList course={this.props.course} />
+          <WikidataLabelEditable course={this.props.course} show={this.props.editable} />
         </div>
       );
       submittedSelector = (

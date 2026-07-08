@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { searchLabelOptions } from '../../utils/wikidata_label_search';
 import TextAreaInput from '../common/text_area_input.jsx';
 import CreatableInput from '../common/creatable_input.jsx';
 import TextInput from '../common/text_input.jsx';
@@ -16,6 +17,50 @@ import WIKI_OPTIONS from '../../utils/wiki_options';
 import { updateCourse } from '@actions/course_actions.js';
 
 const CourseForm = (props) => {
+  // ── Wikidata tags state ──────────────────────────────────────────────────
+  const [tagQuery, setTagQuery] = useState('');
+  const [tagSuggestions, setTagSuggestions] = useState([]);
+  const [tagSearching, setTagSearching] = useState(false);
+  const tagSearchTimeout = useRef(null);
+
+  const handleTagQueryChange = (e) => {
+    const val = e.target.value;
+    setTagQuery(val);
+    clearTimeout(tagSearchTimeout.current);
+    if (!val.trim()) { setTagSuggestions([]); return; }
+    setTagSearching(true);
+    tagSearchTimeout.current = setTimeout(async () => {
+      try {
+        const results = await searchLabelOptions(val);
+        setTagSuggestions(results);
+      } catch (_) {
+        setTagSuggestions([]);
+      } finally {
+        setTagSearching(false);
+      }
+    }, 350);
+  };
+
+  const handleTagAdd = (suggestion) => {
+    const already = (props.pendingWikidataLabels || []).some(l => l.qNumber === suggestion.qNumber || l.qNumber === suggestion.match);
+    if (!already) {
+      const newLabel = {
+        qNumber: suggestion.qNumber || suggestion.match,
+        label: suggestion.label,
+        url: suggestion.url,
+        description: suggestion.description || '',
+      };
+      props.setPendingWikidataLabels([...(props.pendingWikidataLabels || []), newLabel]);
+    }
+    setTagQuery('');
+    setTagSuggestions([]);
+  };
+
+  const handleTagRemove = (qNumber) => {
+    props.setPendingWikidataLabels((props.pendingWikidataLabels || []).filter(l => l.qNumber !== qNumber));
+  };
+  // ── End Wikidata tags state ──────────────────────────────────────────────
+
   const handleWikiChange = (wiki) => {
     const home_wiki = wiki.value;
     const prev_wiki = { ...props.course.home_wiki };
@@ -306,6 +351,63 @@ const CourseForm = (props) => {
         {roleDescription}
         {taSupportCheckbox}
         {privacyCheckbox}
+        <div className="course-creator-wikidata-tags">
+          <span className="text-input-component__label">
+            <strong>{I18n.t('courses.wikidata_labels')}</strong>
+          </span>
+          {(props.pendingWikidataLabels || []).length > 0 && (
+            <div className="wikidata-tags-chips creator">
+              {(props.pendingWikidataLabels || []).map(lbl => (
+                <span key={lbl.qNumber} className="wikidata-tags-chip">
+                  <a href={lbl.url} target="_blank" rel="noopener noreferrer" title={lbl.description}>
+                    {lbl.label}
+                    <span className="wikidata-tags-chip__qnum">{lbl.qNumber}</span>
+                  </a>
+                  <button
+                    type="button"
+                    className="wikidata-tags-chip__remove"
+                    aria-label={`Remove ${lbl.label}`}
+                    onClick={() => handleTagRemove(lbl.qNumber)}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+          <div className="wikidata-label-search-wrapper">
+            <input
+              type="text"
+              className="wikidata-label-search-input"
+              placeholder={I18n.t('courses.wikidata_label_search_placeholder')}
+              value={tagQuery}
+              onChange={handleTagQueryChange}
+              aria-label={I18n.t('courses.wikidata_label_search_placeholder')}
+            />
+            {tagSearching && <span className="wikidata-label-searching">…</span>}
+            {tagSuggestions.length > 0 && (
+              <ul className="wikidata-label-suggestions" role="listbox">
+                {tagSuggestions.map(s => (
+                  <li
+                    key={s.qNumber || s.match}
+                    className="wikidata-label-suggestion"
+                    onClick={() => handleTagAdd(s)}
+                    onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && handleTagAdd(s)}
+                    role="option"
+                    tabIndex={0}
+                    aria-selected="false"
+                  >
+                    <span className="wikidata-label-suggestion__label">{s.label}</span>
+                    <span className="wikidata-label-suggestion__id">{s.qNumber || s.match}</span>
+                    {s.description && (
+                      <span className="wikidata-label-suggestion__desc">{s.description}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
         <button
           onClick={props.next}
           id="next"
