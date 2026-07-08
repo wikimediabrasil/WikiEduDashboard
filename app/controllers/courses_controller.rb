@@ -130,6 +130,55 @@ class CoursesController < ApplicationController
     set_course
   end
 
+  def wikidata_labels
+    set_course
+    translations = WikidataLabelService.translations_for(@course.wikidata_labels)
+    labels = @course.wikidata_labels.map do |l|
+      {
+        id: l.id,
+        match: l.match,
+        label: translations[l.match] || l.labels,
+        url: l.url,
+        description: l.description || ''
+      }
+    end
+    render json: { course: { id: @course.id }, labels: }
+  end
+
+  def add_wikidata_label
+    set_course
+    require_permissions
+    tag_data = params.require(:label).permit(:qNumber, :label, :url, :description)
+    q_number = tag_data[:qNumber].presence
+    return render json: { status: 'error', message: 'qNumber is required' },
+                  status: :unprocessable_entity if q_number.nil?
+
+    label = upsert_wikidata_label(q_number, tag_data)
+    CoursesLabels.find_or_create_by(course: @course, label:)
+    render json: { status: 'ok',
+                   label: { id: label.id, match: label.match,
+                            label: label.labels, url: label.url } }
+  end
+
+  def upsert_wikidata_label(q_number, tag_data)
+    label = Label.find_or_create_by(match: q_number) do |l|
+      l.labels      = tag_data[:label]
+      l.url         = tag_data[:url]
+      l.description = tag_data[:description].to_s
+    end
+    label.update(labels: tag_data[:label], url: tag_data[:url],
+                 description: tag_data[:description].to_s)
+    label
+  end
+
+  def remove_wikidata_label
+    set_course
+    require_permissions
+    label = Label.find_by(match: params[:qNumber])
+    CoursesLabels.find_by(course: @course, label:)&.destroy
+    render json: { status: 'ok' }
+  end
+
   def timeline
     set_course
   end

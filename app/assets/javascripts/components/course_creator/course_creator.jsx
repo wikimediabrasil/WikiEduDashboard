@@ -7,6 +7,7 @@ import { includes } from 'lodash-es';
 import withRouter from '../util/withRouter';
 import { updateCourse } from '../../actions/course_actions';
 import { fetchCampaign, submitCourse, cloneCourse } from '../../actions/course_creation_actions.js';
+import { addCourseWikidataLabel } from '../../actions/course_wikidata_label_actions';
 import { fetchCoursesForUser } from '../../actions/user_courses_actions.js';
 import { setValid, setInvalid, checkCourseSlug, activateValidations, resetValidations } from '../../actions/validation_actions';
 import { getCloneableCourses, isValid, firstValidationErrorMessage, getAvailableArticles } from '../../selectors';
@@ -65,6 +66,7 @@ const CourseCreator = createReactClass({
       showingCreateCourseButton: false,
       onLastScoping: false,
       courseCloneId: null,
+      pendingWikidataLabels: [],
     };
   },
 
@@ -144,6 +146,20 @@ const CourseCreator = createReactClass({
     }
     if (isValidProp) {
       if (course.slug && this.state.justSubmitted) {
+        // Save any pending Wikidata labels that were selected during course creation
+        const { pendingWikidataLabels } = this.state;
+        if (pendingWikidataLabels && pendingWikidataLabels.length > 0) {
+          Promise.all(
+            pendingWikidataLabels.map(label => this.props.addCourseWikidataLabel(course.slug, label))
+          ).finally(() => {
+            if (this.state.default_course_type === 'ClassroomProgramCourse') {
+              window.location = `/courses/${course.slug}/timeline/wizard`;
+            } else {
+              window.location = `/courses/${course.slug}`;
+            }
+          });
+          return;
+        }
         // This has to be a window.location set due to our limited ReactJS scope
         if (this.state.default_course_type === 'ClassroomProgramCourse') {
           window.location = `/courses/${course.slug}/timeline/wizard`;
@@ -490,6 +506,8 @@ const CourseCreator = createReactClass({
               previousWikiEd={this.hideCourseForm}
               tempCourseId={this.state.tempCourseId}
               firstErrorMessage={this.props.firstErrorMessage}
+              pendingWikidataLabels={this.state.pendingWikidataLabels}
+              setPendingWikidataLabels={labels => this.setState({ pendingWikidataLabels: labels })}
             />
             <CourseDates
               courseDateClass={courseDates}
@@ -542,7 +560,8 @@ const mapDispatchToProps = ({
   checkCourseSlug,
   activateValidations,
   resetValidations,
-  fetchAssignments
+  fetchAssignments,
+  addCourseWikidataLabel,
 });
 
 // exporting two difference ways as a testing hack.
