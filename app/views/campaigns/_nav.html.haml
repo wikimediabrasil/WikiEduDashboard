@@ -2,9 +2,11 @@
   %h1.screen-reader= "#{t('campaign.campaign')}: #{@campaign.title}"
   .campaign_navigation
     .container
-      %a
+      .nav__item
         %h2.title#campaign-nav-label
-          = "#{t('campaign.campaign')}: #{@campaign.title}"
+          %span.campaign-breadcrumb__part= link_to t('campaign.campaigns'), campaigns_path
+          %span.campaign-breadcrumb__separator /
+          %span.campaign-breadcrumb__part= link_to @campaign.title, overview_campaign_path(@campaign.slug)
       %nav{'aria-labelledby': 'campaign-nav-label'}
         %ul.campaign-nav__ul
           = nav_link(t('courses.overview'), overview_campaign_path(@campaign.slug))

@@ -19,6 +19,13 @@ describe CoursesController, type: :request do
         get "/courses/#{course.slug}", params: course_params
         expect(response.status).to eq(200)
       end
+
+      it 'renders breadcrumbs' do
+        course_params = { school:, titleterm: }
+        get "/courses/#{course.slug}", params: course_params
+        expect(response.body).to include(I18n.t('courses.courses'))
+        expect(response.body).to include(course.title)
+      end
     end
 
     context 'when a spider tries index.php' do
@@ -367,7 +374,7 @@ describe CoursesController, type: :request do
   describe '#create' do
     describe 'setting slug from school/title/term' do
       let!(:user) { create(:admin) }
-      let(:expected_slug) { 'Wiki_University/How_to_Wiki_(Fall_2015)' }
+      let(:expected_slug) { 'wiki_university/how_to_wiki_(fall_2015)' }
       let(:role_description) { 'Professor' }
 
       before do
@@ -399,6 +406,23 @@ describe CoursesController, type: :request do
         it 'sets passcode correctly' do
           post '/courses', params: { course: course_params }, as: :json
           expect(Course.last.passcode).to eq('passcode')
+        end
+      end
+
+      context 'with special characters and uppercase letters in slug params' do
+        let(:course_params) do
+          { school: 'Wiki University!',
+            title: 'How to Wiki?',
+            term: 'Fall 2015',
+            start: '2015-01-05',
+            end: '2015-12-20',
+            role_description:,
+            passcode: 'passcode' }
+        end
+
+        it 'normalizes the slug to lowercase without special characters' do
+          post '/courses', params: { course: course_params }, as: :json
+          expect(Course.last.slug).to eq('wiki_university/how_to_wiki_(fall_2015)')
         end
       end
 
@@ -500,6 +524,7 @@ describe CoursesController, type: :request do
 
         it 'renders a 404 and does not create the course when title is blank' do
           course_params[:school] = 'Test School'
+          course_params[:title] = '  '
           post '/courses', params: { course: course_params }, as: :json
           expect(response.status).to eq(404)
           expect(Course.count).to eq(0)
@@ -533,7 +558,7 @@ describe CoursesController, type: :request do
           expect(response.status).to eq(404)
           expect(Course.count).to eq(1)
           expect(response.body).to include(
-            'Another program called Wiki_University/How_to_Wiki_(Fall_2015) already exists'
+            'Another program called wiki_university/how_to_wiki_(fall_2015) already exists'
           )
         end
       end

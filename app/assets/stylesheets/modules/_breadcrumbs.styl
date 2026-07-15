@@ -1,0 +1,19 @@
+// Breadcrumbs navigation
+ol.breadcrumbs
+  list-style none
+  font-size 15px
+  margin 0 0 16px 0
+  padding 0
+  li
+    display inline-block
+    &:not(:last-child):after
+      content "/"
+      margin 0 8px
+      color #999
+    a
+      color sprout
+      text-decoration none
+      &:hover
+        text-decoration underline
+    &:last-child
+      color #666

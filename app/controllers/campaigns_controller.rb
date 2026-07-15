@@ -14,6 +14,7 @@ class CampaignsController < ApplicationController
   before_action :require_create_permissions, only: [:create]
   before_action :require_write_permissions, only: %i[update destroy add_organizer
                                                      remove_organizer remove_course edit]
+  before_action :add_campaign_index_breadcrumb, only: %i[index create]
 
   DETAILS_FIELDS = %w[title start end].freeze
 
@@ -416,4 +417,9 @@ class CampaignsController < ApplicationController
       nil
     end.uniq
   end
+
+  def add_campaign_index_breadcrumb
+    add_breadcrumb I18n.t('campaign.campaigns'), :campaigns_path
+  end
+
 end

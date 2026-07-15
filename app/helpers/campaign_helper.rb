@@ -23,6 +23,19 @@ module CampaignHelper
     end
   end
 
+  def campaign_breadcrumb_title_for_action(campaign, action)
+    case action
+    when 'programs'
+      I18n.t("#{campaign.course_string_prefix}.courses")
+    when 'users'
+      I18n.t("#{campaign.course_string_prefix}.students")
+    when 'tags'
+      I18n.t('campaign.tags_page_title')
+    else
+      I18n.t("courses.#{action}", default: action.titleize)
+    end
+  end
+
   def html_from_markdown(markdown)
     return unless markdown
     converter = Redcarpet::Markdown.new(Redcarpet::Render::HTML)

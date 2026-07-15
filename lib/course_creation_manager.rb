@@ -25,7 +25,10 @@ class CourseCreationManager
   # rubocop:enable Metrics/ParameterLists
 
   def valid?
-    if invalid_wiki?
+    if blank_school_or_title?
+      @invalid_reason = I18n.t('courses.error.invalid_slug')
+      return false
+    elsif invalid_wiki?
       @invalid_reason = I18n.t('courses.error.invalid_language_or_project')
       return false
     elsif invalid_slug?
@@ -67,11 +70,22 @@ class CourseCreationManager
   end
 
   def set_slug
-    slug =  @course_params[:school].strip.presence || ''
-    slug += "/#{@course_params[:title].strip}" if @course_params[:title].present?
-    slug += "_(#{@course_params[:term].strip})" if @course_params[:term].present?
-    @slug = slug.tr(' ', '_')
+    slug =  normalize_slug_component(@course_params[:school])
+    slug += "/"
+    slug += normalize_slug_component(@course_params[:title]) if @course_params[:title].present?
+    if @course_params[:term].present?
+      slug += "_(#{normalize_slug_component(@course_params[:term])})"
+    end
+    @slug = slug
     @overrides[:slug] = @slug
+  end
+
+  def normalize_slug_component(text)
+    text.to_s.strip.downcase.gsub(/[^\p{L}0-9_ ]/, '').tr(' ', '_')
+  end
+
+  def blank_school_or_title?
+    @course_params[:school].to_s.strip.blank? || @course_params[:title].to_s.strip.blank?
   end
 
   def invalid_wiki?

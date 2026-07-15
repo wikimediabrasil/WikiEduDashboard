@@ -77,7 +77,10 @@ class CoursesController < ApplicationController
 
     # Only responds to HTML, so spiders fetching index.php will get a 404.
     respond_to do |format|
-      format.html { render }
+      format.html do
+        add_course_breadcrumbs
+        render
+      end
     end
   end
 
@@ -358,10 +361,15 @@ class CoursesController < ApplicationController
   end
 
   def slug_from_params(course = params[:course])
-    slug = +"#{course[:school]}/#{course[:title]}"
-    slug << "_(#{course[:term]})" if course[:term].present?
+    slug = +"#{normalize_course_slug_component(course[:school])}/"
+    slug += normalize_course_slug_component(course[:title])
+    slug << "_(#{normalize_course_slug_component(course[:term])})" if course[:term].present?
 
-    course[:slug] = slug.tr(' ', '_')
+    course[:slug] = slug
+  end
+
+  def normalize_course_slug_component(text)
+    text.to_s.downcase.strip.gsub(/[^\p{L}0-9_ ]/, '').tr(' ', '_')
   end
 
   def ensure_passcode_set
@@ -569,5 +577,10 @@ class CoursesController < ApplicationController
     return unless params.key? 'enroll'
     session['course_slug'] = @course.slug
     session['enroll_code'] = params['enroll'] || ''
+  end
+
+  def add_course_breadcrumbs
+    add_breadcrumb I18n.t('courses.courses'), explore_path
+    add_breadcrumb @course.title
   end
 end

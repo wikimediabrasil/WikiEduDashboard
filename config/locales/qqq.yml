@@ -308,6 +308,36 @@ qqq:
       A direct translation of 'Program template' should be suitable.
     program_template_tooltip: Tooltip explaining what the 'program template' of a
       campaign is.
+    tags: |-
+      Label for the campaign navigation tab that shows the campaign's Wikidata tags
+      {{Identical|Tag}}
+    tags_campaign_empty: Message shown when no tags have been assigned to the campaign
+    tags_charts_error: Error message shown when the tag distribution chart data could
+      not be loaded
+    tags_charts_loading: Message shown while the tag distribution chart data is loading
+    tags_charts_no_data: Message shown when there is no tag data available to display
+      in the charts
+    tags_charts_subtitle: Subtitle describing the tag distribution charts section
+    tags_charts_title: Title for the tag distribution charts section
+    tags_chart_tab_doughnut: Label for the tab that displays tag data as a doughnut
+      chart
+    tags_chart_tab_horizontal: Label for the tab that displays tag data as horizontal
+      bars
+    tags_chart_tab_polar: Label for the tab that displays tag data as a polar area
+      chart
+    tags_chart_tab_vertical: Label for the tab that displays tag data as vertical bars
+    tags_cloud_campaign_title: Heading for the cloud of tags assigned directly to the
+      campaign
+    tags_cloud_programs_title: Heading for the cloud of tags assigned to programs in
+      the campaign
+    tags_cloud_title: Heading for the tag cloud section
+    tags_page_description: Description shown at the top of the campaign tags page
+    tags_page_title: Title of the campaign tags page
+    tags_programs_empty: Message shown when no tags have been assigned to programs in
+      the campaign
+    tags_summary_total_courses: Label under the number of courses/programs in the campaign
+      tags summary
+    tags_summary_total_tags: Label under the number of tags in the campaign tags summary
     title: |-
       Label for the input to change the title of a campaign
       {{Identical|Title}}

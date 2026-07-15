@@ -505,6 +505,26 @@ es:
     use_start_end_dates: Usar fechas de inicio y fin
     wikidata_tags: Etiquetas de Wikidata
     search: Buscar
+    tags: Etiquetas
+    tags_page_title: Etiquetas de la campaña
+    tags_page_description: Temas y conceptos asociados a esta campaña, enlazados a sus entradas de Wikidata.
+    tags_empty: Esta campaña aún no tiene etiquetas.
+    tags_campaign_empty: No se han asignado etiquetas a esta campaña.
+    tags_programs_empty: No se han asignado etiquetas a los programas de esta campaña.
+    tags_cloud_title: Nube de etiquetas
+    tags_cloud_campaign_title: Etiquetas de la campaña
+    tags_cloud_programs_title: Etiquetas de los programas
+    tags_summary_total_tags: etiquetas
+    tags_summary_total_courses: programas
+    tags_charts_title: Gráficos de distribución de etiquetas
+    tags_charts_subtitle: Visualización de cómo se relacionan las etiquetas con los programas de esta campaña.
+    tags_chart_tab_horizontal: Barras horizontales
+    tags_chart_tab_vertical: Barras verticales
+    tags_chart_tab_doughnut: Anillo
+    tags_chart_tab_polar: Polar
+    tags_charts_loading: Cargando gráficos…
+    tags_charts_no_data: Aún no hay datos de etiquetas disponibles.
+    tags_charts_error: No se pudieron cargar los datos de los gráficos.
   categories:
     searching_for_category: Buscando categorías en
     add_category: Añadir categoría
