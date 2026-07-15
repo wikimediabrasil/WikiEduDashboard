@@ -18,6 +18,8 @@ class Label < ApplicationRecord
   has_many :campaigns_labels, class_name: 'CampaignsLabels', dependent: :destroy
   has_many :campaigns, through: :campaigns_labels
 
+  has_many :courses_labels, class_name: 'CoursesLabels', dependent: :destroy
+  has_many :courses, through: :courses_labels
   validates :labels, presence: true
   validates :url, presence: true
 

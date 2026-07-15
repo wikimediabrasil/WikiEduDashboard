@@ -10,7 +10,7 @@ class CampaignsController < ApplicationController
   before_action :set_campaign, only: %i[overview programs articles users edit
                                         update destroy add_organizer remove_organizer
                                         remove_course ores_plot
-                                        alerts active_courses]
+                                        alerts active_courses tags]
   before_action :require_create_permissions, only: [:create]
   before_action :require_write_permissions, only: %i[update destroy add_organizer
                                                      remove_organizer remove_course edit]
@@ -148,6 +148,19 @@ class CampaignsController < ApplicationController
 
   def ores_plot
     set_presenter
+  end
+
+  def tags
+    @campaign_labels = @campaign.labels.where(display: true).order(:labels)
+    course_label_ids = CoursesLabels
+                       .where(course_id: @campaign.courses.select(:id))
+                       .pluck(:label_id).uniq
+    @course_labels   = Label.where(id: course_label_ids, display: true).order(:labels)
+    @labels          = (@campaign_labels + @course_labels).uniq(&:id)
+    respond_to do |format|
+      format.html
+      format.json { render json: tags_chart_data }
+    end
   end
 
   def update
@@ -324,6 +337,34 @@ class CampaignsController < ApplicationController
                                       page: @page,
                                       sort_column: @sort_column,
                                       sort_direction: @sort_direction)
+  end
+
+  def tags_chart_data
+    labels       = @course_labels
+    translations = WikidataLabelService.translations_for(labels)
+    {
+      campaign:      { slug: @campaign.slug, title: @campaign.title },
+      total_courses: @campaign.courses.count,
+      total_labels:  labels.count,
+      labels:        labels.map { |l| label_stat(l, translations) }
+    }
+  end
+
+  def label_stat(label, translations)
+    tagged = @campaign.courses
+                      .joins(:courses_labels)
+                      .where(courses_labels: { label_id: label.id })
+                      .distinct
+                      .pluck(:title, :slug)
+    {
+      id:           label.id,
+      match:        label.match,
+      label:        translations[label.match] || label.labels,
+      url:          label.url,
+      description:  label.description || '',
+      course_count: tagged.size,
+      courses:      tagged.map { |title, slug| { title:, slug: } }
+    }
   end
 
   def add_organizer_to_campaign(user)

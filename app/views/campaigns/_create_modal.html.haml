@@ -60,7 +60,8 @@
 
               .form-group
                 %label
-                  = t('campaign.wikidata_tags')
+                  = succeed ':' do
+                    = t('campaign.wikidata_tags')
                 .campaign-wikidata-tags-mount
 
 

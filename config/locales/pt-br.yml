@@ -549,6 +549,28 @@ pt-br:
     use_start_end_dates: Use datas de início e término
     wikidata_tags: Tags do Wikidata
     search: Pesquisar
+    tags: Tags
+    tags_page_title: Tags da Campanha
+    tags_page_description: Tópicos e temas associados a esta campanha, vinculados às suas entradas no Wikidata.
+    tags_empty: Nenhuma tag foi adicionada a esta campanha ainda.
+    wikidata_tags: Tags do Wikidata
+    tags_cloud_title: Nuvem de Tags
+    tags_summary_total_tags: tags
+    tags_summary_total_courses: programas
+    tags_charts_title: Gráficos de Distribuição de Tags
+    tags_charts_subtitle: Visualização de como as tags se relacionam com os programas desta campanha.
+    tags_charts_loading: Carregando dados do gráfico…
+    tags_charts_no_data: Nenhum dado de tags disponível ainda.
+    tags_charts_error: Não foi possível carregar os dados do gráfico.
+    tags_chart_courses: programas
+    tags_chart_tab_horizontal: Barras Horizontais
+    tags_chart_tab_vertical: Barras Verticais
+    tags_chart_tab_doughnut: Rosca
+    tags_chart_tab_polar: Área Polar
+    tags_chart_horizontal_title: Programas por Tag (classificados)
+    tags_chart_vertical_title: Programas por Tag
+    tags_chart_doughnut_title: Proporção por Tag
+    tags_chart_polar_title: Peso das Tags
   categories:
     searching_for_category: Procurando por categorias em
     add_category: Adicionar categoria
@@ -995,6 +1017,9 @@ pt-br:
     submitted_at: Enviado em
     tag_select: Selecione ou crie uma etiqueta
     tags: 'Etiquetas:'
+    wikidata_labels: 'Tags Wikidata:'
+    wikidata_label_search_placeholder: 'Buscar tags no Wikidata…'
+    wikidata_label_add_aria_label: 'Adicionar tag Wikidata'
     term: Prazo
     timeline: Detalhes da atribuição
     timeline_enabled: Cronograma ativado

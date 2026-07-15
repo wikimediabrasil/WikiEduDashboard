@@ -524,6 +524,39 @@ en:
     use_start_end_dates: Use start and end dates
     wikidata_tags: Wikidata Tags
     search: Search
+    tags: Tags
+    tags_page_title: Campaign Tags
+    tags_page_description: Topics and themes associated with this campaign, linked to their Wikidata entries.
+    tags_empty: No tags have been added to this campaign yet.
+    tags_campaign_empty: No tags have been assigned to this campaign.
+    tags_programs_empty: No tags have been assigned to programs in this campaign yet.
+    wikidata_tags: Wikidata Tags
+    tags_cloud_title: Tag Cloud
+    tags_cloud_campaign_title: Campaign Tags
+    tags_cloud_programs_title: Program Tags
+    tags_summary_total_tags: tags
+    tags_summary_total_courses: courses
+    tags_charts_title: Tag Distribution Charts
+    tags_charts_subtitle: Visualisation of how tags relate to the programs in this campaign.
+    tags_charts_loading: Loading chart data…
+    tags_charts_no_data: No tag data available yet.
+    tags_charts_error: Could not load chart data.
+    tags_chart_courses: courses
+    tags_chart_tab_horizontal: Horizontal Bars
+    tags_chart_tab_vertical: Vertical Bars
+    tags_chart_tab_doughnut: Doughnut
+    tags_chart_tab_polar: Polar Area
+    tags_chart_horizontal_title: Courses per Tag (ranked)
+    tags_chart_vertical_title: Courses per Tag
+    tags_chart_doughnut_title: Tag Share
+    tags_chart_polar_title: Tag Weight
+    tags_tooltip_programs_label: Programs with this tag
+    tags_tooltip_one_program: "1 program"
+    tags_tooltip_n_programs:
+      one: "1 program"
+      other: "%{count} programs"
+    tags_tooltip_no_programs: No programs assigned
+
 
   categories:
     searching_for_category: Searching for categories in
@@ -951,6 +984,9 @@ en:
     approve_course: "Approve Course"
     tag_select: "Select or create a tag"
     tags: "Tags:"
+    wikidata_labels: "Wikidata Tags:"
+    wikidata_label_search_placeholder: "Search Wikidata tags…"
+    wikidata_label_add_aria_label: "Add Wikidata tag"
     term: Term
     timeline: Assignment Details
     timeline_enabled: Timeline enabled

@@ -8,8 +8,9 @@ module CampaignHelper
     @label_translations[label.match] || label.labels
   end
 
-  def translated_labels_for(campaign)
-    @label_translations = WikidataLabelService.translations_for(campaign.labels)
+  def translated_labels_for(campaign_or_labels)
+    labels = campaign_or_labels.is_a?(Campaign) ? campaign_or_labels.labels : campaign_or_labels
+    @label_translations = WikidataLabelService.translations_for(labels)
   end
 
   def nav_link(link_text, link_path)

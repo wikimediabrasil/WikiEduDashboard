@@ -200,6 +200,370 @@
 
 // ── End Wikidata Tags Widget ──────────────────────────────────────────────────
 
+// ── Campaign Tags Page ────────────────────────────────────────────────────────
+
+.campaign-tags-page
+  padding 30px 0
+
+  .campaign-tags-header
+    margin-bottom 24px
+
+    h2
+      font-size 22px
+      font-weight 600
+      margin-bottom 8px
+
+    p
+      color dove
+      font-size 14px
+
+  .campaign-tags-cloud
+    display flex
+    flex-wrap wrap
+    gap 10px
+    padding 20px
+    background-color $bg_light_gray
+    border-radius 6px
+    min-height 80px
+    align-items center
+
+    .campaign-tags-empty
+      color dove
+      font-style italic
+      font-size 14px
+
+  .campaign-tag-chip
+    display inline-flex
+    align-items center
+    gap 5px
+    background-color $bg_light_gray
+    border 1px solid border_lt
+    border-radius 3px
+    padding 4px 8px
+    font-size 12px
+    font-weight 400
+    transition border-color 0.12s ease
+
+    &:hover
+      border-color $brand_primary
+
+    a
+      color $text_dk
+      text-decoration none
+      display inline-flex
+      align-items center
+      gap 5px
+
+      &:hover
+        color $brand_primary
+
+    .campaign-tag-chip__qnum
+      color dove
+      font-size 10px
+      font-weight normal
+
+    .campaign-tag-chip__desc
+      font-size 11px
+      color dove
+      display block
+      margin-top 2px
+
+    .campaign-tag-chip__badge
+      display inline-block
+      font-size 9px
+      font-weight 700
+      border-radius 4px
+      padding 1px 5px
+      text-transform uppercase
+      letter-spacing 0.3px
+      line-height 1.4
+
+    .campaign-tag-chip__badge--campaign
+      background-color #dbeafe
+      color #1d4ed8
+
+    .campaign-tag-chip__badge--course
+      background-color #dcfce7
+      color #15803d
+
+    .campaign-tag-chip__badge--both
+      background-color #fef9c3
+      color #854d0e
+
+// ── Campaign Tags Page – extra sections ──────────────────────────────────────
+
+.campaign-tags-cloud-section
+  margin-bottom 32px
+
+  h3
+    font-size 16px
+    font-weight 600
+    margin-bottom 14px
+    color #333
+
+// ── Summary stats strip ───────────────────────────────────────────────────────
+
+.campaign-tags-summary
+  display flex
+  gap 24px
+  margin-bottom 28px
+  flex-wrap wrap
+
+  &__item
+    background-color white
+    border 1px solid border_lt
+    border-radius 8px
+    padding 16px 24px
+    display flex
+    flex-direction column
+    align-items center
+    min-width 130px
+    box-shadow 0 1px 4px rgba(0,0,0,0.07)
+
+  &__number
+    font-size 32px
+    font-weight 700
+    color $brand_primary
+    line-height 1
+
+  &__label
+    font-size 12px
+    color dove
+    margin-top 4px
+    text-align center
+
+// ── Charts section ────────────────────────────────────────────────────────────
+
+.tags-charts-section
+  margin-top 36px
+
+  &.hidden
+    display none
+
+  h3
+    font-size 16px
+    font-weight 600
+    margin-bottom 6px
+    color #333
+
+  .tags-charts-subtitle
+    font-size 13px
+    color dove
+    margin-bottom 20px
+
+// Tab switcher
+.tags-chart-tabs
+  display flex
+  gap 4px
+  margin-bottom 0
+  border-bottom 2px solid border_lt
+  flex-wrap wrap
+
+.tags-chart-tab
+  background none
+  border none
+  border-bottom 3px solid transparent
+  margin-bottom -2px
+  padding 8px 18px
+  font-size 13px
+  font-weight 500
+  color dove
+  cursor pointer
+  transition color 0.15s, border-color 0.15s
+  border-radius 4px 4px 0 0
+
+  &:hover
+    color #333
+    background-color $bg_light_gray
+
+  &.active
+    color $brand_primary
+    border-bottom-color $brand_primary
+    font-weight 600
+
+// Chart panels
+.tags-chart-panel
+  display none
+  background white
+  border 1px solid border_lt
+  border-top none
+  border-radius 0 0 6px 6px
+  padding 24px
+
+  &.active
+    display block
+
+.tags-chart-canvas-wrapper
+  position relative
+  height 360px
+  width 100%
+
+  &--doughnut
+    height 380px
+
+// Loading / empty states
+.tags-charts-loading
+  color dove
+  font-style italic
+  font-size 13px
+  padding 20px 0
+  text-align center
+
+.tags-charts-empty
+  color dove
+  font-style italic
+  font-size 14px
+  padding 40px
+  text-align center
+
+// ── Custom chart tooltip ──────────────────────────────────────────────────────
+// Colors derived from WikiEduDashboard design system:
+//   $brand_primary #676EB4  ·  sprout #2A8270  ·  $action #1F6F95
+//   $text_dk #2C2C2C  ·  border_lt #D9D9D9  ·  smoke #FAFAFA
+
+#tags-chart-tooltip
+  position absolute
+  z-index 9999
+  pointer-events none
+  opacity 0
+  transform translateY(4px) scale(0.98)
+  transition opacity 0.16s ease, transform 0.16s ease
+  min-width 224px
+  max-width 316px
+  // Dark surface derived from $brand_primary: hue preserved, fully desaturated-dark
+  background #2c2f52
+  color #eceef8
+  border-radius 4px
+  border 1px solid rgba(103,110,180,0.35)
+  box-shadow 0 10px 32px rgba(44,47,82,0.38), 0 2px 8px rgba(44,47,82,0.22)
+  padding 13px 15px
+  font-size 13px
+  line-height 1.5
+  &.visible
+    opacity 1
+    transform translateY(0) scale(1)
+    pointer-events auto
+
+  .tct-header
+    display flex
+    align-items center
+    gap 8px
+    margin-bottom 5px
+
+  .tct-color-swatch
+    flex-shrink 0
+    width 11px
+    height 11px
+    border-radius 3px
+    border 1px solid rgba(255,255,255,0.18)
+
+  .tct-tag-name
+    font-weight 700
+    font-size 13.5px
+    // Tint of $brand_primary lightened for dark bg
+    color #c8ccf0
+    flex 1
+    word-break break-word
+
+  .tct-qid
+    flex-shrink 0
+    font-size 10px
+    font-weight 600
+    // Muted tint of brand_primary
+    color #9096C0
+    background rgba(103,110,180,0.18)
+    border-radius 3px
+    padding 1px 6px
+    text-decoration none
+    letter-spacing 0.3px
+    &:hover
+      color #c8ccf0
+      background rgba(103,110,180,0.32)
+
+  .tct-description
+    font-size 11.5px
+    // Dove-equivalent on dark bg
+    color #9096C0
+    font-style italic
+    margin 0 0 7px
+    line-height 1.4
+
+  .tct-divider
+    height 1px
+    background rgba(103,110,180,0.22)
+    margin 7px 0
+
+  .tct-section-label
+    font-size 9.5px
+    font-weight 700
+    text-transform uppercase
+    letter-spacing 0.9px
+    // Muted brand tint
+    color #737DC8
+    margin 0 0 5px
+
+  .tct-course-list
+    list-style none
+    margin 0 0 8px
+    padding 0
+    max-height 160px
+    overflow-y auto
+    scrollbar-width thin
+    scrollbar-color rgba(103,110,180,0.3) transparent
+
+  .tct-course-item
+    display flex
+    align-items baseline
+    gap 7px
+    padding 3px 0
+    border-bottom 1px solid rgba(103,110,180,0.12)
+    &:last-child
+      border-bottom none
+
+  .tct-course-dot
+    flex-shrink 0
+    width 5px
+    height 5px
+    border-radius 50%
+    // sprout color
+    background #2A8270
+    margin-top 2px
+
+  .tct-course-link
+    // $action color lightened for dark bg
+    color #6eb8d4
+    text-decoration none
+    font-size 12.5px
+    line-height 1.4
+    word-break break-word
+    &:hover
+      color #9dd4e8
+      text-decoration underline
+
+  .tct-course-none
+    color #737DC8
+    font-style italic
+    font-size 12px
+
+  .tct-footer
+    display flex
+    align-items center
+    justify-content space-between
+    margin-top 6px
+
+  .tct-count
+    font-size 11px
+    font-weight 700
+    // Light brand_primary tint — same family as nav active color
+    color #9096C0
+    letter-spacing 0.2px
+
+// ── End Custom chart tooltip ──────────────────────────────────────────────────
+
+// ── End Campaign Tags Charts ──────────────────────────────────────────────────
+
+// ── End Campaign Tags Page ────────────────────────────────────────────────────
+
 .high-modal
   float right
 

@@ -263,3 +263,112 @@ rating(color)
 @media only screen and (min-width: 919px) and (max-width: 986px)
   .campaign_main
     margin-top 60px
+
+// ── Wikidata Label Editable (course overview) ─────────────────────────────────
+
+.wikidata-label-search-wrapper
+  position relative
+  min-width 260px
+
+.wikidata-label-search-input
+  width 100%
+  padding 5px 8px
+  border 1px solid border_lt
+  border-radius 4px
+  font-size 13px
+  &:focus
+    outline none
+    border-color sprout
+
+.wikidata-label-searching
+  position absolute
+  right 8px
+  top 50%
+  transform translateY(-50%)
+  color dove
+  font-size 12px
+
+.wikidata-label-suggestions
+  position absolute
+  z-index 200
+  background white
+  border 1px solid border_lt
+  border-radius 4px
+  box-shadow 0 2px 8px rgba(0,0,0,0.12)
+  list-style none
+  margin 2px 0 0
+  padding 0
+  max-height 200px
+  overflow-y auto
+  width 100%
+
+.wikidata-label-suggestion
+  cursor pointer
+  padding 7px 10px
+  display flex
+  flex-wrap wrap
+  align-items baseline
+  gap 4px
+  border-bottom 1px solid $bg_light_gray
+  &:last-child
+    border-bottom none
+  &:hover
+    background-color $bg_light_gray
+
+  &__label
+    font-size 13px
+    font-weight 600
+    color #222
+
+  &__id
+    font-size 11px
+    color dove
+
+  &__desc
+    font-size 11px
+    color #666
+    width 100%
+
+.tag-qnum
+  font-size 11px
+  color dove
+
+.wikidata-labels-list
+  display block
+  margin-top 4px
+  a
+    color sprout
+    text-decoration none
+    &:hover
+      text-decoration underline
+
+// ── End Wikidata Label Editable ───────────────────────────────────────────────
+
+// ── Wikidata tags in course creator ──────────────────────────────────────────
+
+.course-creator-wikidata-tags
+  margin-bottom 60px
+
+  .text-input-component__label
+    display block
+    margin-bottom 6px
+
+  .wikidata-tags-chips.creator
+    display flex
+    flex-wrap wrap
+    gap 6px
+    margin-bottom 8px
+
+  .wikidata-tags-chip__remove
+    background none
+    border none
+    cursor pointer
+    color #999
+    font-size 14px
+    padding 0 2px
+    margin-left 4px
+    line-height 1
+    &:hover
+      color #e74c3c
+
+// ── End Wikidata tags in course creator ──────────────────────────────────────

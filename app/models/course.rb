@@ -109,6 +109,9 @@ class Course < ApplicationRecord
 
   has_many :tags, dependent: :destroy
 
+  has_many :courses_labels, class_name: 'CoursesLabels', dependent: :destroy
+  has_many :wikidata_labels, through: :courses_labels, source: :label
+
   has_many :courses_wikis, class_name: 'CoursesWikis', dependent: :destroy
   has_many :wikis, through: :courses_wikis
 
