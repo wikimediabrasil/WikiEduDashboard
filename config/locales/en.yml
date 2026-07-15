@@ -520,7 +520,9 @@ en:
     too_many_articles: The edited article list for this campaign is too long to be displayed. Please view individual courses/programs/events to see the articles edited.
     slug: Slug
     search_campaigns: Search campaigns
+    search_campaigns_by_label: Search campaigns by label
     use_start_end_dates: Use start and end dates
+    wikidata_tags: Wikidata Tags
     search: Search
 
   categories:

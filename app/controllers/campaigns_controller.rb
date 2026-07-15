@@ -41,10 +41,11 @@ class CampaignsController < ApplicationController
     if campaign_params[:default_passcode] == 'custom'
       overrides[:default_passcode] = params[:campaign][:custom_default_passcode]
     end
-    @campaign = Campaign.create campaign_params.merge(overrides)
+    @campaign = Campaign.create campaign_params.except(:wikidata_tags).merge(overrides)
 
     if @campaign.valid?
       add_organizer_to_campaign(current_user)
+      attach_labels_to_campaign
       redirect_to overview_campaign_path(@campaign.slug)
     else
       @campaigns = Campaign.all
@@ -150,7 +151,8 @@ class CampaignsController < ApplicationController
   end
 
   def update
-    if @campaign.update(campaign_params)
+    if @campaign.update(campaign_params.except(:wikidata_tags, :sync_wikidata_tags))
+      sync_labels_from_wikidata_tags(campaign_params[:wikidata_tags]) if sync_wikidata_tags?
       flash[:notice] = t('campaign.campaign_updated')
       redirect_to overview_campaign_path(@campaign.slug)
     else
@@ -218,7 +220,7 @@ class CampaignsController < ApplicationController
     user_only = params[:user_only]
     newest = params[:newest]
     # rubocop:disable Layout/LineLength
-    @campaigns = user_only == 'true' ? current_user.campaigns : Campaign.all.order(created_at: :desc)
+    @campaigns = user_only == 'true' ? current_user.campaigns.includes(:labels) : Campaign.includes(:labels).all.order(created_at: :desc)
     # rubocop:enable Layout/LineLength
     @campaigns = @campaigns.limit(10) if newest == 'true'
     render user_only == 'true' ? 'user_statistics' : 'statistics'
@@ -280,7 +282,7 @@ class CampaignsController < ApplicationController
   end
 
   def set_campaign
-    @campaign = Campaign.find_by(slug: params[:slug])
+    @campaign = Campaign.includes(:labels).find_by(slug: params[:slug])
     return if @campaign
     raise ActionController::RoutingError.new('Not Found'), 'Campaign does not exist'
   end
@@ -343,6 +345,34 @@ class CampaignsController < ApplicationController
   def campaign_params
     params.require(:campaign)
           .permit(:slug, :description, :template_description, :title, :start, :end,
-                  :default_course_type, :default_passcode)
+                  :default_course_type, :default_passcode, :sync_wikidata_tags,
+                  wikidata_tags: [])
+  end
+
+  def sync_wikidata_tags?
+    ActiveModel::Type::Boolean.new.cast(campaign_params[:sync_wikidata_tags])
+  end
+
+  def attach_labels_to_campaign
+    sync_labels_from_wikidata_tags(campaign_params[:wikidata_tags])
+  end
+
+  def sync_labels_from_wikidata_tags(wikidata_tags)
+    labels = build_labels_from_wikidata_tags(wikidata_tags || [])
+    @campaign.labels = labels
+  end
+
+  def build_labels_from_wikidata_tags(wikidata_tags)
+    wikidata_tags.filter_map do |tag_json|
+      tag_data = JSON.parse(tag_json)
+      Label.find_or_create_by(match: tag_data['qNumber']) do |label|
+        label.labels      = tag_data['label']
+        label.url         = tag_data['url']
+        label.description = tag_data['description']
+        label.display     = true
+      end
+    rescue JSON::ParserError
+      nil
+    end.uniq
   end
 end

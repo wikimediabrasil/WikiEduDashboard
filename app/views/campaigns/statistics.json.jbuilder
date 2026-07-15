@@ -6,6 +6,9 @@ json.cache! ["#{Time.zone}}-explore-campaigns-#{locale}", @campaigns], expires_i
       campaign_param: campaign.slug
     )
     json.call(campaign, :id, :title, :slug)
+    label_translations = WikidataLabelService.translations_for(campaign.labels)
+    json.labels campaign.labels.map { |label| label_translations[label.match] || label.labels }
+    json.label_matches campaign.labels.pluck(:match)
     json.call(
       presenter,
       :course_count,

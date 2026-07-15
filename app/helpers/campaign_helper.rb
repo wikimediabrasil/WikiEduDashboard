@@ -2,6 +2,16 @@
 
 #= Helpers for campaigns views
 module CampaignHelper
+  def translated_label(label)
+    return label.labels unless @label_translations
+
+    @label_translations[label.match] || label.labels
+  end
+
+  def translated_labels_for(campaign)
+    @label_translations = WikidataLabelService.translations_for(campaign.labels)
+  end
+
   def nav_link(link_text, link_path)
     class_name = current_page?(link_path) ? 'active' : ''
 
