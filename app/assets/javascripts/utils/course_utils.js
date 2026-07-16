@@ -286,6 +286,17 @@ export default class CourseUtils {
     return location.pathname.substr(-5) === '/home';
   }
 
+  // Given the list of campaigns a course belongs to, return the path to
+  // the "programs" page of its primary (first) campaign, so that the
+  // course breadcrumb can link back to where all of the campaign's
+  // courses/programs are listed. Falls back to the general explore page
+  // when the course has no associated campaign (yet).
+  static campaignProgramsLink(campaigns) {
+    const primaryCampaign = campaigns && campaigns.length > 0 ? campaigns[0] : null;
+    if (!primaryCampaign) { return '/explore'; }
+    return `/campaigns/${primaryCampaign.slug}/programs`;
+  }
+
   static newCourseStats(oldCourse, newCourse) {
     return {
       created_count: oldCourse.created_count !== newCourse.created_count,

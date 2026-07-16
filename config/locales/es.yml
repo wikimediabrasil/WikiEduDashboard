@@ -508,6 +508,7 @@ es:
     tags: Etiquetas
     tags_page_title: Etiquetas de la campaña
     tags_page_description: Temas y conceptos asociados a esta campaña, enlazados a sus entradas de Wikidata.
+    tags_page_description_tag: Temas y conceptos asociados a los cursos etiquetados como "%{tag}", enlazados a sus entradas de Wikidata.
     tags_empty: Esta campaña aún no tiene etiquetas.
     tags_campaign_empty: No se han asignado etiquetas a esta campaña.
     tags_programs_empty: No se han asignado etiquetas a los programas de esta campaña.
@@ -984,6 +985,8 @@ es:
       del modelo de calidad de artículo de ORES y sólo están disponibles para algunos
       idiomas.
     tags: Etiquetas
+    tags_page_title: Etiquetas del curso
+    tags_page_description: Temas y conceptos asociados a este curso, enlazados a sus entradas de Wikidata.
     update_statistics_link: Ver más
     upload_count: Subidas a Commons
     uploads_in_use_count:

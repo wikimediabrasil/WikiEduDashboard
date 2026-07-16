@@ -33,7 +33,45 @@ class TaggedCoursesController < ApplicationController
     end
   end
 
+  def tags
+    set_courses_and_presenter
+    course_label_ids = CoursesLabels.where(course_id: @courses.select(:id)).pluck(:label_id).uniq
+    @course_labels = Label.where(id: course_label_ids, display: true).order(:labels)
+    respond_to do |format|
+      format.html
+      format.json { render json: tags_chart_data }
+    end
+  end
+
   private
+
+  def tags_chart_data
+    labels       = @course_labels
+    translations = WikidataLabelService.translations_for(labels)
+    {
+      tag:           @tag,
+      total_courses: @courses.count,
+      total_labels:  labels.count,
+      labels:        labels.map { |l| label_stat(l, translations) }
+    }
+  end
+
+  def label_stat(label, translations)
+    tagged = @courses
+             .joins(:courses_labels)
+             .where(courses_labels: { label_id: label.id })
+             .distinct
+             .pluck(:title, :slug)
+    {
+      id:           label.id,
+      match:        label.match,
+      label:        translations[label.match] || label.labels,
+      url:          label.url,
+      description:  label.description || '',
+      course_count: tagged.size,
+      courses:      tagged.map { |title, slug| { title:, slug: } }
+    }
+  end
 
   def set_page
     @page = params[:page]&.to_i

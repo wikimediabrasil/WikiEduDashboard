@@ -332,6 +332,8 @@ qqq:
       the campaign
     tags_cloud_title: Heading for the tag cloud section
     tags_page_description: Description shown at the top of the campaign tags page
+    tags_page_description_tag: Description shown at the top of the tagged-courses tags
+      page. %{tag} is the tag name.
     tags_page_title: Title of the campaign tags page
     tags_programs_empty: Message shown when no tags have been assigned to programs in
       the campaign
@@ -554,6 +556,8 @@ qqq:
     submitted_note: Message that your course has been successfully submitted
     user_role: '{{Identical|Role}}'
     tags: '{{Identical|Tag}}'
+    tags_page_title: Title of the course tags page
+    tags_page_description: Description shown at the top of the course tags page
     term: '{{Identical|Term}}'
     timeline_link: '{{Identical|Timeline}}'
     timeline_tooltip: Message that explains what timeline is good for

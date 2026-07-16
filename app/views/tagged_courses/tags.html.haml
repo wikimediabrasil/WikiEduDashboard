@@ -1,4 +1,4 @@
-- content_for :before_title, "#{@campaign.title} Tags  — "
+- content_for :before_title, "Tag: #{@tag} Tags  — "
 
 - content_for :javascripts do
   = hot_javascript_tag 'campaign_tags'
@@ -11,31 +11,16 @@
 
       / ── Header ────────────────────────────────────────────────────────────
       .campaign-tags-header
-        %p= t('campaign.tags_page_description')
+        %p= t('campaign.tags_page_description_tag', tag: @tag)
 
       / ── Summary stats ─────────────────────────────────────────────────────
       .campaign-tags-summary
         .campaign-tags-summary__item
-          %span.campaign-tags-summary__number#tags-total-labels= @labels.count
+          %span.campaign-tags-summary__number#tags-total-labels= @course_labels.count
           %span.campaign-tags-summary__label= t('campaign.tags_summary_total_tags')
         .campaign-tags-summary__item
-          %span.campaign-tags-summary__number#tags-total-courses= @campaign.courses.count
+          %span.campaign-tags-summary__number#tags-total-courses= @courses.count
           %span.campaign-tags-summary__label= t('campaign.tags_summary_total_courses')
-
-      / ── Campaign tag cloud ────────────────────────────────────────────────
-      %section.campaign-tags-cloud-section
-        %h3= t('campaign.tags_cloud_campaign_title')
-        - if @campaign_labels.any?
-          - translated_labels_for(@campaign_labels)
-          .campaign-tags-cloud
-            - @campaign_labels.each do |label|
-              .campaign-tag-chip
-                %a{href: label.url, target: '_blank', rel: 'noopener', title: label.description.presence}
-                  = translated_label(label)
-                  %span.campaign-tag-chip__qnum= label.match
-        - else
-          .campaign-tags-cloud
-            %p.campaign-tags-empty= t('campaign.tags_campaign_empty')
 
       / ── Program tag cloud ────────────────────────────────────────────────
       %section.campaign-tags-cloud-section
@@ -52,8 +37,8 @@
           .campaign-tags-cloud
             %p.campaign-tags-empty= t('campaign.tags_programs_empty')
 
-      / ── Charts section (program tags only) ───────────────────────────────
-      %section.tags-charts-section{id: 'campaign-tags-charts', data: {url: tags_campaign_path(@campaign.slug, format: :json)}, class: @course_labels.any? ? '' : 'hidden'}
+      / ── Charts section ────────────────────────────────────────────────────
+      %section.tags-charts-section{id: 'campaign-tags-charts', data: {url: tags_tagged_course_path(@tag, format: :json)}, class: @course_labels.any? ? '' : 'hidden'}
 
         %h3= t('campaign.tags_charts_title')
         %p.tags-charts-subtitle= t('campaign.tags_charts_subtitle')

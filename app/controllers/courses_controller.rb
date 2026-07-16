@@ -77,10 +77,7 @@ class CoursesController < ApplicationController
 
     # Only responds to HTML, so spiders fetching index.php will get a 404.
     respond_to do |format|
-      format.html do
-        add_course_breadcrumbs
-        render
-      end
+      format.html { render }
     end
   end
 
@@ -577,10 +574,5 @@ class CoursesController < ApplicationController
     return unless params.key? 'enroll'
     session['course_slug'] = @course.slug
     session['enroll_code'] = params['enroll'] || ''
-  end
-
-  def add_course_breadcrumbs
-    add_breadcrumb I18n.t('courses.courses'), explore_path
-    add_breadcrumb @course.title
   end
 end

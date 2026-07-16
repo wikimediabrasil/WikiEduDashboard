@@ -398,10 +398,10 @@ function initTagCharts() {
   const container = document.getElementById('campaign-tags-charts');
   if (!container) return;
 
-  const slug = container.dataset.slug;
+  const url = container.dataset.url || `/campaigns/${encodeURIComponent(container.dataset.slug)}/tags.json`;
   const noDataMsg = container.querySelector('.tags-charts-loading');
 
-  fetch(`/campaigns/${encodeURIComponent(slug)}/tags.json`, {
+  fetch(url, {
     headers: { Accept: 'application/json' },
     credentials: 'same-origin',
   })

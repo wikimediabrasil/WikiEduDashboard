@@ -19,13 +19,6 @@ describe CoursesController, type: :request do
         get "/courses/#{course.slug}", params: course_params
         expect(response.status).to eq(200)
       end
-
-      it 'renders breadcrumbs' do
-        course_params = { school:, titleterm: }
-        get "/courses/#{course.slug}", params: course_params
-        expect(response.body).to include(I18n.t('courses.courses'))
-        expect(response.body).to include(course.title)
-      end
     end
 
     context 'when a spider tries index.php' do

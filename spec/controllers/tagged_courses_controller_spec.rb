@@ -75,4 +75,31 @@ describe TaggedCoursesController, type: :request do
       expect(assigns(:alerts).first.course).to eq(course)
     end
   end
+
+  describe '#tags' do
+    let(:label) { create(:label) }
+
+    before do
+      CoursesLabels.create(course:, label:)
+    end
+
+    it 'renders a 200 and assigns the course labels for the tag' do
+      get "/tagged_courses/#{tag_name}/tags"
+
+      expect(response).to be_successful
+      expect(assigns(:tag)).to eq(tag_name)
+      expect(assigns(:course_labels)).to include(label)
+    end
+
+    it 'returns tag chart data as JSON' do
+      get "/tagged_courses/#{tag_name}/tags.json"
+
+      expect(response).to be_successful
+      expect(response.content_type).to include('application/json')
+      json = JSON.parse(response.body)
+      expect(json['tag']).to eq(tag_name)
+      expect(json['total_courses']).to eq(1)
+      expect(json['labels'].first['id']).to eq(label.id)
+    end
+  end
 end
