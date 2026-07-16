@@ -331,6 +331,21 @@ qqq:
     tags_cloud_programs_title: Heading for the cloud of tags assigned to programs in
       the campaign
     tags_cloud_title: Heading for the tag cloud section
+    tags_filter_title: Heading for the section that lets users filter the campaign's
+      programs by tag
+    tags_filter_button: Label for the button that opens the tag filter dropdown
+    tags_filter_loading: Message shown while the list of filterable tags is loading
+    tags_filter_apply: Label for the button that applies the selected tag filters
+    tags_filter_clear: Label for the button that clears the selected tag filters
+    tags_filter_table_program: |-
+      Column header for the program name in the tag filter table
+      {{Identical|Program}}
+    tags_filter_table_tags: |-
+      Column header for the tags column in the tag filter table
+      {{Identical|Tag}}
+    tags_filter_table_loading: Message shown while the tag filter table is loading
+    tags_filter_table_empty: Message shown when no programs match the selected tag
+      filters
     tags_page_description: Description shown at the top of the campaign tags page
     tags_page_description_tag: Description shown at the top of the tagged-courses tags
       page. %{tag} is the tag name.
@@ -558,6 +573,11 @@ qqq:
     tags: '{{Identical|Tag}}'
     tags_page_title: Title of the course tags page
     tags_page_description: Description shown at the top of the course tags page
+    tags_topic_index: Heading for the visual index of topics assigned to a course
+    tags_count_label: Short label displayed under the number of course topics
+    tags_total: Accessible label for the course topic total. %{count} is the number of topics.
+    tags_no_description: Fallback text shown when a Wikidata topic has no description
+    tags_manage: Label shown beside the control for adding or removing course topics
     term: '{{Identical|Term}}'
     timeline_link: '{{Identical|Timeline}}'
     timeline_tooltip: Message that explains what timeline is good for

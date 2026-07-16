@@ -11,7 +11,18 @@
 
       / ── Header ────────────────────────────────────────────────────────────
       .campaign-tags-header
+        %h2= t('campaign.tags_page_title')
         %p= t('campaign.tags_page_description')
+        - translated_labels_for(@campaign_labels)
+        .campaign-tags-cloud
+          - if @campaign_labels.any?
+            - @campaign_labels.each do |label|
+              .campaign-tag-chip
+                %a{href: label.url, target: '_blank', rel: 'noopener', title: label.description.presence}
+                  = translated_label(label)
+                  %span.campaign-tag-chip__qnum= label.match
+          - else
+            %p.campaign-tags-empty= t('campaign.tags_campaign_empty')
 
       / ── Summary stats ─────────────────────────────────────────────────────
       .campaign-tags-summary
@@ -22,35 +33,59 @@
           %span.campaign-tags-summary__number#tags-total-courses= @campaign.courses.count
           %span.campaign-tags-summary__label= t('campaign.tags_summary_total_courses')
 
-      / ── Campaign tag cloud ────────────────────────────────────────────────
-      %section.campaign-tags-cloud-section
-        %h3= t('campaign.tags_cloud_campaign_title')
-        - if @campaign_labels.any?
-          - translated_labels_for(@campaign_labels)
-          .campaign-tags-cloud
-            - @campaign_labels.each do |label|
-              .campaign-tag-chip
-                %a{href: label.url, target: '_blank', rel: 'noopener', title: label.description.presence}
-                  = translated_label(label)
-                  %span.campaign-tag-chip__qnum= label.match
-        - else
-          .campaign-tags-cloud
-            %p.campaign-tags-empty= t('campaign.tags_campaign_empty')
+      / ── Program filter table ─────────────────────────────────────────────
+      %section.campaign-tags-filter-section#campaign-tags-filter-section
+        %h3= t('campaign.tags_filter_title')
+        .campaign-tags-filter-bar
+          .campaign-tags-filter-dropdown
+            %button.campaign-tags-filter-toggle#tags-filter-toggle{type: 'button', 'aria-expanded': 'false', 'aria-haspopup': 'true', 'aria-controls': 'tags-filter-panel'}
+              %i.icon.icon-filter
+              = t('campaign.tags_filter_button')
+              %span.campaign-tags-filter-count#tags-filter-count
+            .campaign-tags-filter-panel#tags-filter-panel{role: 'menu', hidden: true}
+              .campaign-tags-filter-options#tags-filter-options
+                %p.campaign-tags-filter-loading= t('campaign.tags_filter_loading')
+              .campaign-tags-filter-actions
+                %button.campaign-tags-filter-clear#tags-filter-clear{type: 'button'}= t('campaign.tags_filter_clear')
+                %button.campaign-tags-filter-apply#tags-filter-apply{type: 'button'}= t('campaign.tags_filter_apply')
+        .campaign-tags-filter-table-wrapper
+          %table.campaign-tags-filter-table
+            %thead
+              %tr
+                %th= t('campaign.tags_filter_table_program')
+                %th= t('campaign.tags_filter_table_tags')
+            %tbody#tags-filter-table-body
+              %tr.campaign-tags-filter-table-empty
+                %td{colspan: 2}= t('campaign.tags_filter_table_loading')
 
-      / ── Program tag cloud ────────────────────────────────────────────────
-      %section.campaign-tags-cloud-section
-        %h3= t('campaign.tags_cloud_programs_title')
-        - if @course_labels.any?
-          - translated_labels_for(@course_labels)
-          .campaign-tags-cloud
-            - @course_labels.each do |label|
-              .campaign-tag-chip
-                %a{href: label.url, target: '_blank', rel: 'noopener', title: label.description.presence}
-                  = translated_label(label)
-                  %span.campaign-tag-chip__qnum= label.match
-        - else
-          .campaign-tags-cloud
-            %p.campaign-tags-empty= t('campaign.tags_programs_empty')
+      -# Campaign and program tag clouds are intentionally hidden.
+        %section.campaign-tags-cloud-section
+          %h3= t('campaign.tags_cloud_campaign_title')
+          - if @campaign_labels.any?
+            - translated_labels_for(@campaign_labels)
+            .campaign-tags-cloud
+              - @campaign_labels.each do |label|
+                .campaign-tag-chip
+                  %a{href: label.url, target: '_blank', rel: 'noopener', title: label.description.presence}
+                    = translated_label(label)
+                    %span.campaign-tag-chip__qnum= label.match
+          - else
+            .campaign-tags-cloud
+              %p.campaign-tags-empty= t('campaign.tags_campaign_empty')
+
+        %section.campaign-tags-cloud-section
+          %h3= t('campaign.tags_cloud_programs_title')
+          - if @course_labels.any?
+            - translated_labels_for(@course_labels)
+            .campaign-tags-cloud
+              - @course_labels.each do |label|
+                .campaign-tag-chip
+                  %a{href: label.url, target: '_blank', rel: 'noopener', title: label.description.presence}
+                    = translated_label(label)
+                    %span.campaign-tag-chip__qnum= label.match
+          - else
+            .campaign-tags-cloud
+              %p.campaign-tags-empty= t('campaign.tags_programs_empty')
 
       / ── Charts section (program tags only) ───────────────────────────────
       %section.tags-charts-section{id: 'campaign-tags-charts', data: {url: tags_campaign_path(@campaign.slug, format: :json)}, class: @course_labels.any? ? '' : 'hidden'}

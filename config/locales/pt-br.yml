@@ -557,6 +557,15 @@ pt-br:
     tags_cloud_title: Nuvem de Tags
     tags_summary_total_tags: tags
     tags_summary_total_courses: programas
+    tags_filter_title: Filtrar Programas por Tag
+    tags_filter_button: Filtrar por tag
+    tags_filter_loading: Carregando tags…
+    tags_filter_apply: Aplicar filtros
+    tags_filter_clear: Limpar
+    tags_filter_table_program: Programa
+    tags_filter_table_tags: Tags
+    tags_filter_table_loading: Carregando programas…
+    tags_filter_table_empty: Nenhum programa corresponde às tags selecionadas.
     tags_charts_title: Gráficos de Distribuição de Tags
     tags_charts_subtitle: Visualização de como as tags se relacionam com os programas desta campanha.
     tags_charts_loading: Carregando dados do gráfico…
@@ -1017,6 +1026,13 @@ pt-br:
     submitted_at: Enviado em
     tag_select: Selecione ou crie uma etiqueta
     tags: 'Etiquetas:'
+    tags_page_title: Tags do curso
+    tags_page_description: Tópicos e temas associados a este curso, vinculados às suas entradas no Wikidata.
+    tags_topic_index: Índice de tópicos
+    tags_count_label: tópicos
+    tags_total: "%{count} tópicos"
+    tags_no_description: Veja este tópico no Wikidata.
+    tags_manage: Gerenciar tópicos
     wikidata_labels: 'Tags Wikidata:'
     wikidata_label_search_placeholder: 'Buscar tags no Wikidata…'
     wikidata_label_add_aria_label: 'Adicionar tag Wikidata'

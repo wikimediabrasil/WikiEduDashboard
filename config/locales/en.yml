@@ -537,6 +537,15 @@ en:
     tags_cloud_programs_title: Program Tags
     tags_summary_total_tags: tags
     tags_summary_total_courses: courses
+    tags_filter_title: Filter Programs by Tag
+    tags_filter_button: Filter by tag
+    tags_filter_loading: Loading tags…
+    tags_filter_apply: Apply filters
+    tags_filter_clear: Clear
+    tags_filter_table_program: Program
+    tags_filter_table_tags: Tags
+    tags_filter_table_loading: Loading programs…
+    tags_filter_table_empty: No programs match the selected tags.
     tags_charts_title: Tag Distribution Charts
     tags_charts_subtitle: Visualisation of how tags relate to the programs in this campaign.
     tags_charts_loading: Loading chart data…
@@ -987,6 +996,11 @@ en:
     tags: "Tags:"
     tags_page_title: Course Tags
     tags_page_description: Topics and themes associated with this course, linked to their Wikidata entries.
+    tags_topic_index: Topic index
+    tags_count_label: topics
+    tags_total: "%{count} topics"
+    tags_no_description: View this topic on Wikidata.
+    tags_manage: Manage topics
     wikidata_labels: "Wikidata Tags:"
     wikidata_label_search_placeholder: "Search Wikidata tags…"
     wikidata_label_add_aria_label: "Add Wikidata tag"

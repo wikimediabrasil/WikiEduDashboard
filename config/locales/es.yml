@@ -517,6 +517,15 @@ es:
     tags_cloud_programs_title: Etiquetas de los programas
     tags_summary_total_tags: etiquetas
     tags_summary_total_courses: programas
+    tags_filter_title: Filtrar programas por etiqueta
+    tags_filter_button: Filtrar por etiqueta
+    tags_filter_loading: Cargando etiquetas…
+    tags_filter_apply: Aplicar filtros
+    tags_filter_clear: Limpiar
+    tags_filter_table_program: Programa
+    tags_filter_table_tags: Etiquetas
+    tags_filter_table_loading: Cargando programas…
+    tags_filter_table_empty: Ningún programa coincide con las etiquetas seleccionadas.
     tags_charts_title: Gráficos de distribución de etiquetas
     tags_charts_subtitle: Visualización de cómo se relacionan las etiquetas con los programas de esta campaña.
     tags_chart_tab_horizontal: Barras horizontales
@@ -987,6 +996,11 @@ es:
     tags: Etiquetas
     tags_page_title: Etiquetas del curso
     tags_page_description: Temas y conceptos asociados a este curso, enlazados a sus entradas de Wikidata.
+    tags_topic_index: Índice temático
+    tags_count_label: temas
+    tags_total: "%{count} temas"
+    tags_no_description: Consulta este tema en Wikidata.
+    tags_manage: Gestionar temas
     update_statistics_link: Ver más
     upload_count: Subidas a Commons
     uploads_in_use_count:

@@ -344,6 +344,232 @@ rating(color)
 
 // ── End Wikidata Label Editable ───────────────────────────────────────────────
 
+.course-tags-page
+  width 100%
+  max-width 1080px
+  padding 34px 0 48px
+
+.course-tags-header
+  display flex
+  align-items flex-end
+  justify-content space-between
+  gap 30px
+  padding 24px 28px
+  background white
+  border-top 5px solid sprout
+  border-bottom 1px solid border_lt
+
+  h3
+    color $text_dk
+    font-size 28px
+    font-weight 500
+    line-height 1.15
+    margin 5px 0 8px
+
+  p
+    color dove
+    font-size 14px
+    line-height 1.5
+    margin 0
+    max-width 650px
+
+  &__eyebrow
+    color sprout
+    font-size 11px
+    font-weight 700
+    letter-spacing 1.4px
+    text-transform uppercase
+
+  &__total
+    min-width 92px
+    padding-left 22px
+    border-left 1px solid border_lt
+    display flex
+    flex-direction column
+    align-items flex-end
+
+    strong
+      color $brand_primary
+      font-size 36px
+      font-weight 600
+      line-height 1
+
+    span
+      color dove
+      font-size 11px
+      letter-spacing 0.8px
+      margin-top 4px
+      text-transform uppercase
+
+.course-tags-index
+  background $bg_light_gray
+  border-bottom 1px solid border_lt
+  padding 0 28px 28px
+
+  &__heading
+    display flex
+    justify-content space-between
+    gap 20px
+    padding 13px 0
+    color dove
+    font-size 10px
+    font-weight 700
+    letter-spacing 1px
+    text-transform uppercase
+
+    span:last-child
+      max-width 60%
+      overflow hidden
+      text-overflow ellipsis
+      white-space nowrap
+
+.course-tags-gallery
+  display grid
+  grid-template-columns repeat(2, minmax(0, 1fr))
+  gap 1px
+  background border_lt
+  border 1px solid border_lt
+
+.course-tag-card
+  min-height 138px
+  display grid
+  grid-template-columns 36px minmax(0, 1fr) auto
+  gap 16px
+  padding 20px
+  background white
+  color $text_dk
+  text-decoration none
+  border-left 4px solid $brand_primary
+  transition background-color 0.15s ease, transform 0.15s ease
+
+  &:hover, &:focus
+    background lighten($brand_primary, 96%)
+    color $text_dk
+    outline none
+    transform translateY(-2px)
+
+    .course-tag-card__arrow
+      transform translate(2px, -2px)
+
+  &--2
+    border-left-color sprout
+
+    .course-tag-card__index
+      color sprout
+
+  &--3
+    border-left-color $action
+
+    .course-tag-card__index
+      color $action
+
+  &__index
+    color $brand_primary
+    font-size 12px
+    font-weight 700
+    letter-spacing 0.8px
+    padding-top 3px
+
+  &__content
+    display flex
+    flex-direction column
+    min-width 0
+
+  &__label
+    color $text_dk
+    font-size 18px
+    font-weight 600
+    line-height 1.25
+    overflow-wrap anywhere
+
+  &__description
+    color dove
+    display -webkit-box
+    font-size 12px
+    line-height 1.45
+    margin-top 9px
+    overflow hidden
+    -webkit-box-orient vertical
+    -webkit-line-clamp 3
+
+  &__meta
+    display flex
+    align-items flex-start
+    gap 8px
+
+  &__qid
+    color dove
+    background $bg_light_gray
+    border 1px solid border_lt
+    font-family monospace
+    font-size 10px
+    padding 3px 6px
+
+  &__arrow
+    color $brand_primary
+    font-size 16px
+    line-height 1
+    transition transform 0.15s ease
+
+.course-tags-empty
+  min-height 180px
+  display flex
+  align-items center
+  justify-content center
+  gap 14px
+  background white
+  border 1px solid border_lt
+  color dove
+
+  &__mark
+    color lighten($brand_primary, 35%)
+    font-size 42px
+    font-weight 300
+
+  p
+    margin 0
+
+.course-tags-admin
+  display flex
+  align-items center
+  gap 12px
+  padding 14px 28px
+  border-bottom 1px solid border_lt
+  background white
+  color dove
+  font-size 11px
+  font-weight 700
+  letter-spacing 0.8px
+  text-transform uppercase
+
+  .wikidata-labels
+    margin 0
+
+@media only screen and (max-width: 760px)
+  .course-tags-page
+    padding-top 20px
+
+  .course-tags-header
+    align-items flex-start
+    padding 20px
+
+    &__total
+      min-width 66px
+      padding-left 14px
+
+  .course-tags-index
+    padding 0 20px 20px
+
+  .course-tags-gallery
+    grid-template-columns 1fr
+
+  .course-tag-card
+    grid-template-columns 28px minmax(0, 1fr)
+
+    &__meta
+      grid-column 2
+      justify-content space-between
+
 // ── Wikidata tags in course creator ──────────────────────────────────────────
 
 .course-creator-wikidata-tags

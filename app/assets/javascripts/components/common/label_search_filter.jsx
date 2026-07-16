@@ -76,10 +76,10 @@ const LabelSearchFilter = ({ selectedTags, onChange, placeholder }) => {
             <button
               type="button"
               className="wikidata-tags-chip__remove"
-              aria-label={`Remove ${tag.label}`}
+              aria-label={`${I18n.t('assignments.remove')} ${tag.label}`}
               onClick={() => removeTag(tag.match)}
             >
-              ✕
+              {String.fromCharCode(215)}
             </button>
           </span>
         ))}
@@ -107,6 +107,7 @@ const LabelSearchFilter = ({ selectedTags, onChange, placeholder }) => {
           <li
             key={item.match}
             role="option"
+            aria-selected="false"
             className="wikidata-tags-option"
             onMouseDown={(event) => {
               event.preventDefault();

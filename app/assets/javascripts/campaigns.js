@@ -289,7 +289,7 @@ window.onload = () => {
   const initEditLabelsWidget = (detailsEl) => {
     const mountEl = detailsEl?.querySelector('.campaign-wikidata-tags-mount');
     if (mountEl) {
-      new WikidataTagsWidget(mountEl); // eslint-disable-line no-new
+      new WikidataTagsWidget(mountEl);
     }
   };
 

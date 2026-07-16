@@ -374,6 +374,171 @@ function buildPolarArea(canvasId, labelList) {
   return chart;
 }
 
+// ── Program filter table ──────────────────────────────────────────────────────
+//
+// Reuses the same labelList already fetched for the charts to let users
+// filter the campaign's programs by one or more tags via a checkbox dropdown.
+
+function renderFilterOptions(labelList) {
+  const container = document.getElementById('tags-filter-options');
+  if (!container) return;
+
+  container.innerHTML = '';
+  const sorted = [...labelList].sort((a, b) => b.course_count - a.course_count);
+
+  sorted.forEach((l) => {
+    const optionEl = document.createElement('label');
+    optionEl.className = 'campaign-tags-filter-option';
+
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.className = 'campaign-tags-filter-checkbox';
+    checkbox.value = l.match;
+    checkbox.dataset.label = l.label;
+
+    const nameEl = document.createElement('span');
+    nameEl.className = 'campaign-tags-filter-option__name';
+    nameEl.textContent = l.label;
+
+    const countEl = document.createElement('span');
+    countEl.className = 'campaign-tags-filter-option__count';
+    countEl.textContent = l.course_count;
+
+    optionEl.append(checkbox, nameEl, countEl);
+    container.appendChild(optionEl);
+  });
+}
+
+function renderFilterTable(courses) {
+  const tbody = document.getElementById('tags-filter-table-body');
+  if (!tbody) return;
+
+  tbody.innerHTML = '';
+
+  if (courses.length === 0) {
+    const tr = document.createElement('tr');
+    tr.className = 'campaign-tags-filter-table-empty';
+    const td = document.createElement('td');
+    td.colSpan = 2;
+    td.textContent = I18n.t('campaign.tags_filter_table_empty');
+    tr.appendChild(td);
+    tbody.appendChild(tr);
+    return;
+  }
+
+  courses.forEach((course) => {
+    const tr = document.createElement('tr');
+
+    const nameTd = document.createElement('td');
+    const link = document.createElement('a');
+    link.href = `/courses/${course.slug}`;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.textContent = course.title;
+    nameTd.appendChild(link);
+
+    const tagsTd = document.createElement('td');
+    tagsTd.className = 'campaign-tags-filter-table-tags';
+    course.tags.forEach((t) => {
+      const chip = document.createElement('span');
+      chip.className = 'campaign-tags-filter-chip';
+
+      if (t.url) {
+        const link = document.createElement('a');
+        link.href = t.url;
+        link.target = '_blank';
+        link.rel = 'noopener';
+        link.textContent = t.label;
+        chip.appendChild(link);
+      } else {
+        chip.textContent = t.label;
+      }
+
+      tagsTd.appendChild(chip);
+    });
+
+    tr.append(nameTd, tagsTd);
+    tbody.appendChild(tr);
+  });
+}
+
+function updateFilterCount(selectedCount) {
+  const countEl = document.getElementById('tags-filter-count');
+  if (!countEl) return;
+  countEl.textContent = selectedCount > 0 ? selectedCount : '';
+  countEl.classList.toggle('visible', selectedCount > 0);
+}
+
+function applyFilter(allCourses) {
+  const checkboxes = document.querySelectorAll('.campaign-tags-filter-checkbox:checked');
+  const selectedMatches = new Set([...checkboxes].map(cb => cb.value));
+  updateFilterCount(selectedMatches.size);
+
+  const filtered = selectedMatches.size === 0
+    ? allCourses
+    : allCourses.filter(course => course.tags.some(t => selectedMatches.has(t.match)));
+
+  renderFilterTable(filtered);
+}
+
+function initTagFilterTable(labelList) {
+  const panel = document.getElementById('tags-filter-panel');
+  const toggle = document.getElementById('tags-filter-toggle');
+  if (!panel || !toggle) return;
+
+  const courseMap = {};
+  labelList.forEach((l) => {
+    (l.courses || []).forEach((c) => {
+      if (!courseMap[c.slug]) courseMap[c.slug] = { title: c.title, slug: c.slug, tags: [] };
+      courseMap[c.slug].tags.push({
+        label: l.label,
+        match: l.match,
+        url: l.url || (l.match ? `https://www.wikidata.org/wiki/${l.match}` : ''),
+      });
+    });
+  });
+  const allCourses = Object.values(courseMap).sort((a, b) => a.title.localeCompare(b.title));
+
+  renderFilterOptions(labelList);
+  renderFilterTable(allCourses);
+
+  const closePanel = () => {
+    panel.hidden = true;
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.classList.remove('active');
+  };
+
+  toggle.addEventListener('click', () => {
+    const isOpen = !panel.hidden;
+    panel.hidden = isOpen;
+    toggle.setAttribute('aria-expanded', String(!isOpen));
+    toggle.classList.toggle('active', !isOpen);
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!panel.hidden && !panel.contains(e.target) && !toggle.contains(e.target)) {
+      closePanel();
+    }
+  });
+
+  const applyBtn = document.getElementById('tags-filter-apply');
+  if (applyBtn) {
+    applyBtn.addEventListener('click', () => {
+      applyFilter(allCourses);
+      closePanel();
+    });
+  }
+
+  const clearBtn = document.getElementById('tags-filter-clear');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      document.querySelectorAll('.campaign-tags-filter-checkbox').forEach((cb) => { cb.checked = false; });
+      updateFilterCount(0);
+      renderFilterTable(allCourses);
+    });
+  }
+}
+
 // ── Chart switcher tabs ───────────────────────────────────────────────────────
 
 function initChartTabs() {
@@ -414,6 +579,8 @@ function initTagCharts() {
 
       const labelList = data.labels || [];
 
+      initTagFilterTable(labelList);
+
       if (labelList.length === 0) {
         const emptyEl = document.createElement('p');
         emptyEl.className = 'tags-charts-empty';
@@ -451,6 +618,17 @@ function initTagCharts() {
     .catch((err) => {
       console.error('[campaign_tags] fetch failed:', err);
       if (noDataMsg) noDataMsg.textContent = I18n.t('campaign.tags_charts_error');
+      const filterTbody = document.getElementById('tags-filter-table-body');
+      if (filterTbody) {
+        filterTbody.innerHTML = '';
+        const tr = document.createElement('tr');
+        tr.className = 'campaign-tags-filter-table-empty';
+        const td = document.createElement('td');
+        td.colSpan = 2;
+        td.textContent = I18n.t('campaign.tags_charts_error');
+        tr.appendChild(td);
+        filterTbody.appendChild(tr);
+      }
     });
 }
 

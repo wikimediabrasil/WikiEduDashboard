@@ -346,7 +346,7 @@ class CampaignsController < ApplicationController
     {
       campaign:      { slug: @campaign.slug, title: @campaign.title },
       total_courses: @campaign.courses.count,
-      total_labels:  labels.count,
+      total_labels:  @labels.count,
       labels:        labels.map { |l| label_stat(l, translations) }
     }
   end
