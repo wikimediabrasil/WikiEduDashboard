@@ -38,6 +38,7 @@ import validations from './validations';
 import wikidataLabels from './wikidata_labels';
 import wizard from './wizard';
 import course_search_results from './course_search_results';
+import downloads from './downloads';
 import active_courses from './active_courses';
 import wiki_courses from './wiki_courses';
 import refreshing from './refreshing';
@@ -67,6 +68,7 @@ const reducer = combineReducers({
   adminCourseNotes,
   course_search_results,
   currentUserFromHtml: (state = {}) => state, // only set from preloaded state
+  downloads,
   exercises,
   feedback,
   instructorAlert,

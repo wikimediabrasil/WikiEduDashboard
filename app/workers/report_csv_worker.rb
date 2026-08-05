@@ -1,4 +1,6 @@
 # frozen_string_literal: true
+
+require 'zip'
 require_dependency "#{Rails.root}/lib/analytics/campaign_csv_builder"
 require_dependency "#{Rails.root}/lib/analytics/course_csv_builder"
 require_dependency "#{Rails.root}/lib/analytics/course_uploads_csv_builder"
@@ -21,16 +23,21 @@ class ReportCsvWorker
   end
 
   def perform(id, filename, type, include_course)
-    data =
-      if type == 'all_courses_and_instructors'
-        all_courses_and_instructors_csv
-      elsif course_report?(type)
-        to_course_csv(type, id)
-      else
-        to_campaign_csv(type, id, include_course)
-      end
+    if type == 'campaign_all'
+      write_file(filename, to_campaign_zip(id))
+    else
+      data =
+        if type == 'all_courses_and_instructors'
+          all_courses_and_instructors_csv
+        elsif course_report?(type)
+          to_course_csv(type, id)
+        else
+          to_campaign_csv(type, id, include_course)
+        end
 
-    write_csv(filename, data)
+      write_csv(filename, data)
+    end
+
     CsvCleanupWorker.perform_at(1.week.from_now, filename)
   end
 
@@ -50,6 +57,25 @@ class ReportCsvWorker
     when 'campaign_wikidata'
       builder.wikidata_to_csv
     end
+  end
+
+  def to_campaign_zip(campaign_id)
+    campaign = Campaign.find(campaign_id)
+    builder = CampaignCsvBuilder.new(campaign)
+    csv_files = {
+      'students.csv' => campaign.users_to_csv(:students),
+      'students-by-course.csv' => campaign.users_to_csv(:students, course: true),
+      'instructors-by-course.csv' => campaign.users_to_csv(:instructors, course: true),
+      'courses.csv' => builder.courses_to_csv,
+      'pages-edited.csv' => builder.articles_to_csv
+    }
+
+    Zip::OutputStream.write_buffer do |zip|
+      csv_files.each do |filename, data|
+        zip.put_next_entry(filename)
+        zip.write(data)
+      end
+    end.string
   end
 
   def to_course_csv(type, course_id)
@@ -77,8 +103,12 @@ class ReportCsvWorker
   private
 
   def write_csv(filename, data)
+    write_file(filename, data)
+  end
+
+  def write_file(filename, data)
     FileUtils.mkdir_p "public#{ReportsController::CSV_PATH}"
-    File.write "public#{ReportsController::CSV_PATH}/#{filename}", data
+    File.binwrite "public#{ReportsController::CSV_PATH}/#{filename}", data
   end
 
   def course_report?(type)
