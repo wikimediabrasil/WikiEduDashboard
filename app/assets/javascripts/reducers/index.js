@@ -19,6 +19,7 @@ import newAccount from './new_account';
 import notifications from './notifications';
 import persistedCourse from './persisted_course';
 import recentUploads from './recent_uploads';
+import revisionAcceptances from './revision_acceptances';
 import revisions from './revisions';
 import settings from './settings';
 import tags from './tags';
@@ -79,6 +80,7 @@ const reducer = combineReducers({
   persistedNews,
   recentUploads,
   refreshing,
+  revisionAcceptances,
   revisions,
   settings,
   tags,

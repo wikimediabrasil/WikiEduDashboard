@@ -10,11 +10,12 @@ import StudentRevisionRow from './StudentRevisionRow';
 import CourseUtils from '~/app/assets/javascripts/utils/course_utils.js';
 import ArticleUtils from '~/app/assets/javascripts/utils/article_utils.js';
 import studentListKeys from '@components/students/shared/StudentList/student_list_keys.js';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { fetchUserRevisions } from '@actions/user_revisions_actions';
 
-export const StudentRevisionsList = ({ course, student, wikidataLabels, userRevisions }) => {
+export const StudentRevisionsList = ({ course, current_user, student, wikidataLabels, userRevisions }) => {
   const dispatch = useDispatch();
+  const revisionAcceptances = useSelector(state => state.revisionAcceptances);
   const [isOpen, setIsOpen] = useState(false);
   const [namespace, setNamespace] = useState('all');
 
@@ -43,7 +44,10 @@ export const StudentRevisionsList = ({ course, student, wikidataLabels, userRevi
   };
 
 
-  if (!userRevisions[student.id]) dispatch(fetchUserRevisions(course, student));
+  // Dispatch fetch on render if not yet in store.
+  // The action itself guards against duplicate fetches via getState() check.
+  if (!userRevisions[student.username]) dispatch(fetchUserRevisions(course, student));
+
   const filteredRevisions = getfilteredRevisions();
   const uploadsLink = `/courses/${course.slug}/uploads`;
   const elements = [
@@ -54,11 +58,14 @@ export const StudentRevisionsList = ({ course, student, wikidataLabels, userRevi
       toggleDrawer={toggleDrawer}
       student={student}
       uploadsLink={uploadsLink}
+      userRevisions={userRevisions}
+      revisionAcceptances={revisionAcceptances}
     />,
     <StudentDrawer
       key={`${student.id}-drawer`}
       student={student}
       course={course}
+      current_user={current_user}
       exerciseView={true}
       isOpen={isOpen}
       revisions={filteredRevisions}
@@ -67,9 +74,9 @@ export const StudentRevisionsList = ({ course, student, wikidataLabels, userRevi
   ];
 
   const {
-    recent_revisions, character_sum_ms, references_count, total_uploads
+    recent_revisions, character_sum_ms, references_count, total_uploads, review_status
   } = studentListKeys(course);
-  const keys = { recent_revisions, character_sum_ms, references_count, total_uploads };
+  const keys = { recent_revisions, character_sum_ms, references_count, total_uploads, review_status };
 
   const filterLabel = <b>Namespace Filter:</b>;
   const filterRevisions = (

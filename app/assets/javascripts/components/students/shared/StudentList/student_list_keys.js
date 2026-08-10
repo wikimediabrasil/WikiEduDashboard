@@ -53,6 +53,12 @@ const studentListKeys = (course) => {
       desktop_only: true,
       sortable: true,
       info_key: 'users.uploads_doc'
+    },
+    review_status: {
+      label: I18n.t('revisions.review_status'),
+      desktop_only: true,
+      sortable: false,
+      info_key: 'revisions.admin_status_doc'
     }
   };
 };

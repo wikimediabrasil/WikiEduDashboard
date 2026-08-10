@@ -283,18 +283,20 @@ en:
     view_on_wiki: View on wiki
     # This is a maintence script message
     views_added: "Added %{count} new views for %{title}"
+    article_size: Article Size
+    article_size_doc: Size of the article's wikitext (in bytes) after each edit
     edit_size: Edit Size
+    editor_other: Other editors
+    scoring_status: "Fetching scores for %{count} edits"
     wiki: Wiki
     wp10: Structural Completeness
     wp10_doc: >
       The 'Structural Completeness' score represents how closely an article fits
-      the mold of a mature Wikipedia article, based on the machine learning-based
-      Objective Revision Evaluation Service (https://ores.wikimedia.org/). These
-      scores are calculated based on the size of an article, the number of
-      references and wikilinks, and other basic text features. A high score
-      usually indicates that an article follow Wikipedia's conventions for the
-      structure of a good article, but it does not take into account the content
-      itself. (These scores are only available for English Wikipedia articles.)
+      the mold of a mature Wikipedia article, based on the legacy (~2015) machine learning-based
+      "Objective Revision Evaluation Service". These scores are calculated based on the size
+      of an article, the number of references and wikilinks, and other basic text features.
+      A high score usually indicates that an article follow Wikipedia's conventions for the
+      structure of a good article, but it does not take into account the content itself.
     articles_short: Articles
     deleted_message: >
       According to the Dashboard's data, this page has been deleted. (In some cases, page moves, history merges or other actions can result in an article being incorrectly listed as deleted. Deleted articles may also be later undeleted. For articles that are not actually deleted, or have been subsequently restored, the Dashboard will usually reflect this within one or two days.)
@@ -1374,7 +1376,38 @@ en:
     see_more: See more
     show_all: Show All
     show_course_specific: Show Course Specific
+    course_ended_notification: "This shows recent edits by enrolled users, but any edits after the 'end date' are not counted toward the stats or reflected on the Articles tab. You can use the 'Show Course Specific' filter to limit the view to activity that occurred before the end date."
     show_only_new_editors: Show Only New Editors
+    status: Status
+    status_doc: "Shows the status of student contributions (accepted, reverted, or pending by the community)"
+    admin_status: "Instructor Review"
+    admin_status_doc: "Shows the review status of student contributions by the course instructor or administrator."
+    status_accepted: Accepted
+    status_accepted_tooltip: "This edit has been accepted by the community (not reverted)"
+    status_reverted: Reverted
+    status_reverted_tooltip: "This edit was reverted by another editor"
+    status_pending: Pending
+    status_pending_tooltip: "This edit is recent and may still be reviewed by the community"
+    status_under_review: In review
+    status_under_review_tooltip: "Some contributions are still pending instructor review"
+    status_reviewed: Fully reviewed
+    status_reviewed_tooltip: "All contributions have been reviewed by the course instructor"
+    validate: Validate
+    invalidate: Invalidate
+    review_status: Review Status
+    reviewed: Reviewed
+    pending: Pending
+    evaluation: Evaluation
+    evaluation_validated: Validated
+    evaluation_invalidated: Invalidated
+    evaluation_pending_review: Pending review
+    clear_validation: Clear validation
+    acceptance_rate_tooltip: "Percentage of resolved edits accepted by the community (not counting pending edits)"
+    review_per_revision_hint: "Click to review revisions individually"
+    community_status: Community status
+    page_previous: Previous page
+    page_next: Next page
+    page_of: "Page %{current} of %{total}"
 
   resources:
     label: Resources
@@ -1867,6 +1900,7 @@ en:
 
   error:
     form_errors: Please check the form for errors.
+    review_save_failed: "The review could not be saved. Please check your connection and try again."
     invalid_assignment: Invalid assignment
     invalid_date: "%{key} date is invalid"
     invalid_file_format: The file could not be saved. Please upload a PDF or Word document.

@@ -1,4 +1,5 @@
 import { RECEIVE_USERS, SORT_USERS, ADD_USER, REMOVE_USER } from '../constants';
+import { ACCEPT_STUDENT, UNACCEPT_STUDENT } from '../constants/users';
 import { sortByKey, transformUsers } from '../utils/model_utils';
 
 const initialState = {
@@ -65,6 +66,26 @@ export default function users(state = initialState, action) {
         }
       };
     }
+
+    case ACCEPT_STUDENT:
+      return {
+        ...state,
+        users: state.users.map(user =>
+          user.courses_user_id === action.coursesUserId
+            ? { ...user, accepted_by_id: action.accepted_by_id, accepted_at: action.accepted_at }
+            : user
+        )
+      };
+
+    case UNACCEPT_STUDENT:
+      return {
+        ...state,
+        users: state.users.map(user =>
+          user.courses_user_id === action.coursesUserId
+            ? { ...user, accepted_by_id: null, accepted_at: null }
+            : user
+        )
+      };
 
     default:
       return state;

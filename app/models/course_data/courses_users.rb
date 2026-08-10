@@ -25,6 +25,8 @@
 class CoursesUsers < ApplicationRecord
   belongs_to :course
   belongs_to :user
+  belongs_to :accepted_by, class_name: 'User', optional: true,
+                            foreign_key: :accepted_by_id
   before_destroy :cleanup
 
   has_many :assignments, ->(ac) { where(course_id: ac.course_id) },
@@ -116,6 +118,18 @@ class CoursesUsers < ApplicationRecord
     assignments = user.assignments.where(course_id:)
     self.assigned_article_title = assignments.empty? ? '' : assignments.first.article_title
     save
+  end
+
+  def accept!(reviewer)
+    update!(accepted_by: reviewer, accepted_at: Time.zone.now)
+  end
+
+  def unaccept!
+    update!(accepted_by: nil, accepted_at: nil)
+  end
+
+  def accepted?
+    accepted_by_id.present?
   end
 
   ##################
