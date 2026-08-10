@@ -270,7 +270,7 @@ window.onload = () => {
     }
   };
 
-  let wikidataWidget = null;
+  let editLabelsWidget = null;
 
   const initWikidataWidget = () => {
     const mountEl = document.querySelector('.create-modal-wrapper .campaign-wikidata-tags-mount');
@@ -284,12 +284,13 @@ window.onload = () => {
     if (mountEl) {
       mountEl.innerHTML = '';
     }
+    editLabelsWidget = null;
   };
 
   const initEditLabelsWidget = (detailsEl) => {
     const mountEl = detailsEl?.querySelector('.campaign-wikidata-tags-mount');
     if (mountEl) {
-      new WikidataTagsWidget(mountEl); // eslint-disable-line no-new
+      editLabelsWidget = new WikidataTagsWidget(mountEl);
     }
   };
 

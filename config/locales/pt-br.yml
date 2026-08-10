@@ -548,6 +548,7 @@ pt-br:
     slug: URL semântico
     search_campaigns: Pesquisar campanhas
     use_start_end_dates: Use datas de início e término
+    wikidata_tags: Tags do Wikidata
     search: Pesquisar
     tags: Tags
     tags_page_title: Tags da Campanha

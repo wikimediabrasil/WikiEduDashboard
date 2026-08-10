@@ -12,6 +12,7 @@ module CampaignHelper
     labels = campaign_or_labels.is_a?(Campaign) ? campaign_or_labels.labels : campaign_or_labels
     @label_translations = WikidataLabelService.translations_for(labels)
   end
+  end
 
   def nav_link(link_text, link_path)
     class_name = current_page?(link_path) ? 'active' : ''

@@ -20,7 +20,6 @@ class Label < ApplicationRecord
 
   has_many :courses_labels, class_name: 'CoursesLabels', dependent: :destroy
   has_many :courses, through: :courses_labels
-
   validates :labels, presence: true
   validates :url, presence: true
 

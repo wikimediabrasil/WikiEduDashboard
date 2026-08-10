@@ -36,8 +36,7 @@ class LabelsController < ApplicationController
         format.html { redirect_to label_path(@label), notice: 'Label was successfully created.' }
         format.json { render json: @label, status: :created }
       else
-        format.html {
- render plain: @label.errors.full_messages.join(', '), status: :unprocessable_entity }
+        format.html { render plain: @label.errors.full_messages.join(', '), status: :unprocessable_entity }
         format.json { render json: @label.errors, status: :unprocessable_entity }
       end
     end
@@ -53,8 +52,7 @@ class LabelsController < ApplicationController
         format.html { redirect_to label_path(@label), notice: 'Label was successfully updated.' }
         format.json { render json: @label, status: :ok }
       else
-        format.html {
- render plain: @label.errors.full_messages.join(', '), status: :unprocessable_entity }
+        format.html { render plain: @label.errors.full_messages.join(', '), status: :unprocessable_entity }
         format.json { render json: @label.errors, status: :unprocessable_entity }
       end
     end

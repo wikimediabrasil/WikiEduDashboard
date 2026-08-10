@@ -233,7 +233,7 @@ class CampaignsController < ApplicationController
     user_only = params[:user_only]
     newest = params[:newest]
     # rubocop:disable Layout/LineLength
-    @campaigns = user_only == 'true' ? current_user.campaigns : Campaign.all.order(created_at: :desc)
+    @campaigns = user_only == 'true' ? current_user.campaigns.includes(:labels) : Campaign.includes(:labels).all.order(created_at: :desc)
     # rubocop:enable Layout/LineLength
     @campaigns = @campaigns.limit(10) if newest == 'true'
     render user_only == 'true' ? 'user_statistics' : 'statistics'
@@ -295,7 +295,7 @@ class CampaignsController < ApplicationController
   end
 
   def set_campaign
-    @campaign = Campaign.find_by(slug: params[:slug])
+    @campaign = Campaign.includes(:labels).find_by(slug: params[:slug])
     return if @campaign
     raise ActionController::RoutingError.new('Not Found'), 'Campaign does not exist'
   end
