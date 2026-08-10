@@ -54,6 +54,11 @@ const CampaignNavbar = ({ campaign }) => {
             <div className="nav__item">
               <p><NavLink to={`/campaigns/${campaign.slug}/alerts`}>{I18n.t('courses.alerts')}</NavLink></p>
             </div>
+            <div className={`nav__item ${currentTab === 'tags' ? 'active' : ''}`} id="tags-link">
+              <p>
+                <a href={`/campaigns/${campaign.slug}/tags`}>{I18n.t('campaign.tags')}</a>
+              </p>
+            </div>
             <div className="campaign-nav__search" >
               <form action={`/campaigns/${campaign.slug}/programs`} acceptCharset="UTF-8" method="get">
                 <input
