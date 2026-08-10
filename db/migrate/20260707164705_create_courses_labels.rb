@@ -2,6 +2,8 @@
 
 class CreateCoursesLabels < ActiveRecord::Migration[8.1]
   def change
+    return if table_exists?(:courses_labels)
+
     create_table :courses_labels do |t|
       t.integer :course_id
       t.integer :label_id
