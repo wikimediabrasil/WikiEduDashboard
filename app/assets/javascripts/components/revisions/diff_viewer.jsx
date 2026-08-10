@@ -28,7 +28,12 @@ const DiffViewer = createReactClass({
     setSelectedIndex: PropTypes.func,
     lastIndex: PropTypes.number,
     selectedIndex: PropTypes.number,
-    articleTitle: PropTypes.string
+    articleTitle: PropTypes.string,
+    acceptance: PropTypes.object,
+    canAccept: PropTypes.bool,
+    onAccept: PropTypes.func,
+    onUnaccept: PropTypes.func,
+    onClear: PropTypes.func
   },
 
   getInitialState() {
@@ -129,6 +134,12 @@ const DiffViewer = createReactClass({
   },
 
   wikiUrl(revision) {
+    // Files (File: namespace) are hosted on Wikimedia Commons regardless of the
+    // course wiki. Querying the diff from the course wiki returns "not available".
+    const title = revision.title || this.props.articleTitle || '';
+    if (/^File:/i.test(title)) {
+      return 'https://commons.wikimedia.org';
+    }
     return `https://${toWikiDomain(revision.wiki || this.props.article)}`;
   },
 
@@ -201,11 +212,8 @@ const DiffViewer = createReactClass({
       return null;
     }
     return (
-      <button
-        onClick={this.showPreviousArticle}
-        className="button pull-right dark small"
-      >
-        {I18n.t('articles.previous')}
+      <button onClick={this.showPreviousArticle} className="button dark small">
+        ← {I18n.t('articles.previous')}
       </button>
     );
   },
@@ -215,7 +223,9 @@ const DiffViewer = createReactClass({
       return null;
     }
     return (
-      <button onClick={this.showNextArticle} className="pull-right margin button dark small">{I18n.t('articles.next')}</button>
+      <button onClick={this.showNextArticle} className="button dark small">
+        {I18n.t('articles.next')} →
+      </button>
     );
   },
 
@@ -310,13 +320,45 @@ const DiffViewer = createReactClass({
         <div className={className}>
           <div className="diff-viewer-header">
             <a className="button dark small" href={wikiDiffUrl} target="_blank">{I18n.t('revisions.view_on_wiki')}</a>
+            {this.props.canAccept && (() => {
+              const status = this.props.acceptance?.status;
+              const isAccepted = status === 'validated';
+              const isInvalidated = status === 'invalidated';
+              const hasReview = isAccepted || isInvalidated;
+              return (
+                <span className="diff-viewer-review-actions">
+                  <button
+                    className={`cdx-btn cdx-btn--progressive${isAccepted ? ' cdx-btn--active' : ''}`}
+                    onClick={() => { this.props.onAccept(); this.hideDiff(); }}
+                    disabled={isAccepted}
+                  >
+                    {I18n.t('revisions.validate')}
+                  </button>
+                  <button
+                    className={`cdx-btn cdx-btn--destructive${isInvalidated ? ' cdx-btn--active' : ''}`}
+                    onClick={() => { this.props.onUnaccept(); this.hideDiff(); }}
+                    disabled={isInvalidated}
+                  >
+                    {I18n.t('revisions.invalidate')}
+                  </button>
+                  {hasReview && this.props.onClear && (
+                    <button
+                      className="cdx-btn cdx-btn--neutral"
+                      onClick={() => { this.props.onClear(); this.hideDiff(); }}
+                    >
+                      {I18n.t('revisions.clear_validation')}
+                    </button>
+                  )}
+                </span>
+              );
+            })()}
             <button onClick={this.hideDiff} aria-label="Close Diff Viewer" className="pull-right icon-close"/>
           </div>
-          <div className="diff-viewer-header">
-            {this.nextArticle()}
-            {this.previousArticle()}
+          <div className="diff-viewer-nav">
+            <div className="diff-viewer-nav__prev">{this.previousArticle()}</div>
+            <div className="diff-viewer-nav__title">{this.props.articleTitle}</div>
+            <div className="diff-viewer-nav__next">{this.nextArticle()}</div>
           </div>
-          <h4>{this.articleDetails()}</h4>
           <div className="diff-viewer-scrollbox-container">
             <div className="diff-viewer-scrollbox">
               <strong>{salesforceButtons}</strong>

@@ -1494,6 +1494,36 @@ en:
     show_course_specific: Show Course Specific
     course_ended_notification: "This shows recent edits by enrolled users, but any edits after the 'end date' are not counted toward the stats or reflected on the Articles tab. You can use the 'Show Course Specific' filter to limit the view to activity that occurred before the end date."
     show_only_new_editors: Show Only New Editors
+    status: Status
+    status_doc: "Shows the status of student contributions (accepted, reverted, or pending by the community)"
+    admin_status: "Instructor Review"
+    admin_status_doc: "Shows the review status of student contributions by the course instructor or administrator."
+    status_accepted: Accepted
+    status_accepted_tooltip: "This edit has been accepted by the community (not reverted)"
+    status_reverted: Reverted
+    status_reverted_tooltip: "This edit was reverted by another editor"
+    status_pending: Pending
+    status_pending_tooltip: "This edit is recent and may still be reviewed by the community"
+    status_under_review: In review
+    status_under_review_tooltip: "Some contributions are still pending instructor review"
+    status_reviewed: Fully reviewed
+    status_reviewed_tooltip: "All contributions have been reviewed by the course instructor"
+    validate: Validate
+    invalidate: Invalidate
+    review_status: Review Status
+    reviewed: Reviewed
+    pending: Pending
+    evaluation: Evaluation
+    evaluation_validated: Validated
+    evaluation_invalidated: Invalidated
+    evaluation_pending_review: Pending review
+    clear_validation: Clear validation
+    acceptance_rate_tooltip: "Percentage of resolved edits accepted by the community (not counting pending edits)"
+    review_per_revision_hint: "Click to review revisions individually"
+    community_status: Community status
+    page_previous: Previous page
+    page_next: Next page
+    page_of: "Page %{current} of %{total}"
 
   resources:
     label: Resources
@@ -2115,6 +2145,7 @@ en:
 
   error:
     form_errors: Please check the form for errors.
+    review_save_failed: "The review could not be saved. Please check your connection and try again."
     invalid_assignment: Invalid assignment
     invalid_date: "%{key} date is invalid"
     invalid_file_format: The file could not be saved. Please upload a PDF or Word document.

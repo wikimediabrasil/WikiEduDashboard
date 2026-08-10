@@ -23,7 +23,7 @@ const showRecent = (course) => {
   return isAfter(addDays(toDate(lastUpdate.end_time), 7), new Date());
 };
 
-export const StudentList = ({ assignments, course, current_user, editAssignments, students, sortUsers = {} }) => {
+export const StudentList = ({ assignments, course, current_user, editAssignments, students, sortUsers = {}, revisionAcceptances, userRevisions }) => {
   const sort = useSelector(state => state.users.sort);
 
   const rows = students.map(student => (
@@ -35,6 +35,8 @@ export const StudentList = ({ assignments, course, current_user, editAssignments
       key={student.id}
       showRecent={showRecent(course)}
       student={student}
+      revisionAcceptances={revisionAcceptances}
+      userRevisions={userRevisions}
     />
   ));
 
@@ -69,6 +71,8 @@ StudentList.propTypes = {
   current_user: PropTypes.object.isRequired,
   editAssignments: PropTypes.bool,
   sortUsers: PropTypes.func,
+  revisionAcceptances: PropTypes.object,
+  userRevisions: PropTypes.object,
 };
 
 export default StudentList;

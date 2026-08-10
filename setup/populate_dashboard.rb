@@ -70,7 +70,6 @@ def populate_dashboard
     'https://dashboard.wikiedu.org/courses/American_University_of_Armenia/Sophomore_Writing_II_(Spring_2026)/',
     'https://dashboard.wikiedu.org/courses/University_of_North_Carolina_at_Greensboro/ARH_372_African_Art_-_Modern_to_Contemporary_(Spring_2026)/',
     'https://dashboard.wikiedu.org/courses/University_of_Wisconsin-_Whitewater/Foundations_of_Professional_Writing_(Spring_2026)/',
-    'https://dashboard.wikiedu.org/courses/American_University_of_Armenia/Sophomore_Writing_II_(Spring_2026)/',
     'https://dashboard.wikiedu.org/courses/California_State_University_Monterey_Bay/Biochemistry_I_(Spring_2026)/',
     'https://dashboard.wikiedu.org/courses/Montclair_State_Univ/Humanities_2_HYBRID_(Spring_2026)/',
     'https://dashboard.wikiedu.org/courses/UNC_Pembroke/Writing_in_Digital_Environments_(Spring_2026)/',
@@ -83,17 +82,16 @@ def populate_dashboard
     'https://dashboard.wikiedu.org/courses/University_of_California_Santa_Cruz/Systematic_Botany_of_Flowering_Plants_(Winter_2026)',
     'https://dashboard.wikiedu.org/courses/University_of_Maryland/Slavery_in_Latin_America_(Spring_2026)',
     'https://dashboard.wikiedu.org/courses/University_of_Washington/Geographies_of_Energy_and_Sustainability_(Winter_2026)',
-    'https://dashboard.wikiedu.org/courses/University_of_Washington/Geographies_of_Energy_and_Sustainability_(Winter_2026)',
     'https://dashboard.wikiedu.org/courses/College_of_Wooster/Modern_Brazil_(Spring_2025)',
-    'https://dashboard.wikiedu.org/courses/Iowa_State_University/Micro_3020H_Biology_of_Microorganisms_(Spring_2026)', 
+    'https://dashboard.wikiedu.org/courses/Iowa_State_University/Micro_3020H_Biology_of_Microorganisms_(Spring_2026)',
     'https://dashboard.wikiedu.org/courses/Western_Michigan_University_Homer_Stryker_MD_School_of_Medicine/MEDU_9320-WikiProject_Medical_Translation-Spanish_(April_6,_2026)',
     'https://dashboard.wikiedu.org/courses/UCSB/Holocaust_and_other_genocides_in_European_history_(Winter_2026)',
-    
-
-
-
-
-
+    'https://outreachdashboard.wmflabs.org/courses/WMCO/Hidropoeticas_Ambientales_-_Hacerwiki_2026-1',
+    'https://outreachdashboard.wmflabs.org/campaigns/universidade_federal_de_s%C3%A3o_paulo/programs',
+    'https://outreachdashboard.wmflabs.org/courses/Universidade_Federal_de_S%C3%A3o_Paulo,_EFLCH,_Departamento_de_Hist%C3%B3ria/Hist%C3%B3ria_Moderna_I',
+    'https://outreachdashboard.wmflabs.org/courses/UNIFESP/Oficina_de_Literatura_Infantil',
+    'https://outreachdashboard.wmflabs.org/courses/UNIFESP/Oficina_Hist%C3%B3ria_do_Brasil_Contempor%C3%A2neo',
+    'https://outreachdashboard.wmflabs.org/courses/UNIFESP/Sess%C3%A3o_Comunit%C3%A1ria_Projeto_LER_UNIFESP'
   ]
 
   example_courses.each do |url|

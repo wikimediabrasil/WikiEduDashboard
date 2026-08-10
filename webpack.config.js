@@ -34,6 +34,7 @@ module.exports = (env) => {
     campaigns: [`${jsSource}/campaigns.js`],
     campaigns_programs: [`${jsSource}/campaigns_programs.js`],
     campaign_tags: [`${jsSource}/campaign_tags.js`],
+    campaigns_articles: [`${jsSource}/campaigns_articles.js`],
     charts: [`${jsSource}/charts.js`],
     accordian: [`${jsSource}/accordian.js`],
     editable: [`${jsSource}/utils/editable.js`],
