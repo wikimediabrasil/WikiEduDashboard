@@ -2487,4 +2487,6 @@ nl:
     advanced_search: Uitgebreid zoeken
     clear: Wissen
     program_date: Programmadatum
+    from: "Van"
+    to: "Tot"
 ...

@@ -1010,6 +1010,8 @@ qqq:
     advanced_search: Label for advanced search toggle
     clear: Label for clear search button
     program_date: Label for program date
+    from: Label for from date in date range filter
+    to: Label for to date in date range filter
   user_profiles:
     detailed_impact: Heading for the detailed impact section of a user's profile
     words_added_per_article: Heading for the per-article breakdown of words added

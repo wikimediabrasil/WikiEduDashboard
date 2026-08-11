@@ -28,15 +28,17 @@
               .school-select-wrapper.grid-span-3
                 = select_tag 'school[]', options_for_select(@presenter.school_options, params[:school]), multiple: true, id: 'school_select'
             .form-row.advanced-search-grid-small
-              %label{for: 'creation_date_range'}= t("courses.creation_date")
-              = text_field_tag :creation_date_range, nil, id: 'creation_date_range', class: 'w100', placeholder: t('courses.creation_date')
-              = hidden_field_tag :creation_start, params[:creation_start], id: 'creation_start'
-              = hidden_field_tag :creation_end, params[:creation_end], id: 'creation_end'
+              %label= t("courses.creation_date")
+              .flex-input-group
+                = text_field_tag :creation_start, params[:creation_start], id: 'creation_start', class: 'form-control input-sm', placeholder: t('form_search.from')
+                %span -
+                = text_field_tag :creation_end, params[:creation_end], id: 'creation_end', class: 'form-control input-sm', placeholder: t('form_search.to')
             .form-row.advanced-search-grid-small
-              %label{for: 'start_date_range'}= t("form_search.program_date")
-              = text_field_tag :start_date_range, nil, id: 'start_date_range', class: 'w100', placeholder: t('form_search.program_date')
-              = hidden_field_tag :start_date_start, params[:start_date_start], id: 'start_date_start'
-              = hidden_field_tag :start_date_end, params[:start_date_end], id: 'start_date_end'
+              %label= t("form_search.program_date")
+              .flex-input-group
+                = text_field_tag :start_date_start, params[:start_date_start], id: 'start_date_start', class: 'form-control input-sm', placeholder: t('form_search.from')
+                %span -
+                = text_field_tag :start_date_end, params[:start_date_end], id: 'start_date_end', class: 'form-control input-sm', placeholder: t('form_search.to')
             .form-row.advanced-search-grid-small
               %label{for: 'revisions_min'}= t("metrics.revisions")
               .input-group.flex-input-group
