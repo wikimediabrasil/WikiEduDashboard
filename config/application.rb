@@ -65,6 +65,12 @@ module WikiEduDashboard
 
     config.action_dispatch.return_only_media_type_on_content_type = false
 
+    # Allow host headers for configured dashboard URL and standard domain patterns
+    config.hosts << ENV['dashboard_url'] if ENV['dashboard_url'].present?
+    config.hosts << /.*\.wmcloud\.org/
+    config.hosts << /.*\.wmflabs\.org/
+    config.hosts << /.*\.wikiedu\.org/
+
     config.middleware.insert_before 0, Rack::Cors do
       allow do
         origins '*'
