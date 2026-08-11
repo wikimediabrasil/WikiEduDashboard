@@ -4,6 +4,17 @@
 class ErrorsController < ApplicationController
   respond_to :html, :json
 
+  # Error pages can be rendered before Warden has been set up (for example,
+  # when the exceptions app dispatches through the router after a middleware
+  # error). Skip callbacks that depend on a valid `current_user` so the real
+  # error page is shown instead of a failsafe response.
+  skip_before_action :check_for_expired_oauth_credentials,
+                     :check_for_unsupported_browser,
+                     :check_onboarded,
+                     :set_locale,
+                     :set_paper_trail_whodunnit,
+                     :authorize_rmp
+
   def file_not_found
     @message = not_found_message
     render status: :not_found # 404

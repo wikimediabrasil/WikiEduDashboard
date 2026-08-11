@@ -358,10 +358,15 @@ class CoursesController < ApplicationController
   end
 
   def slug_from_params(course = params[:course])
-    slug = +"#{course[:school]}/#{course[:title]}"
-    slug << "_(#{course[:term]})" if course[:term].present?
+    slug = +"#{normalize_course_slug_component(course[:school])}/"
+    slug += normalize_course_slug_component(course[:title])
+    slug << "_(#{normalize_course_slug_component(course[:term])})" if course[:term].present?
 
-    course[:slug] = slug.tr(' ', '_')
+    course[:slug] = slug
+  end
+
+  def normalize_course_slug_component(text)
+    text.to_s.downcase.strip.gsub(/[^\p{L}0-9_ ]/, '').tr(' ', '_')
   end
 
   def ensure_passcode_set

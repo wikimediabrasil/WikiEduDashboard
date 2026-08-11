@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import GetHelpButton from './get_help_button.jsx';
 import CourseUtils from '../../utils/course_utils.js';
 import { BLOCK_KIND_RESOURCES } from '../../constants/timeline';
@@ -12,23 +13,27 @@ const hasResourcesBlock = weeks => weeks.some(
 );
 
 const CourseNavbar = ({ course, location, currentUser, courseLink, weeks = [] }) => {
-  // ///////////////
-  // Course title //
-  // ///////////////
-  let courseLinkElement;
-  if (course.url) {
-    courseLinkElement = (
-      <a href={course.url} target="_blank">
-        <h2 className="title">{course.title}</h2>
-      </a>
-    );
-  } else {
-    courseLinkElement = (
-      <div className="nav__item">
-        <h2 className="title">{course.title}</h2>
-      </div>
-    );
-  }
+  // ///////////////////////
+  // Course title/breadcrumb
+  // ///////////////////////
+  const campaigns = useSelector(state => state.campaigns.campaigns);
+  const campaignProgramsLink = CourseUtils.campaignProgramsLink(campaigns);
+
+  const courseTitleElement = course.url
+    ? <a href={course.url} target="_blank">{course.title}</a>
+    : <span>{course.title}</span>;
+
+  const courseLinkElement = (
+    <div className="nav__item">
+      <h2 id="course-nav-label" className="title">
+        <span className="campaign-breadcrumb__part">
+          <a href={campaignProgramsLink}>{I18n.t('courses.courses')}</a>
+        </span>
+        <span className="campaign-breadcrumb__separator"> / </span>
+        <span className="campaign-breadcrumb__part">{courseTitleElement}</span>
+      </h2>
+    </div>
+  );
 
   // ////////////
   // Home link //
@@ -77,6 +82,7 @@ const CourseNavbar = ({ course, location, currentUser, courseLink, weeks = [] })
   const articlesLink = `${courseLink}/articles`;
   const uploadsLink = `${courseLink}/uploads`;
   const activityLink = `${courseLink}/activity`;
+  const tagsLink = `${courseLink}/tags`;
 
   // /////////////////
   // Get Help button /
@@ -93,7 +99,7 @@ const CourseNavbar = ({ course, location, currentUser, courseLink, weeks = [] })
   return (
     <div className="container">
       {courseLinkElement}
-      <nav aria-label={course.title}>
+      <nav aria-labelledby="course-nav-label">
         <div className="nav__item" id="overview-link">
           <p><NavLink to={homeLink} className={({ isActive }) => (isActive ? 'active' : homeLinkClassName)}>{I18n.t('courses.overview')}</NavLink></p>
         </div>
@@ -107,6 +113,9 @@ const CourseNavbar = ({ course, location, currentUser, courseLink, weeks = [] })
         </div>
         <div className="nav__item" id="activity-link">
           <p><NavLink to={activityLink} className={({ isActive }) => (isActive ? 'active' : '')}>{I18n.t('activity.label')}</NavLink></p>
+        </div>
+        <div className="nav__item" id="tags-link">
+          <p><NavLink to={tagsLink} className={({ isActive }) => (isActive ? 'active' : '')}>{I18n.t('campaign.tags')}</NavLink></p>
         </div>
         {resources}
         {getHelp}

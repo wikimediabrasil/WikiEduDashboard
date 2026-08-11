@@ -5,8 +5,10 @@ import CourseUtils from '../../utils/course_utils';
 
 const CampaignNavbar = ({ campaign }) => {
   const location = useLocation();
-  const pathSegments = location.pathname.split('/');
-  const currentTab = pathSegments[pathSegments.length - 1];
+  const pathSegments = location.pathname.split('/').filter(Boolean);
+  const rawCurrentTab = pathSegments[pathSegments.length - 1] || 'overview';
+  const currentTab = rawCurrentTab === campaign.slug ? 'overview' : rawCurrentTab;
+
   //  useEffect needed only for links not using Navlink and can be removed once the server-rendered pages are turned into React pages that use NavLink.
   useEffect(() => {
     const links = document.querySelectorAll('.nav__item a');
@@ -24,7 +26,15 @@ const CampaignNavbar = ({ campaign }) => {
       <div className="campaign_navigation">
         <div className="container">
           <div className="nav__item">
-            <h2 id="campaign-nav-label" className="title">{I18n.t('campaign.campaign')}: {campaign.title}</h2>
+            <h2 id="campaign-nav-label" className="title">
+              <span className="campaign-breadcrumb__part">
+                <a href="/campaigns">{I18n.t('campaign.campaigns')}</a>
+              </span>
+              <span className="campaign-breadcrumb__separator"> / </span>
+              <span className="campaign-breadcrumb__part">
+                <a href={`/campaigns/${campaign.slug}/overview`}>{campaign.title}</a>
+              </span>
+            </h2>
           </div>
           <nav aria-labelledby="campaign-nav-label">
             <div className={`nav__item ${currentTab === 'overview' ? 'active' : ''}`} id="overview-link">

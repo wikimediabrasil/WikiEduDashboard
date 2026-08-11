@@ -501,4 +501,45 @@ describe CampaignsController, type: :request do
       expect(campaign_json['label_matches']).to include(label.match)
     end
   end
+
+  describe '#tags' do
+    let(:campaign) { create(:campaign) }
+    let(:course) { create(:course) }
+    let(:label) { create(:label) }
+
+    before do
+      campaign.courses << course
+      CoursesLabels.create(course:, label:)
+    end
+
+    it 'renders a 200 and assigns campaign and course labels' do
+      get "/campaigns/#{campaign.slug}/tags"
+
+      expect(response).to be_successful
+      expect(assigns(:course_labels)).to include(label)
+    end
+
+    it 'returns tag chart data as JSON, keyed by the data-url used in campaign_tags.js' do
+      get "/campaigns/#{campaign.slug}/tags.json"
+
+      expect(response).to be_successful
+      expect(response.content_type).to include('application/json')
+      json = JSON.parse(response.body)
+      expect(json['labels'].first['id']).to eq(label.id)
+    end
+
+    it 'keeps the JSON total_labels consistent with the HTML summary' do
+      campaign_only_label = create(:label, match: 'Q999')
+      campaign.labels << campaign_only_label
+
+      get "/campaigns/#{campaign.slug}/tags"
+      html_total = assigns(:labels).count
+
+      get "/campaigns/#{campaign.slug}/tags.json"
+      json_total = JSON.parse(response.body)['total_labels']
+
+      expect(html_total).to eq(2)
+      expect(json_total).to eq(html_total)
+    end
+  end
 end

@@ -423,6 +423,7 @@ Rails.application.routes.draw do
       get 'programs'
       get 'articles'
       get 'alerts'
+      get 'tags'
     end
   end
 

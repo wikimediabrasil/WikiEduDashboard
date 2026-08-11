@@ -490,4 +490,34 @@ describe('courseUtils.formattedArticleTitle', () => {
       }
     );
   });
+
+  describe('courseUtils.campaignProgramsLink', () => {
+    test('returns the programs path of the first campaign when campaigns exist', () => {
+      const campaigns = [
+        { id: 1, slug: 'spring_2024', title: 'Spring 2024' },
+        { id: 2, slug: 'fall_2024', title: 'Fall 2024' }
+      ];
+      expect(courseUtils.campaignProgramsLink(campaigns)).toBe('/campaigns/spring_2024/programs');
+    });
+
+    test('uses only the first campaign when a course belongs to several', () => {
+      const campaigns = [
+        { id: 5, slug: 'only_this_one', title: 'Only This One' },
+        { id: 6, slug: 'not_this_one', title: 'Not This One' }
+      ];
+      expect(courseUtils.campaignProgramsLink(campaigns)).not.toContain('not_this_one');
+    });
+
+    test('falls back to /explore when campaigns is an empty array', () => {
+      expect(courseUtils.campaignProgramsLink([])).toBe('/explore');
+    });
+
+    test('falls back to /explore when campaigns is null', () => {
+      expect(courseUtils.campaignProgramsLink(null)).toBe('/explore');
+    });
+
+    test('falls back to /explore when campaigns is undefined', () => {
+      expect(courseUtils.campaignProgramsLink(undefined)).toBe('/explore');
+    });
+  });
 });

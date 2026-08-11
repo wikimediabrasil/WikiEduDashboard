@@ -1,11 +1,15 @@
 .campaign-nav__wrapper
+  %h1.screen-reader= "Tag: #{@tag}"
   .campaign_navigation
     .container
-      %a
-        %h1.title
-          = "Tag: #{@tag}"
-      %nav{'aria-label': "Tag: #{@tag}"}
+      .nav__item
+        %h2.title#tagged-course-nav-label
+          %span.campaign-breadcrumb__part= link_to t('courses.courses'), explore_path
+          %span.campaign-breadcrumb__separator /
+          %span.campaign-breadcrumb__part= "Tag: #{@tag}"
+      %nav{'aria-labelledby': 'tagged-course-nav-label'}
         %ul.campaign-nav__ul
           = nav_link(t('courses.courses'), programs_tagged_course_path(@tag))
           = nav_link(t('courses.articles'), articles_tagged_course_path(@tag))
           = nav_link(t('courses.alerts'), alerts_tagged_course_path(@tag))
+          = nav_link(t('campaign.tags'), tags_tagged_course_path(@tag))

@@ -36,4 +36,31 @@ RSpec.describe CampaignHelper, type: :helper do
       expect(helper.translated_label(label)).to eq('sport')
     end
   end
+
+  describe '#campaign_breadcrumb_title_for_action' do
+    it 'returns the courses label for the programs action' do
+      expect(helper.campaign_breadcrumb_title_for_action(campaign, 'programs'))
+        .to eq(I18n.t("#{campaign.course_string_prefix}.courses"))
+    end
+
+    it 'returns the students label for the users action' do
+      expect(helper.campaign_breadcrumb_title_for_action(campaign, 'users'))
+        .to eq(I18n.t("#{campaign.course_string_prefix}.students"))
+    end
+
+    it 'returns the tags page title for the tags action' do
+      expect(helper.campaign_breadcrumb_title_for_action(campaign, 'tags'))
+        .to eq(I18n.t('campaign.tags_page_title'))
+    end
+
+    it 'returns the localized courses label for other known actions' do
+      expect(helper.campaign_breadcrumb_title_for_action(campaign, 'articles'))
+        .to eq(I18n.t('courses.articles'))
+    end
+
+    it 'falls back to a titleized action name when no translation exists' do
+      expect(helper.campaign_breadcrumb_title_for_action(campaign, 'unknown_action'))
+        .to eq('Unknown Action')
+    end
+  end
 end
