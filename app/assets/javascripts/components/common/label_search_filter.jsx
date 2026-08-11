@@ -107,6 +107,7 @@ const LabelSearchFilter = ({ selectedTags, onChange, placeholder }) => {
           <li
             key={item.match}
             role="option"
+            aria-selected={false}
             className="wikidata-tags-option"
             onMouseDown={(event) => {
               event.preventDefault();

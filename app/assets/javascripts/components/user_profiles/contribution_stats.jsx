@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import InstructorStats from './instructor_stats.jsx';
 import StudentStats from './student_stats.jsx';
-import ArticleUtils from '../../utils/article_utils';
 import DropdownSortSelect from '../common/dropdown_sort_select';
 
 const defaultParams = {

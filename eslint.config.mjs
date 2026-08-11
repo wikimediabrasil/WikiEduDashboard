@@ -101,6 +101,7 @@ export default [
       'react/prop-types': 'off',
       'import/no-named-as-default': 'off',
       'import/namespace': 'off',
+      'import/no-unresolved': ['error', { ignore: ['^@tiptap/'] }],
     },
   },
 ];
