@@ -1,12 +1,14 @@
 import React from 'react';
 import Select from 'react-select';
-import { compact, without } from 'lodash-es';
+import { compact, without, uniqBy } from 'lodash-es';
 import languageNames from '../../utils/language_names';
 import selectStyles from '../../styles/select';
 import request from '../../utils/request';
 
 const getNativeName = (code) => {
-  const language = languageNames[code];
+  if (!code) { return ''; }
+  const normalizedCode = code.toLowerCase().replace('_', '-');
+  const language = languageNames[code] || languageNames[normalizedCode];
   if (!language) { return ''; }
   return language.nativeName;
 };
@@ -51,7 +53,7 @@ const LanguagePicker = () => {
     return undefined;
   });
 
-  const defLocales = without(allLocales, undefined);
+  const defLocales = uniqBy(without(allLocales, undefined), 'label');
   const newLocales = translateLink.concat(popularLocales).concat(defLocales);
   const curLocale = <span><img src="/assets/images/icon-language.png" alt="Translate this page" /> {I18n.locale} </span>;
 

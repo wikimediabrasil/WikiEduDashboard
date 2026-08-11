@@ -631,7 +631,7 @@ const LanguageNames = {
     },
     'pt-br': {
       name: 'Brazilian Portuguese',
-      nativeName: 'português do Brasil',
+      nativeName: 'Português (Brasil)',
     },
     qu: {
       name: 'Quechua',

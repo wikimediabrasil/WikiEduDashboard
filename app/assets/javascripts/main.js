@@ -41,5 +41,10 @@ document.addEventListener('DOMContentLoaded', () => {
 i18n.defaultLocale = defaultLocale;
 i18n.locale = locale;
 i18n.availableLocales = availableLocales;
-if (typeof stores !== 'undefined') i18n.store(stores);
+if (typeof stores !== 'undefined') {
+  i18n.store(stores);
+  if (stores['pt-br'] && !stores['pt-BR']) {
+    i18n.store({ 'pt-BR': stores['pt-br'] });
+  }
+}
 /* eslint-enable */

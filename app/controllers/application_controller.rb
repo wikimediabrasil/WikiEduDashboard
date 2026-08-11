@@ -139,6 +139,7 @@ class ApplicationController < ActionController::Base
     preferred_locale_from_param
 
     preferred_locale = http_accept_language.preferred_language_from I18n.available_locales
+    preferred_locale = :"pt-br" if preferred_locale == :"pt-BR" || preferred_locale == 'pt-BR'
     I18n.locale = preferred_locale || I18n.default_locale
   end
 

@@ -47,9 +47,10 @@ module ApplicationHelper
   end
 
   def en_if_invalid(locale)
-    # if the locale is not valid, use the default locale
-    return 'en' unless File.exist?("#{Rails.root}/public/assets/javascripts/i18n/#{locale}.js")
-    locale
+    return locale if File.exist?("#{Rails.root}/public/assets/javascripts/i18n/#{locale}.js")
+    downcased = locale.to_s.downcase
+    return downcased if File.exist?("#{Rails.root}/public/assets/javascripts/i18n/#{downcased}.js")
+    'en'
   end
 
   def i18n_javascript_tag(locale)

@@ -19,6 +19,7 @@ class Users::LocaleController < ApplicationController
   private
 
   def validate_locale
+    @locale = 'pt-br' if @locale == 'pt-BR'
     return if I18n.available_locales.include?(@locale.to_sym)
 
     render json: { message: 'Invalid locale' }, status: :unprocessable_content
