@@ -271,6 +271,7 @@ window.onload = () => {
   };
 
   let editLabelsWidget = null;
+  let wikidataWidget = null;
 
   const initWikidataWidget = () => {
     const mountEl = document.querySelector('.create-modal-wrapper .campaign-wikidata-tags-mount');
@@ -289,7 +290,7 @@ window.onload = () => {
 
   const initEditLabelsWidget = (detailsEl) => {
     const mountEl = detailsEl?.querySelector('.campaign-wikidata-tags-mount');
-    if (mountEl) {
+    if (mountEl && !editLabelsWidget) {
       editLabelsWidget = new WikidataTagsWidget(mountEl);
     }
   };
