@@ -13,6 +13,7 @@ if Rails.env.production?
   Rack::MiniProfiler.config.storage = Rack::MiniProfiler::MemcacheStore
 else
   Rack::MiniProfiler.config.storage = Rack::MiniProfiler::MemoryStore
+  Rack::MiniProfiler.config.auto_inject = false
 end
 
 
