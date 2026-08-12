@@ -10,7 +10,7 @@ import { toggleUI } from '@actions/index';
   For class components, use popover_expandable.jsx instead.
 */
 const useExpandablePopover = (getKey) => {
-  const openKey = useSelector(state => state.ui.openKey);
+  const openKey = useSelector(state => state.ui?.openKey);
   const dispatch = useDispatch();
 
   const [key, setKey] = useState('');

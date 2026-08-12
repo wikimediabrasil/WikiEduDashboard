@@ -56,9 +56,9 @@ const Overview = createReactClass({
 
   componentDidMount() {
     document.title = this.props.course.title;
+    this.props.fetchTags(this.props.course_id);
     if (this.props.current_user.admin) {
       this.props.fetchOnboardingAlert(this.props.course);
-      this.props.fetchTags(this.props.course_id);
     }
   },
 

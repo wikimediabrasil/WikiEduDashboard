@@ -386,6 +386,15 @@ const Details = createReactClass({
     let multiWikiSelector;
     let namespaceSelector;
 
+    tags = (
+      <div className="tags">
+        <TagList course={this.props.course} />
+        <TagEditable {...this.props} show={this.props.editable} />
+        <WikidataLabelList course={this.props.course} />
+        <WikidataLabelEditable course={this.props.course} show={this.props.editable} />
+      </div>
+    );
+
     if (this.props.current_user.admin) {
       subject = (
         <TextInput
@@ -397,14 +406,6 @@ const Details = createReactClass({
           type="text"
           label={I18n.t('courses.subject')}
         />
-      );
-      tags = (
-        <div className="tags">
-          <TagList course={this.props.course} />
-          <TagEditable {...this.props} show={this.props.editable} />
-          <WikidataLabelList course={this.props.course} />
-          <WikidataLabelEditable course={this.props.course} show={this.props.editable} />
-        </div>
       );
       submittedSelector = (
         <SubmittedSelector

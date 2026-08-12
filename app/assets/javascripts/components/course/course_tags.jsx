@@ -67,12 +67,10 @@ const CourseTags = ({ course, current_user: currentUser }) => {
         {tagGallery}
       </section>
 
-      {currentUser?.isAdmin && (
-        <div className="course-tags-admin">
-          <span>{I18n.t('courses.tags_manage')}</span>
-          <WikidataLabelEditable course={course} show={currentUser.isAdmin} />
-        </div>
-      )}
+      <div className="course-tags-admin">
+        <span>{I18n.t('courses.tags_manage')}</span>
+        <WikidataLabelEditable course={course} show={true} />
+      </div>
     </div>
   );
 };

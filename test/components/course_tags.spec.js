@@ -41,6 +41,7 @@ const labels = [
 const renderCourseTags = (courseLabels = labels) => {
   const store = createStore(state => state, {
     wikidataLabels: { labels: {}, courseLabels },
+    ui: { openKey: null },
   });
   const container = document.createElement('div');
   document.body.appendChild(container);
@@ -87,5 +88,11 @@ describe('CourseTags', () => {
     renderCourseTags();
 
     expect(fetchCourseWikidataLabels).toHaveBeenCalledWith(course.slug);
+  });
+
+  test('renders tag management controls for non-admin users', () => {
+    const container = renderCourseTags();
+
+    expect(container.querySelector('.course-tags-admin')).not.toBeNull();
   });
 });
