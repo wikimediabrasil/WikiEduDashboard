@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import WikidataLabelEditable from '../overview/wikidata_label_editable.jsx';
 import { fetchCourseWikidataLabels } from '../../actions/course_wikidata_label_actions';
 
-const CourseTags = ({ course, current_user: currentUser }) => {
+const CourseTags = ({ course }) => {
   const dispatch = useDispatch();
   const courseLabels = useSelector(state => state.wikidataLabels.courseLabels);
 
@@ -80,9 +80,6 @@ CourseTags.propTypes = {
     title: PropTypes.string,
     slug: PropTypes.string,
   }).isRequired,
-  current_user: PropTypes.shape({
-    isAdmin: PropTypes.bool,
-  }),
 };
 
 export default CourseTags;
