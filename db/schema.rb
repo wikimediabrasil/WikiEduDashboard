@@ -97,6 +97,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_164705) do
     t.datetime "updated_at", precision: nil
     t.date "views_updated_at"
     t.integer "wiki_id"
+    t.index ["id", "namespace"], name: "index_articles_on_id_and_namespace"
     t.index ["index_hash"], name: "index_articles_on_index_hash", unique: true
     t.index ["mw_page_id"], name: "index_articles_on_mw_page_id"
     t.index ["namespace", "wiki_id", "title"], name: "index_articles_on_namespace_and_wiki_id_and_title"
@@ -396,6 +397,22 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_164705) do
     t.index ["wiki_id"], name: "index_courses_wikis_on_wiki_id"
   end
 
+  create_table "facilitator_stats", charset: "utf8mb3", collation: "utf8mb3_uca1400_ai_ci", force: :cascade do |t|
+    t.boolean "active_in_last_year", default: false
+    t.integer "active_programs_count", default: 0
+    t.datetime "created_at", null: false
+    t.integer "new_editors_count", default: 0
+    t.integer "new_editors_count_with_preregistration", default: 0
+    t.date "snapshot_date", null: false
+    t.bigint "total_characters_added", default: 0
+    t.integer "total_edits", default: 0
+    t.integer "total_programs_count", default: 0
+    t.integer "total_students_count", default: 0
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["snapshot_date", "user_id"], name: "index_facilitator_stats_on_snapshot_date_and_user_id", unique: true
+    t.index ["user_id"], name: "index_facilitator_stats_on_user_id"
+  end
   create_table "faqs", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.text "content"
     t.datetime "created_at", null: false
@@ -593,6 +610,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_164705) do
     t.index ["survey_id"], name: "index_surveys_question_groups_on_survey_id"
   end
 
+  create_table "system_stats", charset: "utf8mb3", collation: "utf8mb3_uca1400_ai_ci", force: :cascade do |t|
+    t.integer "active_facilitators_count", default: 0
+    t.integer "active_programs_count", default: 0
+    t.integer "archived_programs_count", default: 0
+    t.datetime "created_at", null: false
+    t.integer "new_editors_count", default: 0
+    t.integer "new_editors_count_with_preregistration", default: 0
+    t.date "snapshot_date", null: false
+    t.bigint "total_article_views", default: 0
+    t.integer "total_articles_created", default: 0
+    t.integer "total_articles_improved", default: 0
+    t.bigint "total_characters_added", default: 0
+    t.bigint "total_edits", default: 0
+    t.datetime "updated_at", null: false
+    t.text "wiki_stats"
+    t.index ["snapshot_date"], name: "index_system_stats_on_snapshot_date", unique: true
+  end
   create_table "tags", id: :integer, charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.integer "course_id"
     t.datetime "created_at", precision: nil
@@ -733,6 +767,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_164705) do
     t.integer "verification_claim_id", null: false
     t.index ["user_id", "course_id"], name: "index_verification_claim_assignments_on_user_id_and_course_id", unique: true
     t.index ["verification_claim_id"], name: "index_verification_claim_assignments_on_verification_claim_id"
+  end
+
+  create_table "verification_claim_responses", charset: "utf8mb3", collation: "utf8mb3_uca1400_ai_ci", force: :cascade do |t|
+    t.text "claim_location"
+    t.integer "course_id", null: false
+    t.datetime "created_at", null: false
+    t.text "other_comments"
+    t.string "source_access", null: false
+    t.text "source_access_notes"
+    t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.string "verdict"
+    t.integer "verification_claim_id", null: false
+    t.text "verification_notes"
+    t.index ["course_id"], name: "index_verification_claim_responses_on_course_id"
+    t.index ["user_id", "course_id", "verification_claim_id"], name: "index_verification_claim_responses_uniqueness", unique: true
+    t.index ["verification_claim_id"], name: "index_verification_claim_responses_on_verification_claim_id"
   end
 
   create_table "verification_claims", charset: "utf8mb3", collation: "utf8mb3_uca1400_ai_ci", force: :cascade do |t|
