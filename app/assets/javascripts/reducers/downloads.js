@@ -2,6 +2,15 @@ import { ADD_DOWNLOAD, UPDATE_DOWNLOAD, REMOVE_DOWNLOAD, MARK_DOWNLOADS_READ } f
 
 const STORAGE_KEY = 'wiki_edu_downloads';
 
+const uniqueCompletedDownloads = (items) => {
+  const seenIds = new Set();
+  return items.filter((item) => {
+    if (item.status === 'pending' || seenIds.has(item.id)) { return false; }
+    seenIds.add(item.id);
+    return true;
+  });
+};
+
 const getInitialState = () => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -10,8 +19,8 @@ const getInitialState = () => {
       // Only restore downloads that are 'ready' or 'error' (not 'pending')
       // Pending downloads are lost on page reload since polling can't resume
       return {
-        items: parsed.items.filter(item => item.status !== 'pending'),
-        unreadCount: parsed.unreadCount
+        items: uniqueCompletedDownloads(Array.isArray(parsed.items) ? parsed.items : []),
+        unreadCount: Number.isInteger(parsed.unreadCount) ? parsed.unreadCount : 0
       };
     }
   } catch (e) {
@@ -38,10 +47,14 @@ export default function downloads(state = initialState, action) {
 
   switch (action.type) {
     case ADD_DOWNLOAD: {
+      const alreadyListed = state.items.some(item => item.id === action.download.id);
       newState = {
         ...state,
-        items: [action.download, ...state.items],
-        unreadCount: state.unreadCount + 1
+        // Retrying a completed/failed export replaces its previous entry. IDs
+        // identify export types, so keeping both would also create duplicate
+        // React keys in DownloadsBell.
+        items: [action.download, ...state.items.filter(item => item.id !== action.download.id)],
+        unreadCount: alreadyListed ? state.unreadCount : state.unreadCount + 1
       };
       break;
     }

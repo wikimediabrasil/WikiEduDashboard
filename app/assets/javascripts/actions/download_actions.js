@@ -4,7 +4,7 @@ const INITIAL_POLL_DELAY_MS = 100; // First check after 100ms for small files
 const POLL_INTERVAL_MS = 1000; // Then check every 1 second
 const MAX_POLL_ATTEMPTS = 300; // Max 5 minutes of polling
 
-// Tracks in-flight polling intervals, keyed by download id, so that polling
+// Tracks in-flight polling timers, keyed by download id, so that polling
 // keeps running independently of whether any component is mounted.
 const activePolls = {};
 const pollAttempts = {};
@@ -26,10 +26,18 @@ const isStillGenerating = async (response) => {
   return text.includes('This file is being generated');
 };
 
+const hasActivePoll = id => Object.prototype.hasOwnProperty.call(activePolls, id);
+
+const stopPolling = (id) => {
+  clearTimeout(activePolls[id]);
+  delete activePolls[id];
+  delete pollAttempts[id];
+};
+
 // Starts (or resumes polling for) a CSV download. The polling itself lives
 // here rather than in a component, so it survives modal closes and route changes.
 export const startDownload = ({ id, href, label }) => async (dispatch) => {
-  if (activePolls[id]) { return; }
+  if (hasActivePoll(id)) { return; }
 
   dispatch(addDownload({ id, href, label, status: 'pending', createdAt: Date.now() }));
 
@@ -41,35 +49,33 @@ export const startDownload = ({ id, href, label }) => async (dispatch) => {
     try {
       const response = await fetch(href, { credentials: 'include' });
 
+      if (!response.ok) {
+        throw new Error(`Download request failed with status ${response.status}`);
+      }
+
       if (await isStillGenerating(response)) {
         // Still generating, check if we've exceeded max attempts
         if (pollAttempts[id] >= MAX_POLL_ATTEMPTS) {
-          clearInterval(activePolls[id]);
-          delete activePolls[id];
-          delete pollAttempts[id];
+          stopPolling(id);
           dispatch(updateDownload(id, { status: 'error' }));
+        } else {
+          // Schedule only after this request finishes to avoid overlapping polls.
+          activePolls[id] = setTimeout(poll, POLL_INTERVAL_MS);
         }
         return;
       }
 
-      clearInterval(activePolls[id]);
-      delete activePolls[id];
-      delete pollAttempts[id];
+      stopPolling(id);
 
       const filename = response.url.split('/').pop() || `${label}.csv`;
 
       dispatch(updateDownload(id, { status: 'ready', downloadUrl: response.url, filename }));
     } catch {
-      clearInterval(activePolls[id]);
-      delete activePolls[id];
-      delete pollAttempts[id];
+      stopPolling(id);
       dispatch(updateDownload(id, { status: 'error' }));
     }
   };
 
   // First check immediately after a short delay for small files
-  setTimeout(poll, INITIAL_POLL_DELAY_MS);
-
-  // Then set up interval for subsequent checks
-  activePolls[id] = setInterval(poll, POLL_INTERVAL_MS);
+  activePolls[id] = setTimeout(poll, INITIAL_POLL_DELAY_MS);
 };

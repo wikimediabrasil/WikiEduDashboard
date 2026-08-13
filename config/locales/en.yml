@@ -2238,6 +2238,8 @@ en:
     new_downloads: You have new downloads.
     no_downloads: You have no new downloads.
     aria_label: Downloads
+    csv: Download CSV
+    json: Download JSON
 
   survey:
     login_message: "Thank you for your time. Please log in to the Dashboard to take the survey."
@@ -2423,10 +2425,6 @@ en:
 
   tagged_courses:
     download_csv: 'Download CSV'
-
-  downloads:
-    csv: 'Download CSV'
-    json: 'Download JSON'
 
   weekday_picker:
     aria:
