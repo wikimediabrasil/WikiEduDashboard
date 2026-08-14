@@ -16,6 +16,10 @@
       = form_tag programs_campaign_path(@campaign.slug, anchor: 'courses_table'), method: :get, accept_charset: 'UTF-8', id: 'campaign_search_form', onsubmit: 'this.action = this.action.replace(/#.*$/, "") + "#courses_table";' do
         = hidden_field_tag :sort, params[:sort]
         = hidden_field_tag :direction, params[:direction]
+        - @selected_tag_details.each do |tag|
+          = hidden_field_tag 'tag_details[]', tag.to_json
+        - @selected_excluded_tag_details.each do |tag|
+          = hidden_field_tag 'excluded_tag_details[]', tag.to_json
         .form-fields
           .form-row
             = text_field_tag :title_query, params[:title_query], placeholder: t('form_search.search') + ' ' + t('courses_generic.course'), id: 'title_query', class: 'w100'

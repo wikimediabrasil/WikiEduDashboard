@@ -96,6 +96,38 @@
   padding 3px 6px
   font-size 12px
 
+  &--excluded
+    background-color #fff1f0
+    border-color #d98b86
+
+    .wikidata-tags-chip__link
+      color $warning_text
+
+  &__mode
+    align-items center
+    background sprout
+    border 0
+    border-radius 50%
+    color white
+    cursor pointer
+    display inline-flex
+    flex 0 0 16px
+    font-size 13px
+    font-weight 700
+    height 16px
+    justify-content center
+    line-height 1
+    margin 0
+    padding 0
+    width 16px
+
+    .wikidata-tags-chip--excluded &
+      background $warning_text
+
+    &:focus
+      outline 2px solid sprout
+      outline-offset 1px
+
   &__link
     color sprout
     text-decoration none
@@ -118,6 +150,8 @@
     font-size 12px
     line-height 1
     padding 0 2px
+    &::before
+      content '✕'
     &:hover
       color $warning_text
 
@@ -566,4 +600,3 @@
 
 .high-modal
   float right
-

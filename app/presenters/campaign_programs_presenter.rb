@@ -31,6 +31,9 @@ class CampaignProgramsPresenter
       parts << build_range_term(label, filters[min], filters[max])
     end
 
+    parts << build_tags_term(filters[:tag_details])
+    parts << build_tags_term(filters[:excluded_tag_details], excluded: true)
+
     parts.compact.join(', ')
   end
 
@@ -38,6 +41,8 @@ class CampaignProgramsPresenter
     scope = filter_courses_by_text(@courses, filters)
     scope = filter_courses_by_integer_ranges(scope, filters)
     scope = filter_courses_by_time_ranges(scope, filters)
+    scope = filter_courses_by_included_tags(scope, filters)
+    scope = filter_courses_by_excluded_tags(scope, filters)
 
     scope.distinct.order(courses_order_clause).paginate(page: @page, per_page: 25)
   end
@@ -57,6 +62,37 @@ class CampaignProgramsPresenter
   def build_range_term(label, min, max)
     return nil if min.blank? && max.blank?
     "#{label}: #{min} - #{max}"
+  end
+
+  def build_tags_term(tag_details, excluded: false)
+    return nil if tag_details.blank?
+    names = tag_details.filter_map { |tag| tag['label'] }
+    return nil if names.empty?
+    label = excluded ? 'excluded tags' : 'tags'
+    "#{label}: #{names.join(', ')}"
+  end
+
+  # OR-filter: returns courses that have AT LEAST ONE of the selected tags.
+  # Tags that don't match any course simply contribute no extra rows, they
+  # never cause the whole result set to become empty or raise an error.
+  def filter_courses_by_included_tags(scope, filters)
+    matches = Array(filters[:tag_details]).filter_map { |tag| tag['qNumber'] }
+    return scope if matches.empty?
+
+    scope.joins(:courses_labels)
+         .where(courses_labels: { label_id: Label.where(match: matches).select(:id) })
+  end
+
+  # Excludes a course if it has AT LEAST ONE selected reverse tag. A subquery is
+  # required here because `where.not` on a labels join would retain the course
+  # through any of its other, non-excluded labels.
+  def filter_courses_by_excluded_tags(scope, filters)
+    matches = Array(filters[:excluded_tag_details]).filter_map { |tag| tag['qNumber'] }
+    return scope if matches.empty?
+
+    excluded_label_ids = Label.where(match: matches).select(:id)
+    excluded_course_ids = CoursesLabels.where(label_id: excluded_label_ids).select(:course_id)
+    scope.where.not(id: excluded_course_ids)
   end
 
   def filter_courses_by_text(scope, filters)

@@ -3,7 +3,7 @@
 - content_for :javascripts do
   = hot_javascript_tag 'campaign_tags'
 
-= render 'nav'
+#react_root{data: {slug: @campaign.slug}}
 
 .campaign-path
   .container
@@ -29,9 +29,9 @@
         - if @campaign_labels.any?
           - translated_labels_for(@campaign_labels)
           .campaign-tags-cloud
-            - @campaign_labels.each do |label|
+            - @campaign_labels.select { |label| wikidata_label_visible?(label) }.each do |label|
               .campaign-tag-chip
-                %a{href: label.url, target: '_blank', rel: 'noopener', title: label.description.presence}
+                %a{href: wikidata_label_url(label), target: '_blank', rel: 'noopener', title: translated_description(label).presence}
                   = translated_label(label)
                   %span.campaign-tag-chip__qnum= label.match
         - else
@@ -44,9 +44,9 @@
         - if @course_labels.any?
           - translated_labels_for(@course_labels)
           .campaign-tags-cloud
-            - @course_labels.each do |label|
+            - @course_labels.select { |label| wikidata_label_visible?(label) }.each do |label|
               .campaign-tag-chip
-                %a{href: label.url, target: '_blank', rel: 'noopener', title: label.description.presence}
+                %a{href: wikidata_label_url(label), target: '_blank', rel: 'noopener', title: translated_description(label).presence}
                   = translated_label(label)
                   %span.campaign-tag-chip__qnum= label.match
         - else

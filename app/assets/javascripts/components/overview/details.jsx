@@ -366,7 +366,6 @@ const Details = createReactClass({
       </span>
     );
     let subject;
-    let tags;
     let courseTypeSelector;
     let submittedSelector;
     let privacySelector;
@@ -397,14 +396,6 @@ const Details = createReactClass({
           type="text"
           label={I18n.t('courses.subject')}
         />
-      );
-      tags = (
-        <div className="tags">
-          <TagList course={this.props.course} />
-          <TagEditable {...this.props} show={this.props.editable} />
-          <WikidataLabelList course={this.props.course} />
-          <WikidataLabelEditable course={this.props.course} show={this.props.editable} />
-        </div>
       );
       submittedSelector = (
         <SubmittedSelector
@@ -453,6 +444,23 @@ const Details = createReactClass({
         />
       );
     }
+
+    // Wikidata tags describe the course and should be visible to everyone.
+    // The legacy tag controls and Wikidata editing controls remain admin-only.
+    const tags = (
+      <div className="tags">
+        {this.props.current_user.admin && (
+          <>
+            <TagList course={this.props.course} />
+            <TagEditable {...this.props} show={this.props.editable} />
+          </>
+        )}
+        <WikidataLabelList course={this.props.course} />
+        {this.props.current_user.admin && (
+          <WikidataLabelEditable course={this.props.course} show={this.props.editable} />
+        )}
+      </div>
+    );
 
     // Users who can rename a course are also allowed to change the type.
     if (canRename) {

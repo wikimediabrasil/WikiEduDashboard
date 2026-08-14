@@ -618,6 +618,9 @@ en:
       one: "1 program"
       other: "%{count} programs"
     tags_tooltip_no_programs: No programs assigned
+    search_programs_and_tags: Search programs or tags…
+    exclude_tag: Exclude %{tag}
+    include_tag: Include %{tag}
 
 
   categories:

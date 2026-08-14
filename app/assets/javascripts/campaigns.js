@@ -2,8 +2,8 @@ import './utils/editable';
 import { searchLabelOptions } from './utils/wikidata_label_search';
 
 // ── Wikidata Tags Widget ──────────────────────────────────────────────────────
-// Renders an autocomplete input that queries local labels first, then Wikidata,
-// and lets the user add multiple entity tags (chips) to the campaign creation form.
+// Renders an autocomplete input backed by Wikidata and lets the user add
+// multiple verified entity tags (chips) to the campaign creation form.
 
 class WikidataTagsWidget {
   constructor(container) {

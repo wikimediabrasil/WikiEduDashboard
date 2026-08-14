@@ -38,6 +38,34 @@ describe CampaignsController, type: :request do
         expect(CampaignsUsers.last.user_id).to eq(admin.id)
       end
 
+      it 'stores campaign tag metadata resolved from Wikidata instead of client values' do
+        service = instance_double(
+          WikidataLabelService,
+          metadata: {
+            'Q349' => {
+              match: 'Q349', label: 'deporte', description: 'actividad recreativa',
+              url: 'https://www.wikidata.org/wiki/Q349'
+            }
+          },
+          successful: true
+        )
+        allow(WikidataLabelService).to receive(:new).with(['Q349']).and_return(service)
+        forged_tag = {
+          qNumber: 'Q349', label: 'Invented', description: 'Invented',
+          url: 'https://example.com/not-wikidata'
+        }.to_json
+
+        post '/campaigns', params: campaign_params.deep_merge(
+          campaign: { wikidata_tags: [forged_tag] }
+        )
+
+        label = Campaign.find_by!(slug: expected_slug).labels.find_by!(match: 'Q349')
+        expect(label.attributes.symbolize_keys).to include(
+          labels: 'deporte', description: 'actividad recreativa',
+          url: 'https://www.wikidata.org/wiki/Q349'
+        )
+      end
+
       it 'does not create duplicate titles' do
         Campaign.create(title:, slug: 'foo')
         post '/campaigns', params: campaign_params
@@ -322,6 +350,123 @@ describe CampaignsController, type: :request do
       request_params = { slug: campaign.slug, courses_query: course.title }
       get "/campaigns/#{campaign.slug}/programs", params: request_params
       expect(response.body).to include(course.title)
+    end
+
+    it 'filters campaign programs by selected Wikidata tags' do
+      label = Label.create!(labels: 'Sport', match: 'Q349',
+                            url: 'https://www.wikidata.org/wiki/Q349')
+      CoursesLabels.create!(course:, label:)
+      tag = { qNumber: 'Q349', label: 'Sport', url: label.url }.to_json
+
+      get "/campaigns/#{campaign.slug}/programs", params: { tag_details: [tag] }
+
+      expect(response.body).to include(course.title)
+      expect(response.body).not_to include(course2.title)
+      expect(assigns(:selected_tag_details)).to eq([
+        {
+          'qNumber' => 'Q349', 'label' => 'Sport', 'url' => label.url,
+          'description' => ''
+        }
+      ])
+    end
+
+    it 'ignores client metadata and resolves the filter label from Wikidata' do
+      label = Label.create!(labels: 'Sport', match: 'Q349',
+                            url: 'https://www.wikidata.org/wiki/Q349')
+      CoursesLabels.create!(course:, label:)
+      service = instance_double(
+        WikidataLabelService,
+        metadata: {
+          'Q349' => {
+            match: 'Q349', label: 'deporte', description: 'actividad recreativa',
+            url: 'https://www.wikidata.org/wiki/Q349'
+          }
+        },
+        successful: true
+      )
+      allow(WikidataLabelService).to receive(:new).with(['Q349']).and_return(service)
+      forged_tag = {
+        qNumber: 'Q349', label: 'Invented', description: 'Invented',
+        url: 'https://example.com/not-wikidata'
+      }.to_json
+
+      get "/campaigns/#{campaign.slug}/programs", params: { tag_details: [forged_tag] }
+
+      expect(assigns(:selected_tag_details)).to contain_exactly(
+        {
+          'qNumber' => 'Q349', 'label' => 'deporte',
+          'description' => 'actividad recreativa',
+          'url' => 'https://www.wikidata.org/wiki/Q349'
+        }
+      )
+    end
+
+    it 'does not apply a QID that Wikidata reports as missing' do
+      service = instance_double(WikidataLabelService, metadata: {}, successful: true)
+      allow(WikidataLabelService).to receive(:new).with(['Q999999999']).and_return(service)
+      tag = { qNumber: 'Q999999999', label: 'Invented' }.to_json
+
+      get "/campaigns/#{campaign.slug}/programs", params: { tag_details: [tag] }
+
+      expect(assigns(:selected_tag_details)).to be_empty
+      expect(response.body).to include(course.title)
+      expect(response.body).to include(course2.title)
+    end
+
+    it 'excludes campaign programs by selected reverse tags' do
+      label = Label.create!(labels: 'Sport', match: 'Q349',
+                            url: 'https://www.wikidata.org/wiki/Q349')
+      CoursesLabels.create!(course:, label:)
+      tag = { qNumber: 'Q349', label: 'Sport', url: label.url }.to_json
+
+      get "/campaigns/#{campaign.slug}/programs", params: { excluded_tag_details: [tag] }
+
+      expect(response.body).not_to include(course.title)
+      expect(response.body).to include(course2.title)
+      expect(assigns(:selected_excluded_tag_details)).to eq([
+        {
+          'qNumber' => 'Q349', 'label' => 'Sport', 'url' => label.url,
+          'description' => ''
+        }
+      ])
+    end
+
+    it 'gives exclusion precedence when the same tag is included and excluded' do
+      label = Label.create!(labels: 'Sport', match: 'Q349',
+                            url: 'https://www.wikidata.org/wiki/Q349')
+      CoursesLabels.create!(course:, label:)
+      tag = { qNumber: 'Q349', label: 'Sport', url: label.url }.to_json
+
+      get "/campaigns/#{campaign.slug}/programs", params: {
+        tag_details: [tag], excluded_tag_details: [tag]
+      }
+
+      expect(response.body).not_to include(course.title)
+      expect(response.body).to include(course2.title)
+      expect(assigns(:selected_tag_details)).to be_empty
+    end
+
+    it 'ignores malformed or invalid tag parameters' do
+      get "/campaigns/#{campaign.slug}/programs", params: {
+        tag_details: ['not-json', { qNumber: 'invalid', label: 'Invalid' }.to_json],
+        excluded_tag_details: ['not-json', { qNumber: 'invalid', label: 'Invalid' }.to_json]
+      }
+
+      expect(response).to be_successful
+      expect(response.body).to include(course.title)
+      expect(response.body).to include(course2.title)
+    end
+  end
+
+  describe '#tags' do
+    let(:campaign) { create(:campaign) }
+
+    it 'mounts the shared React campaign navigation' do
+      get "/campaigns/#{campaign.slug}/tags"
+
+      expect(response).to be_successful
+      expect(response.body).to include("id='react_root'")
+      expect(response.body).not_to include("name='courses_query'")
     end
   end
 

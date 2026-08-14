@@ -135,14 +135,13 @@ class CampaignsController < ApplicationController
     set_sort
     set_presenter
     filters = extract_program_filters
+    @selected_tag_details = filters[:tag_details]
+    @selected_excluded_tag_details = filters[:excluded_tag_details]
 
     if filters.values.any?(&:present?)
       presenter = programs_presenter
       @search_terms = presenter.build_search_terms(filters)
       @results = presenter.filter_courses(filters)
-    elsif params[:courses_query].present?
-      @search_terms = params[:courses_query]
-      @results = @presenter.search_courses(@search_terms)
     end
   end
 
@@ -156,6 +155,8 @@ class CampaignsController < ApplicationController
                        .where(course_id: @campaign.courses.select(:id))
                        .pluck(:label_id).uniq
     @course_labels   = Label.where(id: course_label_ids, display: true).order(:labels)
+    @campaign_labels = verified_wikidata_labels(@campaign_labels)
+    @course_labels   = verified_wikidata_labels(@course_labels)
     @labels          = (@campaign_labels + @course_labels).uniq(&:id)
     respond_to do |format|
       format.html
@@ -264,13 +265,73 @@ class CampaignsController < ApplicationController
   private
 
   def extract_program_filters
-    params.slice(:title_query, :creation_start, :creation_end,
-                 :start_date_start, :start_date_end,
-                 :school, :revisions_min, :revisions_max,
-                 :word_count_min, :word_count_max,
-                 :references_min, :references_max,
-                 :views_min, :views_max,
-                 :users_min, :users_max)
+    filters = params.slice(:title_query, :creation_start, :creation_end,
+                           :start_date_start, :start_date_end,
+                           :school, :revisions_min, :revisions_max,
+                           :word_count_min, :word_count_max,
+                           :references_min, :references_max,
+                           :views_min, :views_max,
+                           :users_min, :users_max)
+                    .to_unsafe_h.symbolize_keys
+    filters[:title_query] = params[:courses_query] if filters[:title_query].blank?
+    add_program_tag_filters(filters)
+  end
+
+  def add_program_tag_filters(filters)
+    included_qids = extract_tag_qids(:tag_details)
+    excluded_qids = extract_tag_qids(:excluded_tag_details)
+    resolved_tags = resolve_program_tags(included_qids | excluded_qids)
+    filters[:excluded_tag_details] = excluded_qids.filter_map { |qid| resolved_tags[qid] }
+    excluded_q_numbers = filters[:excluded_tag_details].pluck('qNumber')
+    filters[:tag_details] = included_qids.filter_map { |qid| resolved_tags[qid] }.reject do |tag|
+      excluded_q_numbers.include?(tag['qNumber'])
+    end
+    filters
+  end
+
+  # Only QIDs are accepted from the client. Display metadata is resolved from
+  # Wikidata below instead of trusting serialized labels and descriptions.
+  def extract_tag_qids(param_name)
+    Array(params[param_name]).first(20).filter_map { |tag_json| parse_tag_qid(tag_json) }.uniq
+  end
+
+  def parse_tag_qid(tag_json)
+    tag = JSON.parse(tag_json)
+    return unless tag.is_a?(Hash)
+
+    WikidataLabelService.normalize_match(tag['qNumber'])
+  rescue JSON::ParserError
+    nil
+  end
+
+  def resolve_program_tags(qids)
+    lookup = WikidataLabelService.new(qids)
+    metadata = lookup.metadata
+    if lookup.successful
+      return metadata.transform_values { |entity| serialized_wikidata_entity(entity) }
+    end
+
+    # A temporary Wikidata outage should not disable existing filters. The QID
+    # remains authoritative and all client-provided metadata is still ignored.
+    local_labels = Label.where(match: qids).index_by { |label| label.match.to_s.upcase }
+    qids.index_with do |qid|
+      label = local_labels[qid]
+      {
+        'qNumber' => qid,
+        'label' => label&.labels || qid,
+        'url' => "https://www.wikidata.org/wiki/#{qid}",
+        'description' => label&.description.to_s
+      }
+    end
+  end
+
+  def serialized_wikidata_entity(entity)
+    {
+      'qNumber' => entity[:match],
+      'label' => entity[:label],
+      'url' => entity[:url],
+      'description' => entity[:description]
+    }
   end
 
   def programs_presenter
@@ -341,16 +402,28 @@ class CampaignsController < ApplicationController
 
   def tags_chart_data
     labels       = @course_labels
-    translations = WikidataLabelService.translations_for(labels)
+    lookup       = WikidataLabelService.new(labels)
+    metadata     = lookup.metadata
+    if lookup.successful
+      labels = labels.select { |label| metadata.key?(label.match.to_s.upcase) }
+    end
     {
       campaign:      { slug: @campaign.slug, title: @campaign.title },
       total_courses: @campaign.courses.count,
       total_labels:  labels.count,
-      labels:        labels.map { |l| label_stat(l, translations) }
+      labels:        labels.map { |l| label_stat(l, metadata) }
     }
   end
 
-  def label_stat(label, translations)
+  def verified_wikidata_labels(labels)
+    lookup = WikidataLabelService.new(labels)
+    metadata = lookup.metadata
+    return labels unless lookup.successful
+
+    labels.select { |label| metadata.key?(label.match.to_s.upcase) }
+  end
+
+  def label_stat(label, metadata)
     tagged = @campaign.courses
                       .joins(:courses_labels)
                       .where(courses_labels: { label_id: label.id })
@@ -358,12 +431,18 @@ class CampaignsController < ApplicationController
                       .pluck(:title, :slug)
     {
       id:           label.id,
-      match:        label.match,
-      label:        translations[label.match] || label.labels,
-      url:          label.url,
-      description:  label.description || '',
       course_count: tagged.size,
       courses:      tagged.map { |title, slug| { title:, slug: } }
+    }.merge(localized_label_fields(label, metadata))
+  end
+
+  def localized_label_fields(label, metadata)
+    entity = metadata[label.match.to_s.upcase]
+    {
+      match: entity&.dig(:match) || label.match,
+      label: entity&.dig(:label) || label.labels,
+      url: entity&.dig(:url) || "https://www.wikidata.org/wiki/#{label.match}",
+      description: entity&.dig(:description) || label.description.to_s
     }
   end
 
@@ -404,16 +483,34 @@ class CampaignsController < ApplicationController
   end
 
   def build_labels_from_wikidata_tags(wikidata_tags)
+    qids = wikidata_tag_qids(wikidata_tags)
+    lookup = WikidataLabelService.new(qids)
+    metadata = lookup.metadata
+    unless lookup.successful
+      Rails.logger.warn(
+        'Wikidata unavailable while synchronizing campaign tags; keeping known tags'
+      )
+      return Label.where(match: qids).to_a
+    end
+
+    qids.filter_map { |qid| upsert_campaign_label(metadata[qid]) }
+  end
+
+  def wikidata_tag_qids(wikidata_tags)
     wikidata_tags.filter_map do |tag_json|
       tag_data = JSON.parse(tag_json)
-      Label.find_or_create_by(match: tag_data['qNumber']) do |label|
-        label.labels      = tag_data['label']
-        label.url         = tag_data['url']
-        label.description = tag_data['description']
-        label.display     = true
-      end
+      WikidataLabelService.normalize_match(tag_data['qNumber'])
     rescue JSON::ParserError
       nil
     end.uniq
+  end
+
+  def upsert_campaign_label(entity)
+    return if entity.nil?
+
+    label = Label.find_or_initialize_by(match: entity[:match])
+    label.update!(labels: entity[:label], url: entity[:url],
+                  description: entity[:description], display: true)
+    label
   end
 end

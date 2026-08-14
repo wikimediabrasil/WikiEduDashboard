@@ -77,6 +77,18 @@ describe CampaignProgramsPresenter do
       expect(terms).to include('revisions: 5 - 20')
       expect(terms).to include('word_count: 100 - 500')
     end
+
+    it 'includes selected Wikidata tags' do
+      filters = { tag_details: [{ 'qNumber' => 'Q349', 'label' => 'Sport' }] }
+
+      expect(presenter.build_search_terms(filters)).to include('tags: Sport')
+    end
+
+    it 'includes excluded Wikidata tags' do
+      filters = { excluded_tag_details: [{ 'qNumber' => 'Q349', 'label' => 'Sport' }] }
+
+      expect(presenter.build_search_terms(filters)).to include('excluded tags: Sport')
+    end
   end
 
   describe '#filter_courses' do
@@ -144,6 +156,89 @@ describe CampaignProgramsPresenter do
         revisions_min: '5'
       })
       expect(results).to include(course)
+    end
+
+    it 'filters by a Wikidata tag' do
+      label = Label.create!(labels: 'Sport', match: 'Q349',
+                            url: 'https://www.wikidata.org/wiki/Q349')
+      CoursesLabels.create!(course:, label:)
+
+      results = presenter.filter_courses({
+        tag_details: [{ 'qNumber' => 'Q349', 'label' => 'Sport' }]
+      })
+
+      expect(results).to contain_exactly(course)
+    end
+
+    it 'uses OR semantics for multiple Wikidata tags' do
+      other_course = create(:course, title: 'Health Course', slug: 'School/Health_Course')
+      sport = Label.create!(labels: 'Sport', match: 'Q349',
+                            url: 'https://www.wikidata.org/wiki/Q349')
+      health = Label.create!(labels: 'Health', match: 'Q12147',
+                             url: 'https://www.wikidata.org/wiki/Q12147')
+      CoursesLabels.create!(course:, label: sport)
+      CoursesLabels.create!(course: other_course, label: health)
+
+      results = presenter.filter_courses({
+        tag_details: [
+          { 'qNumber' => 'Q349', 'label' => 'Sport' },
+          { 'qNumber' => 'Q12147', 'label' => 'Health' }
+        ]
+      })
+
+      expect(results).to contain_exactly(course, other_course)
+    end
+
+    it 'excludes courses with any selected reverse tag' do
+      other_course = create(:course, title: 'Health Course', slug: 'School/Health_Course')
+      sport = Label.create!(labels: 'Sport', match: 'Q349',
+                            url: 'https://www.wikidata.org/wiki/Q349')
+      health = Label.create!(labels: 'Health', match: 'Q12147',
+                             url: 'https://www.wikidata.org/wiki/Q12147')
+      CoursesLabels.create!(course:, label: sport)
+      CoursesLabels.create!(course: other_course, label: health)
+
+      results = presenter.filter_courses({
+        excluded_tag_details: [
+          { 'qNumber' => 'Q349', 'label' => 'Sport' },
+          { 'qNumber' => 'Q12147', 'label' => 'Health' }
+        ]
+      })
+
+      expect(results).to be_empty
+    end
+
+    it 'combines included and excluded tag filters' do
+      sport = Label.create!(labels: 'Sport', match: 'Q349',
+                            url: 'https://www.wikidata.org/wiki/Q349')
+      health = Label.create!(labels: 'Health', match: 'Q12147',
+                             url: 'https://www.wikidata.org/wiki/Q12147')
+      sport_only = create(:course, title: 'Sport Course', slug: 'School/Sport_Course')
+      sport_and_health = create(:course, title: 'Sport Health', slug: 'School/Sport_Health')
+      CoursesLabels.create!(course: sport_only, label: sport)
+      CoursesLabels.create!(course: sport_and_health, label: sport)
+      CoursesLabels.create!(course: sport_and_health, label: health)
+
+      results = presenter.filter_courses({
+        tag_details: [{ 'qNumber' => 'Q349', 'label' => 'Sport' }],
+        excluded_tag_details: [{ 'qNumber' => 'Q12147', 'label' => 'Health' }]
+      })
+
+      expect(results).to contain_exactly(sport_only)
+    end
+
+    it 'combines text and Wikidata tag filters' do
+      label = Label.create!(labels: 'Sport', match: 'Q349',
+                            url: 'https://www.wikidata.org/wiki/Q349')
+      CoursesLabels.create!(course:, label:)
+      create(:course, title: 'Another Test Course', slug: 'School/Another_Test_Course')
+
+      results = presenter.filter_courses({
+        title_query: 'Test Course',
+        tag_details: [{ 'qNumber' => 'Q349', 'label' => 'Sport' }]
+      })
+
+      expect(results).to contain_exactly(course)
     end
 
     it 'returns empty when no matches' do

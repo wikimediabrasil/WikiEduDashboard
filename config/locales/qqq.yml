@@ -313,6 +313,9 @@ qqq:
       A direct translation of 'Program template' should be suitable.
     program_template_tooltip: Tooltip explaining what the 'program template' of a
       campaign is.
+    search_programs_and_tags: Placeholder for the campaign navigation search. It can search program text or Wikidata tags.
+    exclude_tag: Accessible label for changing an included tag into an exclusion filter. %{tag} is the translated Wikidata tag label.
+    include_tag: Accessible label for changing an excluded tag back into an inclusion filter. %{tag} is the translated Wikidata tag label.
     title: |-
       Label for the input to change the title of a campaign
       {{Identical|Title}}

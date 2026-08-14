@@ -1,12 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
+import PropTypes from 'prop-types';
 import { searchLabelOptions } from '../../utils/wikidata_label_search';
 
-const LabelSearchFilter = ({ selectedTags, onChange, placeholder }) => {
-  const [query, setQuery] = useState('');
+const LabelSearchFilter = ({ selectedTags, onChange, placeholder, inputName, inputId, initialQuery }) => {
+  const [query, setQuery] = useState(initialQuery);
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const debounceRef = useRef(null);
+  const searchRequestRef = useRef(0);
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -17,21 +19,34 @@ const LabelSearchFilter = ({ selectedTags, onChange, placeholder }) => {
       }
     };
     document.addEventListener('click', handleClickOutside);
-    return () => document.removeEventListener('click', handleClickOutside);
+    return () => {
+      clearTimeout(debounceRef.current);
+      searchRequestRef.current += 1;
+      document.removeEventListener('click', handleClickOutside);
+    };
   }, []);
 
+  useEffect(() => {
+    setQuery(initialQuery);
+  }, [initialQuery]);
+
   const runSearch = async (searchQuery) => {
+    const requestId = searchRequestRef.current + 1;
+    searchRequestRef.current = requestId;
     setLoading(true);
     try {
       const options = await searchLabelOptions(searchQuery);
+      if (requestId !== searchRequestRef.current) return;
       const selectedMatches = new Set(selectedTags.map(tag => tag.match));
-      setResults(options.filter(option => !selectedMatches.has(option.match)));
-      setDropdownOpen(options.length > 0);
+      const availableOptions = options.filter(option => !selectedMatches.has(option.match));
+      setResults(availableOptions);
+      setDropdownOpen(availableOptions.length > 0);
     } catch (_error) {
+      if (requestId !== searchRequestRef.current) return;
       setResults([]);
       setDropdownOpen(false);
     } finally {
-      setLoading(false);
+      if (requestId === searchRequestRef.current) setLoading(false);
     }
   };
 
@@ -40,6 +55,8 @@ const LabelSearchFilter = ({ selectedTags, onChange, placeholder }) => {
     setQuery(value);
     clearTimeout(debounceRef.current);
     if (value.trim().length < 2) {
+      searchRequestRef.current += 1;
+      setLoading(false);
       setResults([]);
       setDropdownOpen(false);
       return;
@@ -58,11 +75,31 @@ const LabelSearchFilter = ({ selectedTags, onChange, placeholder }) => {
     onChange(selectedTags.filter(tag => tag.match !== match));
   };
 
+  const toggleTagMode = (match) => {
+    onChange(selectedTags.map(tag => (
+      tag.match === match ? { ...tag, excluded: !tag.excluded } : tag
+    )));
+  };
+
   return (
     <div className="wikidata-tags-widget" ref={containerRef}>
       <div className="wikidata-tags-chips" aria-live="polite">
         {selectedTags.map((tag) => (
-          <span className="wikidata-tags-chip" key={tag.match} data-tag-id={tag.match}>
+          <span
+            className={`wikidata-tags-chip${tag.excluded ? ' wikidata-tags-chip--excluded' : ''}`}
+            key={tag.match}
+            data-tag-id={tag.match}
+            data-filter-mode={tag.excluded ? 'exclude' : 'include'}
+          >
+            <button
+              type="button"
+              className="wikidata-tags-chip__mode"
+              aria-label={I18n.t(tag.excluded ? 'campaign.include_tag' : 'campaign.exclude_tag', { tag: tag.label })}
+              title={I18n.t(tag.excluded ? 'campaign.include_tag' : 'campaign.exclude_tag', { tag: tag.label })}
+              onClick={() => toggleTagMode(tag.match)}
+            >
+              {tag.excluded ? '−' : '+'}
+            </button>
             <a
               href={tag.url}
               target="_blank"
@@ -76,17 +113,17 @@ const LabelSearchFilter = ({ selectedTags, onChange, placeholder }) => {
             <button
               type="button"
               className="wikidata-tags-chip__remove"
-              aria-label={`Remove ${tag.label}`}
+              aria-label={`${I18n.t('assignments.remove')} ${tag.label}`}
               onClick={() => removeTag(tag.match)}
-            >
-              ✕
-            </button>
+            />
           </span>
         ))}
       </div>
       <div className="wikidata-tags-input-row">
         <input
           type="text"
+          name={inputName}
+          id={inputId}
           className="wikidata-tags-search"
           placeholder={placeholder}
           autoComplete="off"
@@ -107,10 +144,18 @@ const LabelSearchFilter = ({ selectedTags, onChange, placeholder }) => {
           <li
             key={item.match}
             role="option"
+            aria-selected="false"
+            tabIndex={0}
             className="wikidata-tags-option"
             onMouseDown={(event) => {
               event.preventDefault();
               selectTag(item);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                selectTag(item);
+              }
             }}
           >
             <span className="wikidata-tags-option__label">{item.label}</span>
@@ -123,6 +168,27 @@ const LabelSearchFilter = ({ selectedTags, onChange, placeholder }) => {
       </ul>
     </div>
   );
+};
+
+LabelSearchFilter.propTypes = {
+  selectedTags: PropTypes.arrayOf(PropTypes.shape({
+    match: PropTypes.string.isRequired,
+    label: PropTypes.string.isRequired,
+    description: PropTypes.string,
+    url: PropTypes.string,
+    excluded: PropTypes.bool,
+  })).isRequired,
+  onChange: PropTypes.func.isRequired,
+  placeholder: PropTypes.string.isRequired,
+  inputName: PropTypes.string,
+  inputId: PropTypes.string,
+  initialQuery: PropTypes.string,
+};
+
+LabelSearchFilter.defaultProps = {
+  inputName: undefined,
+  inputId: undefined,
+  initialQuery: '',
 };
 
 export default LabelSearchFilter;
