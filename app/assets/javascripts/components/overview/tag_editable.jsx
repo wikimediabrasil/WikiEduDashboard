@@ -1,122 +1,63 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
 import CreatableSelect from 'react-select/creatable';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { getAvailableTags } from '../../selectors';
 import selectStyles from '../../styles/select';
-
-import Popover from '../common/popover.jsx';
-import Conditional from '../high_order/conditional.jsx';
-
+import CourseUtils from '../../utils/course_utils.js';
 import { removeTag, fetchAllTags, addTag } from '../../actions/tag_actions';
-import useExpandablePopover from '../../hooks/useExpandablePopover';
+import { tagText } from './tag_list.jsx';
 
+const optionForTag = tag => ({ label: tagText(tag), value: tag.tag });
 
-const TagEditable = ({ course_id }) => {
-  const availableTags = useSelector(state => getAvailableTags(state));
+// Uses the same multi-value select pattern as Tracked Wikis, so selected tags
+// are visible and removable directly inside the field.
+const TagEditable = ({ course, course_id }) => {
   const tags = useSelector(state => state.tags.tags);
   const dispatch = useDispatch();
-
-  const [createdTagOption, setCreatedTagOption] = useState([]);
-  const [selectedTag, setSelectedTag] = useState();
-  const tagSelectRef = useRef(null);
+  const availableTags = useSelector(state => getAvailableTags(state));
 
   useEffect(() => { dispatch(fetchAllTags()); }, []);
 
-  const getKey = () => {
-    return 'add_tag';
+  const selectedOptions = tags.map(optionForTag);
+  const options = availableTags.map(tag => ({ label: tag, value: tag }));
+
+  const handleChange = (nextOptions = []) => {
+    const nextValues = new Set(nextOptions.map(option => option.value));
+    const currentValues = new Set(tags.map(tag => tag.tag));
+
+    tags.forEach((tag) => {
+      if (!nextValues.has(tag.tag)) dispatch(removeTag(course_id, tag.tag));
+    });
+
+    nextOptions.forEach((option) => {
+      if (!currentValues.has(option.value)) dispatch(addTag(course_id, option.value));
+    });
   };
 
-  const { isOpen, ref, open } = useExpandablePopover(getKey);
-
-  const handleChangeTag = (val) => {
-    if (!val) {
-      setSelectedTag(null);
-      return;
-    }
-
-    // The value includes `__isNew__: true` if it's a user-created option.
-    // In that case, we need to add it to the list of options, so that it shows up as selected.
-    const isNew = val.__isNew__;
-    if (isNew) {
-      setCreatedTagOption([val]);
-    }
-    setSelectedTag(val);
-  };
-
-  const openPopover = (e) => {
-    if (!isOpen) {
-      tagSelectRef.current.focus();
-    }
-    return open(e);
-  };
-
-  const removeTagHandler = (tagId) => {
-    dispatch(removeTag(course_id, tagId));
-  };
-
-  const addTagHandler = () => {
-    dispatch(addTag(course_id, selectedTag.value));
-    setSelectedTag(null);
-  };
-
-  // In editable mode we'll show a list of tags and a remove button plus a selector to add new tags
-  const tagList = tags.map((tag) => {
-    const removeButton = (
-      <button className="button border plus" aria-label="Remove tag" onClick={() => removeTagHandler(tag.tag)}>-</button>
-    );
-    return (
-      <tr key={`${tag.id}_tag`}>
-        <td>{tag.tag}{removeButton}</td>
-      </tr>
-    );
-  });
-
-  const availableOptions = availableTags.map((tag) => {
-    return { label: tag, value: tag };
-  });
-  const tagOptions = [...createdTagOption, ...availableOptions];
-  let addTagButtonDisabled = true;
-  if (selectedTag) {
-    addTagButtonDisabled = false;
-  }
-  const tagSelect = (
-    <tr>
-      <th>
-        <div className="select-with-button">
-          <CreatableSelect
-            className="fixed-width"
-            ref={tagSelectRef}
-            name="tag"
-            value={selectedTag}
-            placeholder={I18n.t('courses.tag_select')}
-            onChange={handleChangeTag}
-            options={tagOptions}
-            styles={selectStyles}
-            isClearable
-          />
-          <button type="submit" className="button dark" disabled={addTagButtonDisabled} onClick={addTagHandler}>
-            Add
-          </button>
-        </div>
-      </th>
-    </tr>
-  );
+  const label = CourseUtils.i18n('tags', course.string_prefix);
 
   return (
-    <div key="tags" className="pop__container tags open" ref={ref}>
-      <button
-        className="button border plus open" onClick={openPopover}
-        aria-label={I18n.t('courses.new_tag_button_aria_label')}
-      >+
-      </button>
-      <Popover
-        is_open={isOpen}
-        edit_row={tagSelect}
-        rows={tagList}
+    <div className="form-group tags tag-selector">
+      <label id="course-tags-label" htmlFor="course-tags" className="text-input-component__label">
+        <strong>{label}:&nbsp;</strong>
+      </label>
+      <CreatableSelect
+        id="course-tags"
+        aria-labelledby="course-tags-label"
+        className="multi-wiki-selector"
+        closeMenuOnSelect={false}
+        isClearable={false}
+        isMulti
+        noOptionsMessage={() => I18n.t('courses.tag_select')}
+        onChange={handleChange}
+        options={options}
+        placeholder={I18n.t('courses.tag_select')}
+        styles={{ ...selectStyles, singleValue: null }}
+        value={selectedOptions}
       />
     </div>
   );
 };
 
-export default (Conditional(TagEditable));
+export default TagEditable;

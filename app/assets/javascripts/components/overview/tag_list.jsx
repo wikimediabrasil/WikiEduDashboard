@@ -4,12 +4,21 @@ import { map } from 'lodash-es';
 
 import CourseUtils from '../../utils/course_utils.js';
 
+// Legacy administrative tags are strings, while course-topic labels are objects.
+// The latter can be returned alongside tags for courses that use Wikidata labels.
+export const tagText = (tag) => {
+  if (typeof tag.tag !== 'object' || tag.tag === null) return tag.tag;
+
+  return tag.tag.label || tag.tag.match || '';
+};
+
 const TagList = ({ tags, course }) => {
   const lastIndex = tags.length - 1;
   const renderedTags = (tags.length > 0
     ? map(tags, (tag, index) => {
       const comma = (index !== lastIndex) ? ', ' : '';
-      return <span key={`${tag.tag}${tag.id}`}>{tag.tag}{comma}</span>;
+      const text = tagText(tag);
+      return <span key={`${text}${tag.id}`}>{text}{comma}</span>;
     })
     : <span>{I18n.t('courses.none')}</span>);
 

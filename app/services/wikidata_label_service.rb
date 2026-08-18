@@ -26,7 +26,7 @@ class WikidataLabelService
 
     matches.each do |match|
       translation = Rails.cache.read(cache_key(match))
-      if translation
+      if translation.is_a?(String)
         cached[match] = translation
       else
         missing << match

@@ -1163,6 +1163,8 @@ es:
     tags_total: "%{count} temas"
     tags_no_description: Consulta este tema en Wikidata.
     tags_manage: Gestionar temas
+    wikidata_labels: 'Etiquetas de Wikidata:'
+    wikidata_label_search_placeholder: 'Buscar etiquetas de Wikidata…'
     update_statistics_link: Ver más
     upload_count: Subidas a Commons
     uploads_in_use_count:

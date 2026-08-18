@@ -13,7 +13,7 @@ class LabelsController < ApplicationController
     end
     respond_to do |format|
       format.html { render plain: @labels.to_json }
-      format.json { render json: { labels: @labels } }
+      format.json { render json: { labels: localized_labels } }
     end
   end
 
@@ -70,6 +70,15 @@ class LabelsController < ApplicationController
 
   def set_label
     @label = Label.find(params[:id])
+  end
+
+  def localized_labels
+    translations = WikidataLabelService.translations_for(
+      @labels, params[:locale].presence || I18n.locale
+    )
+    @labels.map do |label|
+      label.as_json.merge('localized_label' => translations[label.match] || label.match)
+    end
   end
 
   def label_params

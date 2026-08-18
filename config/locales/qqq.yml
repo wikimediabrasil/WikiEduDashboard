@@ -583,6 +583,8 @@ qqq:
     tags_total: Accessible label for the course topic total. %{count} is the number of topics.
     tags_no_description: Fallback text shown when a Wikidata topic has no description
     tags_manage: Label shown beside the control for adding or removing course topics
+    wikidata_labels: Label for the course's Wikidata topics
+    wikidata_label_search_placeholder: Placeholder for the input used to search Wikidata topics
     term: '{{Identical|Term}}'
     timeline_link: '{{Identical|Timeline}}'
     timeline_tooltip: Message that explains what timeline is good for

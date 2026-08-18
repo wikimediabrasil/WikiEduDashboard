@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchCourseWikidataLabels } from '../../actions/course_wikidata_label_actions';
+import { wikidataLabelText } from '../../utils/wikidata_label_utils';
 
 const WikidataLabelList = ({ course }) => {
   const dispatch = useDispatch();
@@ -28,7 +29,7 @@ const WikidataLabelList = ({ course }) => {
       {courseLabels.map((lbl, i) => (
         <span key={lbl.match}>
           <a href={lbl.url} target="_blank" rel="noopener noreferrer" title={lbl.description}>
-            {lbl.label}
+            {wikidataLabelText(lbl.label)}
           </a>
           {i < courseLabels.length - 1 ? ', ' : ''}
         </span>

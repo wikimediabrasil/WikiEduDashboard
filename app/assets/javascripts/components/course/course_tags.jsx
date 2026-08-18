@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import WikidataLabelEditable from '../overview/wikidata_label_editable.jsx';
 import { fetchCourseWikidataLabels } from '../../actions/course_wikidata_label_actions';
+import { wikidataLabelText } from '../../utils/wikidata_label_utils';
 
 const CourseTags = ({ course }) => {
   const dispatch = useDispatch();
@@ -26,7 +27,7 @@ const CourseTags = ({ course }) => {
         >
           <span className="course-tag-card__index">{String(index + 1).padStart(2, '0')}</span>
           <span className="course-tag-card__content">
-            <span className="course-tag-card__label">{label.label}</span>
+            <span className="course-tag-card__label">{wikidataLabelText(label.label)}</span>
             <span className="course-tag-card__description">
               {label.description || I18n.t('courses.tags_no_description')}
             </span>

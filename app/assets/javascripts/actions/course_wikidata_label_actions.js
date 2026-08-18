@@ -7,8 +7,11 @@ import {
 import logErrorMessage from '../utils/log_error_message';
 import request from '../utils/request';
 
+const dashboardLocale = () => ((typeof I18n !== 'undefined' && I18n.locale) ? I18n.locale : 'en');
+
 const fetchCourseWikidataLabelsPromise = async (courseSlug) => {
-  const response = await request(`/courses/${courseSlug}/wikidata_labels.json`);
+  const locale = encodeURIComponent(dashboardLocale());
+  const response = await request(`/courses/${courseSlug}/wikidata_labels.json?locale=${locale}`);
   if (!response.ok) {
     logErrorMessage(response);
     const data = await response.text();

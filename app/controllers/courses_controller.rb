@@ -132,12 +132,16 @@ class CoursesController < ApplicationController
 
   def wikidata_labels
     set_course
-    translations = WikidataLabelService.translations_for(@course.wikidata_labels)
+    translations = WikidataLabelService.translations_for(
+      @course.wikidata_labels, params[:locale].presence || I18n.locale
+    )
     labels = @course.wikidata_labels.map do |l|
       {
         id: l.id,
         match: l.match,
-        label: translations[l.match] || l.labels,
+        # Never fall back to a label saved in a different language. The QID is
+        # language-neutral when Wikidata has no label for the dashboard locale.
+        label: translations[l.match] || l.match,
         url: l.url,
         description: l.description || ''
       }

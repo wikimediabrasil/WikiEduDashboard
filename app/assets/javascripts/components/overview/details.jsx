@@ -388,10 +388,12 @@ const Details = createReactClass({
 
     tags = (
       <div className="tags">
-        <TagList course={this.props.course} />
-        <TagEditable {...this.props} show={this.props.editable} />
-        <WikidataLabelList course={this.props.course} />
-        <WikidataLabelEditable course={this.props.course} show={this.props.editable} />
+        {this.props.editable
+          ? <TagEditable {...this.props} />
+          : <TagList course={this.props.course} />}
+        {this.props.editable
+          ? <WikidataLabelEditable course={this.props.course} />
+          : <WikidataLabelList course={this.props.course} />}
       </div>
     );
 

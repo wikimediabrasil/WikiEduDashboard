@@ -7,8 +7,10 @@ const wikidataLocale = () => (
 const mapLocalLabel = (label) => ({
   id: label.match,
   match: label.match,
-  label: label.labels,
-  description: label.description || '',
+  label: label.localized_label || label.match,
+  // Stored descriptions are not localized. Leave them out rather than showing
+  // text in a language different from the current Dashboard locale.
+  description: '',
   url: label.url || '',
   source: 'local',
 });
@@ -23,7 +25,8 @@ const mapWikidataItem = (item) => ({
 });
 
 export const searchLocalLabels = async (query) => {
-  const resp = await request(`/labels.json?search=${encodeURIComponent(query)}`);
+  const locale = encodeURIComponent(wikidataLocale());
+  const resp = await request(`/labels.json?search=${encodeURIComponent(query)}&locale=${locale}`);
   if (!resp.ok) {
     return [];
   }
@@ -35,7 +38,8 @@ export const fetchLabelsByMatch = async (matches) => {
   if (!matches.length) {
     return [];
   }
-  const resp = await request(`/labels.json?match=${encodeURIComponent(matches.join(','))}`);
+  const locale = encodeURIComponent(wikidataLocale());
+  const resp = await request(`/labels.json?match=${encodeURIComponent(matches.join(','))}&locale=${locale}`);
   if (!resp.ok) {
     return [];
   }
@@ -66,7 +70,7 @@ export const searchWikidata = async (query) => {
 export const searchLabelOptions = async (query) => {
   const localResults = await searchLocalLabels(query);
   const wikidataResults = await searchWikidata(query);
-  const localMatches = new Set(localResults.map(result => result.match));
-  const dedupedWikidata = wikidataResults.filter(result => !localMatches.has(result.match));
-  return [...localResults, ...dedupedWikidata];
+  const wikidataMatches = new Set(wikidataResults.map(result => result.match));
+  const localOnlyResults = localResults.filter(result => !wikidataMatches.has(result.match));
+  return [...wikidataResults, ...localOnlyResults];
 };

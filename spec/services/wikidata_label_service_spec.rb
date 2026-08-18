@@ -41,6 +41,16 @@ RSpec.describe WikidataLabelService, type: :service do
         translations = described_class.translations_for([label], 'es')
         expect(translations).to eq({})
       end
+
+      it 're-fetches a cached value that is not a text label' do
+        Rails.cache.write('wikidata_label/Q349/es', { 'label' => 'sport' })
+
+        translations = described_class.translations_for([label], 'es')
+
+        expect(translations).to eq('Q349' => 'deporte')
+      ensure
+        Rails.cache.delete('wikidata_label/Q349/es')
+      end
     end
 
     context 'when Wikidata API fails' do
