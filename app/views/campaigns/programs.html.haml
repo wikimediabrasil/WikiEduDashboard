@@ -16,10 +16,6 @@
       = form_tag programs_campaign_path(@campaign.slug, anchor: 'courses_table'), method: :get, accept_charset: 'UTF-8', id: 'campaign_search_form', onsubmit: 'this.action = this.action.replace(/#.*$/, "") + "#courses_table";' do
         = hidden_field_tag :sort, params[:sort]
         = hidden_field_tag :direction, params[:direction]
-        - @selected_tag_details.each do |tag|
-          = hidden_field_tag 'tag_details[]', tag.to_json
-        - @selected_excluded_tag_details.each do |tag|
-          = hidden_field_tag 'excluded_tag_details[]', tag.to_json
         .form-fields
           .form-row
             = text_field_tag :title_query, params[:title_query], placeholder: t('form_search.search') + ' ' + t('courses_generic.course'), id: 'title_query', class: 'w100'
@@ -31,16 +27,19 @@
               %label{for: 'school_select'}= t('courses_generic.creator.course_school')
               .school-select-wrapper.grid-span-3
                 = select_tag 'school[]', options_for_select(@presenter.school_options, params[:school]), multiple: true, id: 'school_select'
-            .form-row.advanced-search-grid-small
-              %label{for: 'creation_date_range'}= t("courses.creation_date")
-              = text_field_tag :creation_date_range, nil, id: 'creation_date_range', class: 'w100', placeholder: t('courses.creation_date')
-              = hidden_field_tag :creation_start, params[:creation_start], id: 'creation_start'
-              = hidden_field_tag :creation_end, params[:creation_end], id: 'creation_end'
+            .form-row.advanced-search-grid-large
+              %label{for: 'program_tag_search_input'}= t('campaign.wikidata_tags')
+              #program_tag_search{data: {selected_tags: (@selected_tag_details.map { |tag| { match: tag['qNumber'], label: tag['label'], description: tag['description'], url: tag['url'], excluded: false } } + @selected_excluded_tag_details.map { |tag| { match: tag['qNumber'], label: tag['label'], description: tag['description'], url: tag['url'], excluded: true } }).to_json}}
             .form-row.advanced-search-grid-small
               %label{for: 'start_date_range'}= t("form_search.program_date")
               = text_field_tag :start_date_range, nil, id: 'start_date_range', class: 'w100', placeholder: t('form_search.program_date')
               = hidden_field_tag :start_date_start, params[:start_date_start], id: 'start_date_start'
               = hidden_field_tag :start_date_end, params[:start_date_end], id: 'start_date_end'
+            .form-row.advanced-search-grid-small
+              %label{for: 'creation_date_range'}= t("courses.creation_date")
+              = text_field_tag :creation_date_range, nil, id: 'creation_date_range', class: 'w100', placeholder: t('courses.creation_date')
+              = hidden_field_tag :creation_start, params[:creation_start], id: 'creation_start'
+              = hidden_field_tag :creation_end, params[:creation_end], id: 'creation_end'
             .form-row.advanced-search-grid-small
               %label{for: 'revisions_min'}= t("metrics.revisions")
               .input-group.flex-input-group

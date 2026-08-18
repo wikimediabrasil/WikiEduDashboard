@@ -316,6 +316,7 @@ qqq:
     search_programs_and_tags: Placeholder for the campaign navigation search. It can search program text or Wikidata tags.
     exclude_tag: Accessible label for changing an included tag into an exclusion filter. %{tag} is the translated Wikidata tag label.
     include_tag: Accessible label for changing an excluded tag back into an inclusion filter. %{tag} is the translated Wikidata tag label.
+    wikidata_tags: Label for filters that search for Wikidata tags.
     title: |-
       Label for the input to change the title of a campaign
       {{Identical|Title}}
@@ -531,6 +532,9 @@ qqq:
     submitted_note: Message that your course has been successfully submitted
     user_role: '{{Identical|Role}}'
     tags: '{{Identical|Tag}}'
+    wikidata_labels: Label for the Wikidata tags assigned to a course.
+    wikidata_label_search_placeholder: Placeholder for the input used to search Wikidata tags for a course.
+    wikidata_label_add_aria_label: Accessible label for the control that adds a Wikidata tag to a course.
     term: '{{Identical|Term}}'
     timeline_link: '{{Identical|Timeline}}'
     timeline_tooltip: Message that explains what timeline is good for

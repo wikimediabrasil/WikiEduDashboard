@@ -554,6 +554,9 @@ pt-br:
     tags_page_description: Tópicos e temas associados a esta campanha, vinculados às suas entradas no Wikidata.
     tags_empty: Nenhuma tag foi adicionada a esta campanha ainda.
     wikidata_tags: Tags do Wikidata
+    search_programs_and_tags: Pesquisar programas ou tags…
+    exclude_tag: Excluir %{tag}
+    include_tag: Incluir %{tag}
     tags_cloud_title: Nuvem de Tags
     tags_summary_total_tags: tags
     tags_summary_total_courses: programas

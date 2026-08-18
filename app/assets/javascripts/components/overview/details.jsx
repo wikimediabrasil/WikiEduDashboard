@@ -446,7 +446,8 @@ const Details = createReactClass({
     }
 
     // Wikidata tags describe the course and should be visible to everyone.
-    // The legacy tag controls and Wikidata editing controls remain admin-only.
+    // Legacy tag controls remain admin-only, while Wikidata tags can be
+    // managed by anyone who has entered this form's edit mode.
     const tags = (
       <div className="tags">
         {this.props.current_user.admin && (
@@ -455,10 +456,8 @@ const Details = createReactClass({
             <TagEditable {...this.props} show={this.props.editable} />
           </>
         )}
-        <WikidataLabelList course={this.props.course} />
-        {this.props.current_user.admin && (
-          <WikidataLabelEditable course={this.props.course} show={this.props.editable} />
-        )}
+        {!this.props.editable && <WikidataLabelList course={this.props.course} />}
+        <WikidataLabelEditable course={this.props.course} show={this.props.editable} />
       </div>
     );
 
