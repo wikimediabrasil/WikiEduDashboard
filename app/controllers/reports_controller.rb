@@ -167,7 +167,7 @@ class ReportsController < ApplicationController
   end
 
   def csv_params
-    params.permit(:slug, :course)
+    params.permit(:slug, :course, :format)
   end
 
   def system_csv_filters

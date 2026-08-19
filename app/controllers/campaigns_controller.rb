@@ -391,7 +391,7 @@ class CampaignsController < ApplicationController
   end
 
   def csv_params
-    params.permit(:slug, :course)
+    params.permit(:slug, :course, :format)
   end
 
   def campaign_params
