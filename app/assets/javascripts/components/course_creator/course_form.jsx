@@ -361,16 +361,14 @@ const CourseForm = (props) => {
                 <span key={lbl.qNumber} className="wikidata-tags-chip">
                   <a href={lbl.url} target="_blank" rel="noopener noreferrer" title={lbl.description}>
                     {lbl.label}
-                    <span className="wikidata-tags-chip__qnum">{lbl.qNumber}</span>
+                    <span className="wikidata-tags-chip__qnum">{lbl.qNumber.replace(/^Q(?=\d)/, 'Q ')}</span>
                   </a>
                   <button
                     type="button"
                     className="wikidata-tags-chip__remove"
                     aria-label={`Remove ${lbl.label}`}
                     onClick={() => handleTagRemove(lbl.qNumber)}
-                  >
-                    ×
-                  </button>
+                  />
                 </span>
               ))}
             </div>

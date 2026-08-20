@@ -105,7 +105,7 @@
 
   &__mode
     align-items center
-    background sprout
+    background $brand_primary
     border 0
     border-radius 50%
     color white
@@ -125,11 +125,11 @@
       background $warning_text
 
     &:focus
-      outline 2px solid sprout
+      outline 2px solid $brand_primary
       outline-offset 1px
 
   &__link
-    color sprout
+    color $brand_primary
     text-decoration none
     display inline-flex
     align-items center
@@ -169,14 +169,14 @@
   padding 5px 8px
   width 100%
   &:focus
-    border-color sprout
+    border-color $brand_primary
     outline none
 
 .wikidata-tags-spinner
   width 14px
   height 14px
   border 2px solid border_lt
-  border-top-color sprout
+  border-top-color $brand_primary
   border-radius 50%
   animation wikidata-spin 0.7s linear infinite
   flex-shrink 0
@@ -452,7 +452,7 @@
 
 // ── Custom chart tooltip ──────────────────────────────────────────────────────
 // Colors derived from WikiEduDashboard design system:
-//   $brand_primary #676EB4  ·  sprout #2A8270  ·  $action #1F6F95
+//   $brand_primary #676EB4  ·  $action #1F6F95
 //   $text_dk #2C2C2C  ·  border_lt #D9D9D9  ·  smoke #FAFAFA
 
 #tags-chart-tooltip
@@ -559,8 +559,7 @@
     width 5px
     height 5px
     border-radius 50%
-    // sprout color
-    background #2A8270
+    background $brand_primary
     margin-top 2px
 
   .tct-course-link

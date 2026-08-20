@@ -141,9 +141,9 @@ class WikidataTagsWidget {
     chip.innerHTML = `
       <a href="${this._escape(tag.url)}" target="_blank" rel="noopener" class="wikidata-tags-chip__link" title="${this._escape(tag.description)}">
         ${this._escape(tag.label)}
-        <span class="wikidata-tags-chip__qnum">${this._escape(tag.qNumber)}</span>
+        <span class="wikidata-tags-chip__qnum">${this._escape(tag.qNumber.replace(/^Q(?=\d)/, 'Q '))}</span>
       </a>
-      <button type="button" class="wikidata-tags-chip__remove" aria-label="Remove ${this._escape(tag.label)}">✕</button>
+      <button type="button" class="wikidata-tags-chip__remove" aria-label="Remove ${this._escape(tag.label)}"></button>
     `;
     chip.querySelector('.wikidata-tags-chip__remove').addEventListener('click', () => {
       this._removeTag(tag.id);

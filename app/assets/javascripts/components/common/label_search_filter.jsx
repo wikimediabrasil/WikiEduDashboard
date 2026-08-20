@@ -108,7 +108,7 @@ const LabelSearchFilter = ({ selectedTags, onChange, placeholder, inputName, inp
               title={tag.description}
             >
               {tag.label}
-              <span className="wikidata-tags-chip__qnum">{tag.match}</span>
+              <span className="wikidata-tags-chip__qnum">{tag.match.replace(/^Q(?=\d)/, 'Q ')}</span>
             </a>
             <button
               type="button"
