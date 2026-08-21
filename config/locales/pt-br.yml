@@ -567,6 +567,9 @@ pt-br:
     tags_filter_table_tags: Tags
     tags_filter_table_loading: Carregando programas…
     tags_filter_table_empty: Nenhum programa corresponde às tags selecionadas.
+    search_programs_and_tags: Pesquisar programas ou tags…
+    exclude_tag: Excluir %{tag}
+    include_tag: Incluir %{tag}
     tags_charts_title: Gráficos de Distribuição de Tags
     tags_charts_subtitle: Visualização de como as tags se relacionam com os programas desta campanha.
     tags_charts_loading: Carregando dados do gráfico…

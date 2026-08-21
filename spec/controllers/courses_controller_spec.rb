@@ -52,6 +52,55 @@ describe CoursesController, type: :request do
     end
   end
 
+  describe '#add_wikidata_label' do
+    let(:course) { create(:course, slug: slug_params) }
+    let(:admin) { create(:admin) }
+
+    before do
+      allow_any_instance_of(ApplicationController).to receive(:current_user).and_return(admin)
+      allow_any_instance_of(ApplicationController).to receive(:user_signed_in?).and_return(true)
+    end
+
+    it 'stores canonical localized metadata returned by Wikidata' do
+      service = instance_double(
+        WikidataLabelService,
+        metadata: {
+          'Q349' => {
+            match: 'Q349', label: 'deporte', description: 'actividad recreativa',
+            url: 'https://www.wikidata.org/wiki/Q349'
+          }
+        },
+        successful: true
+      )
+      allow(WikidataLabelService).to receive(:new).with(['Q349']).and_return(service)
+
+      post "/courses/#{course.slug}/wikidata_labels", params: {
+        label: {
+          qNumber: 'q349', label: 'invented', description: 'invented',
+          url: 'https://example.com/not-wikidata'
+        }
+      }, as: :json
+
+      label = course.reload.wikidata_labels.find_by!(match: 'Q349')
+      expect(response).to be_successful
+      expect(label.attributes.symbolize_keys).to include(
+        labels: 'deporte', description: 'actividad recreativa',
+        url: 'https://www.wikidata.org/wiki/Q349'
+      )
+    end
+
+    it 'rejects a QID that Wikidata reports as missing' do
+      service = instance_double(WikidataLabelService, metadata: {}, successful: true)
+      allow(WikidataLabelService).to receive(:new).with(['Q999999999']).and_return(service)
+
+      post "/courses/#{course.slug}/wikidata_labels",
+           params: { label: { qNumber: 'Q999999999', label: 'invented' } }, as: :json
+
+      expect(response.status).to eq(422)
+      expect(Label.find_by(match: 'Q999999999')).to be_nil
+    end
+  end
+
   describe '#destroy' do
     let!(:course)           { create(:course, submitted: true, slug: slug_params) }
     let!(:user)             { create(:test_user) }

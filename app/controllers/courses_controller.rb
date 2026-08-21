@@ -132,47 +132,66 @@ class CoursesController < ApplicationController
 
   def wikidata_labels
     set_course
-    translations = WikidataLabelService.translations_for(
-      @course.wikidata_labels, params[:locale].presence || I18n.locale
-    )
-    labels = @course.wikidata_labels.map do |l|
-      {
-        id: l.id,
-        match: l.match,
-        # Never fall back to a label saved in a different language. The QID is
-        # language-neutral when Wikidata has no label for the dashboard locale.
-        label: translations[l.match] || l.match,
-        url: l.url,
-        description: l.description || ''
-      }
+    locale = params[:locale].presence || I18n.locale
+    lookup = WikidataLabelService.new(@course.wikidata_labels, locale)
+    metadata = lookup.metadata
+    course_labels = @course.wikidata_labels
+    if lookup.successful
+      course_labels = course_labels.select { |label| metadata.key?(label.match.to_s.upcase) }
     end
+    labels = course_labels.map { |label| wikidata_label_json(label, metadata) }
     render json: { course: { id: @course.id }, labels: }
   end
 
   def add_wikidata_label
     set_course
     require_permissions
-    tag_data = params.require(:label).permit(:qNumber, :label, :url, :description)
-    q_number = tag_data[:qNumber].presence
+    q_number = WikidataLabelService.normalize_match(params.dig(:label, :qNumber))
     return render json: { status: 'error', message: 'qNumber is required' },
                   status: :unprocessable_entity if q_number.nil?
 
-    label = upsert_wikidata_label(q_number, tag_data)
+    locale = params[:locale].presence || I18n.locale
+    metadata = verified_wikidata_metadata(q_number, locale)
+    return if performed?
+
+    label = upsert_wikidata_label(metadata)
     CoursesLabels.find_or_create_by(course: @course, label:)
     render json: { status: 'ok',
                    label: { id: label.id, match: label.match,
-                            label: label.labels, url: label.url } }
+                            label: label.labels, url: label.url,
+                            description: label.description.to_s } }
   end
 
-  def upsert_wikidata_label(q_number, tag_data)
-    label = Label.find_or_create_by(match: q_number) do |l|
-      l.labels      = tag_data[:label]
-      l.url         = tag_data[:url]
-      l.description = tag_data[:description].to_s
-    end
-    label.update(labels: tag_data[:label], url: tag_data[:url],
-                 description: tag_data[:description].to_s)
+  def upsert_wikidata_label(metadata)
+    label = Label.find_or_initialize_by(match: metadata[:match])
+    label.update!(labels: metadata[:label], url: metadata[:url],
+                  description: metadata[:description])
     label
+  end
+
+  def verified_wikidata_metadata(q_number, locale = I18n.locale)
+    lookup = WikidataLabelService.new([q_number], locale)
+    metadata = lookup.metadata[q_number]
+    unless lookup.successful
+      render json: { status: 'error', message: 'Wikidata is temporarily unavailable' },
+             status: :service_unavailable
+    end
+    if lookup.successful && metadata.nil?
+      render json: { status: 'error', message: 'Wikidata item was not found' },
+             status: :unprocessable_entity
+    end
+    metadata
+  end
+
+  def wikidata_label_json(label, metadata)
+    entity = metadata[label.match.to_s.upcase]
+    {
+      id: label.id,
+      match: entity&.dig(:match) || label.match,
+      label: entity&.dig(:label) || label.labels,
+      url: entity&.dig(:url) || canonical_wikidata_url(label.match),
+      description: entity&.dig(:description) || label.description.to_s
+    }
   end
 
   def remove_wikidata_label
@@ -183,6 +202,10 @@ class CoursesController < ApplicationController
     render json: { status: 'ok' }
   end
 
+  def canonical_wikidata_url(match)
+    qid = WikidataLabelService.normalize_match(match)
+    qid ? "https://www.wikidata.org/wiki/#{qid}" : ''
+  end
   def timeline
     set_course
   end

@@ -508,6 +508,10 @@ pt:
     search_campaigns: Pesquisar campanhas
     use_start_end_dates: Utilizar datas iniciais e finais
     search: Pesquisar
+    wikidata_tags: Etiquetas do Wikidata
+    search_programs_and_tags: Pesquisar programas ou etiquetas…
+    exclude_tag: Excluir %{tag}
+    include_tag: Incluir %{tag}
   categories:
     searching_for_category: A procurar por categorias em
     add_category: Adicionar categoria
@@ -923,6 +927,9 @@ pt:
     submitted_at: Enviado em
     tag_select: Selecionar ou criar uma etiqueta
     tags: 'Etiquetas:'
+    wikidata_labels: 'Etiquetas do Wikidata:'
+    wikidata_label_search_placeholder: 'Pesquisar etiquetas do Wikidata…'
+    wikidata_label_add_aria_label: 'Adicionar etiqueta do Wikidata'
     term: Período
     timeline: Detalhes do trabalho
     timeline_enabled: Calendário ativado

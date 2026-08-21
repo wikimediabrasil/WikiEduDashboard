@@ -27,6 +27,9 @@
               %label{for: 'school_select'}= t('courses_generic.creator.course_school')
               .school-select-wrapper.grid-span-3
                 = select_tag 'school[]', options_for_select(@presenter.school_options, params[:school]), multiple: true, id: 'school_select'
+            .form-row.advanced-search-grid-large
+              %label{for: 'program_tag_search_input'}= t('campaign.wikidata_tags')
+              #program_tag_search{data: {selected_tags: (@selected_tag_details.map { |tag| { match: tag['qNumber'], label: tag['label'], description: tag['description'], url: tag['url'], excluded: false } } + @selected_excluded_tag_details.map { |tag| { match: tag['qNumber'], label: tag['label'], description: tag['description'], url: tag['url'], excluded: true } }).to_json}}
             .form-row.advanced-search-grid-small
               %label= t("courses.creation_date")
               .flex-input-group

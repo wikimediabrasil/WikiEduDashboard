@@ -3,14 +3,37 @@
 #= Helpers for campaigns views
 module CampaignHelper
   def translated_label(label)
-    return label.labels unless @label_translations
+    wikidata_metadata(label)&.dig(:label) || label.labels
+  end
 
-    @label_translations[label.match] || label.labels
+  def translated_description(label)
+    wikidata_metadata(label)&.dig(:description) || label.description.to_s
+  end
+
+  def wikidata_label_url(label)
+    wikidata_metadata(label)&.dig(:url) || canonical_wikidata_url(label.match)
   end
 
   def translated_labels_for(campaign_or_labels)
     labels = campaign_or_labels.is_a?(Campaign) ? campaign_or_labels.labels : campaign_or_labels
-    @label_translations = WikidataLabelService.translations_for(labels)
+    lookup = WikidataLabelService.new(labels)
+    @label_metadata = lookup.metadata
+    @wikidata_lookup_successful = lookup.successful
+  end
+
+  def wikidata_label_visible?(label)
+    !@wikidata_lookup_successful || wikidata_metadata(label).present?
+  end
+
+  def localized_label_details_for(labels)
+    labels.select { |label| wikidata_label_visible?(label) }.map do |label|
+      {
+        qNumber: label.match.to_s.upcase,
+        label: translated_label(label),
+        description: translated_description(label),
+        url: wikidata_label_url(label)
+      }
+    end
   end
 
   def nav_link(link_text, link_path)
@@ -23,22 +46,20 @@ module CampaignHelper
     end
   end
 
-  def campaign_breadcrumb_title_for_action(campaign, action)
-    case action
-    when 'programs'
-      I18n.t("#{campaign.course_string_prefix}.courses")
-    when 'users'
-      I18n.t("#{campaign.course_string_prefix}.students")
-    when 'tags'
-      I18n.t('campaign.tags_page_title')
-    else
-      I18n.t("courses.#{action}", default: action.titleize)
-    end
-  end
-
   def html_from_markdown(markdown)
     return unless markdown
     converter = Redcarpet::Markdown.new(Redcarpet::Render::HTML)
     sanitize converter.render(markdown)
+  end
+
+  private
+
+  def wikidata_metadata(label)
+    @label_metadata&.dig(label.match.to_s.upcase)
+  end
+
+  def canonical_wikidata_url(match)
+    qid = WikidataLabelService.normalize_match(match)
+    qid ? "https://www.wikidata.org/wiki/#{qid}" : ''
   end
 end

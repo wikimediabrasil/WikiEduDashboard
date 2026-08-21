@@ -655,6 +655,9 @@ es:
     tags_charts_loading: Cargando gráficos…
     tags_charts_no_data: Aún no hay datos de etiquetas disponibles.
     tags_charts_error: No se pudieron cargar los datos de los gráficos.
+    search_programs_and_tags: Buscar programas o etiquetas…
+    exclude_tag: Excluir %{tag}
+    include_tag: Incluir %{tag}
   categories:
     searching_for_category: Buscando categorías en
     add_category: Añadir categoría
@@ -958,6 +961,9 @@ es:
     approve_course: Aprobar el curso
     tag_select: Selecciona o crea una etiqueta
     tags: 'Etiquetas:'
+    wikidata_labels: 'Etiquetas de Wikidata:'
+    wikidata_label_search_placeholder: 'Buscar etiquetas de Wikidata…'
+    wikidata_label_add_aria_label: 'Añadir etiqueta de Wikidata'
     term: Término
     timeline: Detalles de la tarea
     timeline_enabled: Línea de tiempo habilitada

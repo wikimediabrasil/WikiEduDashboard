@@ -1,6 +1,55 @@
+import React, { useEffect, useState } from 'react';
+import { createRoot } from 'react-dom/client';
+import LabelSearchFilter from './components/common/label_search_filter';
+import { localizeLabelOptions } from './utils/wikidata_label_search';
+
 window.DISABLE_COURSES_LISTJS = true;
 
+const serializedTag = tag => JSON.stringify({
+  qNumber: tag.match,
+  label: tag.label,
+  description: tag.description || '',
+  url: `https://www.wikidata.org/wiki/${tag.match}`,
+});
+
+const ProgramTagFilter = ({ initialTags }) => {
+  const [selectedTags, setSelectedTags] = useState(initialTags);
+
+  useEffect(() => {
+    let cancelled = false;
+    localizeLabelOptions(initialTags).then((localizedTags) => {
+      if (!cancelled) setSelectedTags(localizedTags);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  return (
+    <>
+      <LabelSearchFilter
+        selectedTags={selectedTags}
+        onChange={setSelectedTags}
+        placeholder={I18n.t('campaign.search_programs_and_tags')}
+        inputId="program_tag_search_input"
+      />
+      {selectedTags.map(tag => (
+        <input
+          key={tag.match}
+          type="hidden"
+          name={tag.excluded ? 'excluded_tag_details[]' : 'tag_details[]'}
+          value={serializedTag(tag)}
+        />
+      ))}
+    </>
+  );
+};
+
 document.addEventListener('DOMContentLoaded', () => {
+  const programTagSearch = document.getElementById('program_tag_search');
+  if (programTagSearch) {
+    const initialTags = JSON.parse(programTagSearch.dataset.selectedTags || '[]');
+    createRoot(programTagSearch).render(<ProgramTagFilter initialTags={initialTags} />);
+  }
+
   const toggleAdvancedSearchBtn = document.getElementById('toggle_advanced_search');
   const advancedSearchFields = document.getElementById('advanced_search_fields');
 
