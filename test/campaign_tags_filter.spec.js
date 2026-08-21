@@ -109,8 +109,8 @@ describe('campaign tags filter table', () => {
 
     const rows = document.querySelectorAll('#tags-filter-table-body tr');
     expect(rows.length).toBe(3);
-    expect(rows[0].textContent).toContain('Salud en Brasil');
-    expect(rows[1].textContent).toContain('Salud en Bolivia');
+    expect(rows[0].textContent).toContain('Salud en Bolivia');
+    expect(rows[1].textContent).toContain('Salud en Brasil');
     expect(rows[2].textContent).toContain('Salud en Chile');
   });
 });

@@ -1,6 +1,7 @@
 import '../testHelper';
 
 import {
+  fetchLabelsByMatch,
   localizeLabelOptions,
   rankLabelOptions,
   searchLabelOptions,
@@ -93,6 +94,25 @@ describe('Wikidata label search', () => {
       description: 'formas de actividad recreativa',
       url: 'https://www.wikidata.org/wiki/Q349',
       source: 'wikidata',
+    })]);
+  });
+
+  test('fetchLabelsByMatch localizes matching QIDs', async () => {
+    I18n.locale = 'es';
+    global.fetch.mockResolvedValue(response({
+      entities: {
+        Q349: {
+          labels: { es: { value: 'deporte' } },
+          descriptions: { es: { value: 'formas de actividad recreativa' } },
+        },
+      },
+    }));
+
+    const results = await fetchLabelsByMatch(['Q349']);
+    expect(results).toEqual([expect.objectContaining({
+      match: 'Q349',
+      label: 'deporte',
+      description: 'formas de actividad recreativa',
     })]);
   });
 });

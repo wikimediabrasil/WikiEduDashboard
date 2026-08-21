@@ -146,6 +146,19 @@ export const rankLabelOptions = (options, query) => {
   });
 };
 
+export const fetchLabelsByMatch = async (matches = []) => {
+  if (!matches.length) {
+    return [];
+  }
+  const options = matches.map(match => ({
+    match,
+    label: match,
+    description: '',
+    url: `https://www.wikidata.org/wiki/${match}`,
+  }));
+  return localizeLabelOptions(options);
+};
+
 export const searchLabelOptions = async (query) => {
   const wikidataResults = await searchWikidata(query);
   return rankLabelOptions(wikidataResults, query).slice(0, 12);
