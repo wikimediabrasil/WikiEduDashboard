@@ -16,7 +16,6 @@ class LookupsController < ApplicationController
 
   # Used to generate list of existing tags for pulldown
   def tag
-    require_admin_permissions
     @model = 'tag'
     @key = 'tag'
     @values = Tag.all.pluck(:tag)

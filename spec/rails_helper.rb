@@ -102,6 +102,10 @@ RSpec.configure do |config|
       .to_return(status: 200, body: +'@font-face {}', headers: {})
   end
 
+  config.before(:each, type: :request) do
+    host! 'dashboard.wikiedu.org'
+  end
+
   config.before(:each, type: :feature, js: true) do
     # Make sure any logs from the previous test get
     errors = page.driver.browser.logs.get(:browser)

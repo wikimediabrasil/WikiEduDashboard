@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_07_164705) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_05_120000) do
   create_table "admin_course_notes", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.integer "courses_id"
     t.datetime "created_at", null: false
@@ -60,7 +60,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_164705) do
     t.index ["course_id", "updated_at", "article_id"], name: "article_course_timeslice_by_updated_at"
   end
 
-  create_table "article_course_user_wiki_timeslices", charset: "utf8mb3", collation: "utf8mb3_uca1400_ai_ci", force: :cascade do |t|
+  create_table "article_course_user_wiki_timeslices", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.integer "article_id", null: false
     t.integer "character_sum", default: 0
     t.integer "course_id", null: false
@@ -192,7 +192,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_164705) do
     t.index ["course_id", "campaign_id"], name: "index_campaigns_courses_on_course_id_and_campaign_id", unique: true
   end
 
-  create_table "campaigns_labels", charset: "utf8mb3", collation: "utf8mb3_uca1400_ai_ci", force: :cascade do |t|
+  create_table "campaigns_labels", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.integer "campaign_id"
     t.datetime "created_at", null: false
     t.integer "label_id"
@@ -353,7 +353,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_164705) do
     t.index ["slug"], name: "index_courses_on_slug", unique: true
   end
 
-  create_table "courses_labels", charset: "utf8mb3", collation: "utf8mb3_uca1400_ai_ci", force: :cascade do |t|
+  create_table "courses_labels", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.integer "course_id"
     t.datetime "created_at", null: false
     t.integer "label_id"
@@ -397,7 +397,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_164705) do
     t.index ["wiki_id"], name: "index_courses_wikis_on_wiki_id"
   end
 
-  create_table "facilitator_stats", charset: "utf8mb3", collation: "utf8mb3_uca1400_ai_ci", force: :cascade do |t|
+  create_table "facilitator_stats", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.boolean "active_in_last_year", default: false
     t.integer "active_programs_count", default: 0
     t.datetime "created_at", null: false
@@ -427,7 +427,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_164705) do
     t.integer "user_id"
   end
 
-  create_table "labels", charset: "utf8mb3", collation: "utf8mb3_uca1400_ai_ci", force: :cascade do |t|
+  create_table "labels", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "description"
     t.boolean "display", default: true
@@ -513,7 +513,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_164705) do
     t.string "username"
   end
 
-  create_table "revision_acceptances", charset: "utf8mb3", collation: "utf8mb3_uca1400_ai_ci", force: :cascade do |t|
+  create_table "revision_acceptances", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.datetime "accepted_at", null: false
     t.integer "accepted_by_id", null: false
     t.integer "course_id", null: false
@@ -610,7 +610,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_164705) do
     t.index ["survey_id"], name: "index_surveys_question_groups_on_survey_id"
   end
 
-  create_table "system_stats", charset: "utf8mb3", collation: "utf8mb3_uca1400_ai_ci", force: :cascade do |t|
+  create_table "system_stats", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.integer "active_facilitators_count", default: 0
     t.integer "active_programs_count", default: 0
     t.integer "archived_programs_count", default: 0
@@ -759,7 +759,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_164705) do
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 
-  create_table "verification_claim_assignments", charset: "utf8mb3", collation: "utf8mb3_uca1400_ai_ci", force: :cascade do |t|
+  create_table "verification_claim_assignments", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.integer "course_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -769,7 +769,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_164705) do
     t.index ["verification_claim_id"], name: "index_verification_claim_assignments_on_verification_claim_id"
   end
 
-  create_table "verification_claim_responses", charset: "utf8mb3", collation: "utf8mb3_uca1400_ai_ci", force: :cascade do |t|
+  create_table "verification_claim_responses", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.text "claim_location"
     t.integer "course_id", null: false
     t.datetime "created_at", null: false
@@ -786,7 +786,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_07_164705) do
     t.index ["verification_claim_id"], name: "index_verification_claim_responses_on_verification_claim_id"
   end
 
-  create_table "verification_claims", charset: "utf8mb3", collation: "utf8mb3_uca1400_ai_ci", force: :cascade do |t|
+  create_table "verification_claims", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
     t.integer "alert_id"
     t.text "archive_url"
     t.integer "article_id"
