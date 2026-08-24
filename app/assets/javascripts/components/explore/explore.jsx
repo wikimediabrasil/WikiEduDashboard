@@ -21,6 +21,7 @@ const Explore = ({ dashboardTitle }) => {
       <div id="campaigns_list">
         <DetailedCampaignList
           headerText={isFeaturedCampaigns ? I18n.t('campaign.featured_campaigns') : I18n.t('campaign.newest_campaigns')}
+          featuredOrNewestOnly
         />
         <div className="campaigns-actions" >
           {showCreateButton && <a className="button dark" href="campaigns/new?create=true">{I18n.t('campaign.create_campaign')}</a>}
