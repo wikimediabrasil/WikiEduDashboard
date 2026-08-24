@@ -11,10 +11,10 @@ import SearchBar from '../common/search_bar';
 const CAMPAIGNS_PER_PAGE = 10;
 
 const CampaignList = ({ keys, showSearch, RowElement, headerText, userOnly, showStatistics = false, featuredOrNewestOnly = false, paginate = false }) => {
-  const { all_campaigns, all_campaigns_loaded, sort } = useSelector(state => state.campaigns);
+  const { all_campaigns, all_campaigns_loaded, campaign_pagination, sort } = useSelector(state => state.campaigns);
   const [searchParams, setSearchParams] = useSearchParams();
   const search = searchParams.get('search');
-  const filteredCampaigns = showSearch && search ? all_campaigns.filter(campaign => campaign.title.toLowerCase().includes(search.toLowerCase())) : all_campaigns;
+  const filteredCampaigns = paginate ? all_campaigns : (showSearch && search ? all_campaigns.filter(campaign => campaign.title.toLowerCase().includes(search.toLowerCase())) : all_campaigns);
   const [currentPage, setCurrentPage] = useState(0);
   const dispatch = useDispatch();
   const inputRef = useRef();
@@ -37,31 +37,29 @@ const CampaignList = ({ keys, showSearch, RowElement, headerText, userOnly, show
 
   const onClickHandler = () => {
     if (inputRef?.current) {
-      setSearchParams(`search=${inputRef?.current.value}`);
+      setCurrentPage(0);
+      setSearchParams({ search: inputRef.current.value });
     }
   };
 
   useEffect(() => {
     if (showStatistics) {
       dispatch(fetchCampaignStatistics(userOnly, featuredOrNewestOnly));
+    } else if (paginate) {
+      dispatch(fetchAllCampaigns({
+        page: currentPage + 1,
+        search,
+      }));
     } else {
       dispatch(fetchAllCampaigns());
     }
-  }, []);
-
-  useEffect(() => {
-    setCurrentPage(0);
-  }, [search]);
-
+  }, [currentPage, search]);
 
   if (!all_campaigns_loaded) {
     return <Loading/>;
   }
-  const pageCount = Math.ceil(filteredCampaigns.length / CAMPAIGNS_PER_PAGE);
-  const firstCampaignIndex = currentPage * CAMPAIGNS_PER_PAGE;
-  const visibleCampaigns = paginate
-    ? filteredCampaigns.slice(firstCampaignIndex, firstCampaignIndex + CAMPAIGNS_PER_PAGE)
-    : filteredCampaigns;
+  const pageCount = paginate ? campaign_pagination.total_pages : Math.ceil(filteredCampaigns.length / CAMPAIGNS_PER_PAGE);
+  const visibleCampaigns = filteredCampaigns;
   const campaignElements = visibleCampaigns.map(campaign => <RowElement campaign={campaign} key={campaign.slug}/>);
 
   return (

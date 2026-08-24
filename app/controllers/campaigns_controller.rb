@@ -16,9 +16,19 @@ class CampaignsController < ApplicationController
                                                      remove_organizer remove_course edit]
 
   DETAILS_FIELDS = %w[title start end].freeze
+  CAMPAIGNS_PER_PAGE = 10
 
   def index
-    @campaign = Campaign.new
+    respond_to do |format|
+      format.html { @campaign = Campaign.new }
+      format.json do
+        campaigns = Campaign.order(created_at: :desc)
+        if params[:search].present?
+          campaigns = campaigns.where('lower(title) LIKE ?', campaign_search)
+        end
+        @campaigns = campaigns.paginate(page: params[:page], per_page: CAMPAIGNS_PER_PAGE)
+      end
+    end
   end
 
   def show
@@ -314,6 +324,10 @@ class CampaignsController < ApplicationController
     else
       'recent_revision_count'
     end
+  end
+
+  def campaign_search
+    "%#{Campaign.sanitize_sql_like(params[:search].downcase)}%"
   end
 
   def set_presenter
