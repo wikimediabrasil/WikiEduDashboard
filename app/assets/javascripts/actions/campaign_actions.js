@@ -97,24 +97,26 @@ const fetchFeaturedCampaigns = async (dispatch) => {
 };
 
 
-const fetchCampaignStatisticsPromise = async (userOnly, dispatch) => {
-  const featured_campaigns = await fetchFeaturedCampaigns(dispatch);
-  // newest limits the fetched campaigns to the 10 most recent ones
-  // it is set to false if there are featured campaigns listed
-  const newest = !(featured_campaigns.length > 0);
+const fetchCampaignStatisticsPromise = async (userOnly, dispatch, featuredOrNewestOnly) => {
+  const featured_campaigns = featuredOrNewestOnly ? await fetchFeaturedCampaigns(dispatch) : [];
+  // The explore page displays either featured campaigns or the 10 newest ones.
+  // Full campaign lists must not use either of those filters.
+  const newest = featuredOrNewestOnly && featured_campaigns.length === 0;
   const response = await request(`/campaigns/statistics.json?user_only=${userOnly}&newest=${newest}`);
   await ensureOk(response);
   const response_data = await response.json();
-  const campaigns = filterFeaturedCampaigns(response_data, featured_campaigns);
+  const campaigns = featuredOrNewestOnly
+    ? filterFeaturedCampaigns(response_data, featured_campaigns)
+    : response_data.campaigns;
   return { campaigns };
 };
 
 
 // this function returns the campaigns along with their statistics data
 // if userOnly is set to true, only campaigns the user has created will be returned
-export const fetchCampaignStatistics = (userOnly = false) => (dispatch) => {
+export const fetchCampaignStatistics = (userOnly = false, featuredOrNewestOnly = false) => (dispatch) => {
   return (
-    fetchCampaignStatisticsPromise(userOnly, dispatch)
+    fetchCampaignStatisticsPromise(userOnly, dispatch, featuredOrNewestOnly)
       .then((data) => {
         dispatch({
           type: RECEIVE_CAMPAIGNS_WITH_STATS,

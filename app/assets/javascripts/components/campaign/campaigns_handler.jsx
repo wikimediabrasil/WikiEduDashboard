@@ -18,7 +18,7 @@ const CampaignsHandler = () => {
   };
   return (
     <Routes>
-      <Route index element={<CampaignList showSearch={true} RowElement={CampaignRow} keys={keys}/>}/>
+      <Route index element={<CampaignList showSearch={true} paginate RowElement={CampaignRow} keys={keys}/>}/>
       <Route path=":campaign_slug/*" element={<Campaign />} />
     </Routes>
   );

@@ -2,7 +2,7 @@ import React from 'react';
 import CampaignList from './campaign_list';
 import DetailedCampaignRow from './detailed_campaign_row';
 
-const DetailedCampaignList = ({ headerText, userOnly }) => {
+const DetailedCampaignList = ({ headerText, userOnly, featuredOrNewestOnly = false }) => {
   const keys = {
     title: {
       label: I18n.t('campaign.campaigns'),
@@ -47,7 +47,14 @@ const DetailedCampaignList = ({ headerText, userOnly }) => {
     };
   }
   return (
-    <CampaignList RowElement={DetailedCampaignRow} keys={keys} headerText={headerText} userOnly={userOnly} showStatistics/>
+    <CampaignList
+      RowElement={DetailedCampaignRow}
+      keys={keys}
+      headerText={headerText}
+      userOnly={userOnly}
+      showStatistics
+      featuredOrNewestOnly={featuredOrNewestOnly}
+    />
   );
 };
 

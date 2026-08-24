@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import ReactPaginate from 'react-paginate';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
 import { fetchAllCampaigns, fetchCampaignStatistics, sortCampaigns } from '../../actions/campaign_actions';
@@ -7,15 +8,19 @@ import Loading from '../common/loading';
 import DropdownSortSelect from '../common/dropdown_sort_select';
 import SearchBar from '../common/search_bar';
 
-const CampaignList = ({ keys, showSearch, RowElement, headerText, userOnly, showStatistics = false }) => {
+const CAMPAIGNS_PER_PAGE = 10;
+
+const CampaignList = ({ keys, showSearch, RowElement, headerText, userOnly, showStatistics = false, featuredOrNewestOnly = false, paginate = false }) => {
   const { all_campaigns, all_campaigns_loaded, sort } = useSelector(state => state.campaigns);
   const [searchParams, setSearchParams] = useSearchParams();
   const search = searchParams.get('search');
   const filteredCampaigns = showSearch && search ? all_campaigns.filter(campaign => campaign.title.toLowerCase().includes(search.toLowerCase())) : all_campaigns;
+  const [currentPage, setCurrentPage] = useState(0);
   const dispatch = useDispatch();
   const inputRef = useRef();
 
   const sortBy = (key) => {
+    setCurrentPage(0);
     dispatch(sortCampaigns(key));
   };
 
@@ -38,17 +43,26 @@ const CampaignList = ({ keys, showSearch, RowElement, headerText, userOnly, show
 
   useEffect(() => {
     if (showStatistics) {
-      dispatch(fetchCampaignStatistics(userOnly));
+      dispatch(fetchCampaignStatistics(userOnly, featuredOrNewestOnly));
     } else {
       dispatch(fetchAllCampaigns());
     }
   }, []);
 
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [search]);
+
 
   if (!all_campaigns_loaded) {
     return <Loading/>;
   }
-  const campaignElements = filteredCampaigns.map(campaign => <RowElement campaign={campaign} key={campaign.slug}/>);
+  const pageCount = Math.ceil(filteredCampaigns.length / CAMPAIGNS_PER_PAGE);
+  const firstCampaignIndex = currentPage * CAMPAIGNS_PER_PAGE;
+  const visibleCampaigns = paginate
+    ? filteredCampaigns.slice(firstCampaignIndex, firstCampaignIndex + CAMPAIGNS_PER_PAGE)
+    : filteredCampaigns;
+  const campaignElements = visibleCampaigns.map(campaign => <RowElement campaign={campaign} key={campaign.slug}/>);
 
   return (
     <div className="container">
@@ -73,6 +87,19 @@ const CampaignList = ({ keys, showSearch, RowElement, headerText, userOnly, show
         sortBy={sortBy}
         className="table--expandable table--hoverable"
       />
+      {paginate && pageCount > 1 && (
+        <ReactPaginate
+          previousLabel={I18n.t('application.back')}
+          nextLabel={I18n.t('application.next')}
+          breakLabel="..."
+          pageCount={pageCount}
+          marginPagesDisplayed={2}
+          pageRangeDisplayed={6}
+          onPageChange={({ selected }) => setCurrentPage(selected)}
+          forcePage={currentPage}
+          containerClassName={'pagination'}
+        />
+      )}
     </div>
   );
 };
