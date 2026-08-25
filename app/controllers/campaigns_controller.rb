@@ -17,9 +17,19 @@ class CampaignsController < ApplicationController
   before_action :add_campaign_index_breadcrumb, only: %i[index create]
 
   DETAILS_FIELDS = %w[title start end].freeze
+  CAMPAIGNS_PER_PAGE = 10
 
   def index
-    @campaign = Campaign.new
+    respond_to do |format|
+      format.html { @campaign = Campaign.new }
+      format.json do
+        campaigns = Campaign.order(created_at: :desc)
+        if params[:search].present?
+          campaigns = campaigns.where('lower(title) LIKE ?', campaign_search)
+        end
+        @campaigns = campaigns.paginate(page: params[:page], per_page: CAMPAIGNS_PER_PAGE)
+      end
+    end
   end
 
   def show
@@ -264,6 +274,10 @@ class CampaignsController < ApplicationController
   end
 
   private
+
+  def campaign_search
+    "%#{Campaign.sanitize_sql_like(params[:search].downcase)}%"
+  end
 
   def extract_program_filters
     filters = params.slice(:title_query, :creation_start, :creation_end,
