@@ -113,7 +113,7 @@
                   .wikidata-tags-chips
                     - @campaign.labels.select { |label| wikidata_label_visible?(label) }.each do |label|
                       %span.wikidata-tags-chip
-                        %a.wikidata-tags-chip__link{href: wikidata_label_url(label), target: '_blank', rel: 'noopener', title: translated_description(label)}
+                        %a.wikidata-label-list{href: wikidata_label_url(label), target: '_blank', rel: 'noopener', title: translated_description(label)}
                           = translated_label(label)
                           %span.wikidata-tags-chip__qnum= label.match.sub(/\AQ(?=\d)/, 'Q ')
                 - else
