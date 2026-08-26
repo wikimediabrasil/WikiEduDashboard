@@ -14,18 +14,8 @@
         %h2= t('campaign.tags_page_title')
         %p= t('campaign.tags_page_description')
 
-      / ── Summary stats ─────────────────────────────────────────────────────
-      .campaign-tags-summary
-        .campaign-tags-summary__item
-          %span.campaign-tags-summary__number#tags-total-labels= @labels.count
-          %span.campaign-tags-summary__label= t('campaign.tags_summary_total_tags')
-        .campaign-tags-summary__item
-          %span.campaign-tags-summary__number#tags-total-courses= @campaign.courses.count
-          %span.campaign-tags-summary__label= t('campaign.tags_summary_total_courses')
-
       / ── Campaign tag cloud ────────────────────────────────────────────────
       %section.campaign-tags-cloud-section
-        %h3= t('campaign.tags_cloud_campaign_title')
         - if @campaign_labels.any?
           - translated_labels_for(@campaign_labels)
           .campaign-tags-cloud
@@ -37,6 +27,15 @@
         - else
           .campaign-tags-cloud
             %p.campaign-tags-empty= t('campaign.tags_campaign_empty')
+
+      / ── Summary stats ─────────────────────────────────────────────────────
+      .campaign-tags-summary
+        .campaign-tags-summary__item
+          %span.campaign-tags-summary__number#tags-total-labels= @labels.count
+          %span.campaign-tags-summary__label= t('campaign.tags_summary_total_tags')
+        .campaign-tags-summary__item
+          %span.campaign-tags-summary__number#tags-total-courses= @campaign.courses.count
+          %span.campaign-tags-summary__label= t('campaign.tags_summary_total_courses')
 
       / ── Program tag cloud ────────────────────────────────────────────────
       %section.campaign-tags-cloud-section

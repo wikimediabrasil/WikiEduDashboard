@@ -115,7 +115,7 @@
                       %span.wikidata-tags-chip
                         %a.wikidata-label-list{href: wikidata_label_url(label), target: '_blank', rel: 'noopener', title: translated_description(label)}
                           = translated_label(label)
-                          %span.wikidata-tags-chip__qnum= label.match.sub(/\AQ(?=\d)/, 'Q ')
+                          %span.wikidata-tags-chip__qnum= label.match
                 - else
                   %span —
               %span.rails_editable-input

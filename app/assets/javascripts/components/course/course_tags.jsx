@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 
-import WikidataLabelEditable from '../overview/wikidata_label_editable.jsx';
 import { fetchCourseWikidataLabels } from '../../actions/course_wikidata_label_actions';
 import { wikidataLabelText } from '../../utils/wikidata_label_utils';
 
@@ -67,11 +66,6 @@ const CourseTags = ({ course }) => {
         </div>
         {tagGallery}
       </section>
-
-      <div className="course-tags-admin">
-        <span>{I18n.t('courses.tags_manage')}</span>
-        <WikidataLabelEditable course={course} show={true} />
-      </div>
     </div>
   );
 };

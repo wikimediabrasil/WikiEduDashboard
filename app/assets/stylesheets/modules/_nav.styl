@@ -30,14 +30,14 @@ nav.top-nav
 
 
   .container
-    // min-height (not fixed height) so the nav can grow when items
-    // wrap onto a second row at high browser zoom. flex-wrap lets
-    // them actually wrap instead of being crushed. WCAG 1.4.4.
-    min-height $nav_height
+    // The desktop navigation is a single header row. Below the desktop
+    // breakpoint the React component switches to the hamburger menu,
+    // so wrapping these groups here only creates a duplicated header row.
+    height $nav_height
     display flex
-    flex-wrap wrap
+    flex-wrap nowrap
     align-items center
-    justify-content space-around
+    justify-content space-between
 
   .notifications
     a
@@ -103,6 +103,7 @@ nav.top-nav
 
 .top-nav__login-links
   display flex
+  flex-wrap nowrap
   justify-content flex-end
   align-items: center
   margin-left auto
@@ -146,6 +147,7 @@ nav.top-nav
 
 .top-nav__main-links
   display flex
+  flex-wrap nowrap
   justify-content flex-start
   margin 0
   padding 0

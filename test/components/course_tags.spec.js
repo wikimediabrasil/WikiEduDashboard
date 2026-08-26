@@ -90,9 +90,9 @@ describe('CourseTags', () => {
     expect(fetchCourseWikidataLabels).toHaveBeenCalledWith(course.slug);
   });
 
-  test('renders tag management controls for non-admin users', () => {
+  test('does not render tag management controls', () => {
     const container = renderCourseTags();
 
-    expect(container.querySelector('.course-tags-admin')).not.toBeNull();
+    expect(container.querySelector('.course-tags-admin')).toBeNull();
   });
 });

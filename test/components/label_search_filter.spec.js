@@ -103,6 +103,23 @@ describe('LabelSearchFilter', () => {
     expect(props.onChange).toHaveBeenCalledWith([{ ...sport, excluded: true }]);
   });
 
+  test('renders an accessible remove button that removes a selected tag', () => {
+    const sport = {
+      match: 'Q349', label: 'Sport', description: 'physical activity',
+      url: 'https://www.wikidata.org/wiki/Q349'
+    };
+    const props = renderFilter({ selectedTags: [sport] });
+    const removeButton = container.querySelector('.wikidata-tags-chip__remove');
+
+    expect(container.querySelector('.wikidata-tags-chip__qnum').textContent).toBe('Q349');
+    expect(removeButton.textContent.trim()).toBe('✕');
+    expect(removeButton.getAttribute('aria-label')).toContain('Sport');
+
+    act(() => removeButton.click());
+
+    expect(props.onChange).toHaveBeenCalledWith([]);
+  });
+
   test('does not replace newer suggestions with a slower previous search', async () => {
     let resolveSoccer;
     let resolveSport;

@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { searchLabelOptions } from '../../utils/wikidata_label_search';
 
+const removeIcon = String.fromCodePoint(0x2715);
+
 const LabelSearchFilter = ({ selectedTags, onChange, placeholder, inputName, inputId, initialQuery }) => {
   const [query, setQuery] = useState(initialQuery);
   const [results, setResults] = useState([]);
@@ -108,14 +110,16 @@ const LabelSearchFilter = ({ selectedTags, onChange, placeholder, inputName, inp
               title={tag.description}
             >
               {tag.label}
-              <span className="wikidata-tags-chip__qnum">{tag.match.replace(/^Q(?=\d)/, 'Q ')}</span>
+              <span className="wikidata-tags-chip__qnum">{tag.match}</span>
             </a>
             <button
               type="button"
               className="wikidata-tags-chip__remove"
               aria-label={`${I18n.t('assignments.remove')} ${tag.label}`}
               onClick={() => removeTag(tag.match)}
-            />
+            >
+              {removeIcon}
+            </button>
           </span>
         ))}
       </div>
