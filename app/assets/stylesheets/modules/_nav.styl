@@ -343,16 +343,18 @@ nav.ham-nav
     padding-right 15px
     +above(desktop)
       display flex
-      // flex-wrap lets the nav drop onto a second line below the
-      // course title when the viewport is effectively narrow (e.g.
-      // 200% browser zoom), instead of crushing the nav into a
-      // too-small column.
-      flex-wrap wrap
+      align-items center
+      flex-wrap nowrap
+      height $nav_height
+      min-width 0
+      overflow hidden
     > a, > .nav__item
       display block
       text-decoration none
       text-align center
       +above(desktop)
+        flex 0 1 370px
+        min-width 120px
         max-width 290px
         @media only screen and (min-width: 1000px)
           max-width 370px
@@ -385,6 +387,14 @@ nav.ham-nav
           text-decoration none
           &:hover
             text-decoration underline
+    > nav
+      +above(desktop)
+        align-items center
+        display flex
+        flex 1 1 auto
+        flex-wrap nowrap
+        min-width 0
+        white-space nowrap
   .campaign-nav__ul
     display inline
 
@@ -393,6 +403,11 @@ nav.ham-nav
   box-sizing border-box
   max-width 100%
   width 380px
+
+  +above(desktop)
+    flex 1 1 240px
+    min-width 180px
+    width auto
 
   > form
     display flex
