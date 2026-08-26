@@ -150,12 +150,10 @@
               %span.rails_editable-content
                 - if @campaign.labels.any?
                   - translated_labels_for(@campaign)
-                  .wikidata-tags-chips
-                    - @campaign.labels.select { |label| wikidata_label_visible?(label) }.each do |label|
-                      %span.wikidata-tags-chip
-                        %a.wikidata-label-list{href: wikidata_label_url(label), target: '_blank', rel: 'noopener', title: translated_description(label)}
-                          = translated_label(label)
-                          %span.wikidata-tags-chip__qnum= label.match
+                  - @campaign.labels.select { |label| wikidata_label_visible?(label) }.each_with_index do |label, index|
+                    = ', ' if index.positive?
+                    %a.wikidata-label-list{href: wikidata_label_url(label), target: '_blank', rel: 'noopener', title: translated_description(label)}
+                      = "#{translated_label(label)} (#{label.match})"
                 - else
                   %span —
               %span.rails_editable-input

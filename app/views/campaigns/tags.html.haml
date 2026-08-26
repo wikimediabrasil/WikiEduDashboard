@@ -31,7 +31,7 @@
       / ── Summary stats ─────────────────────────────────────────────────────
       .campaign-tags-summary
         .campaign-tags-summary__item
-          %span.campaign-tags-summary__number#tags-total-labels= @labels.count
+          %span.campaign-tags-summary__number#tags-total-labels= @course_labels.count
           %span.campaign-tags-summary__label= t('campaign.tags_summary_total_tags')
         .campaign-tags-summary__item
           %span.campaign-tags-summary__number#tags-total-courses= @campaign.courses.count

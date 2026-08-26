@@ -168,7 +168,9 @@ class CampaignsController < ApplicationController
     @course_labels   = Label.where(id: course_label_ids, display: true).order(:labels)
     @campaign_labels = verified_wikidata_labels(@campaign_labels)
     @course_labels   = verified_wikidata_labels(@course_labels)
-    @labels          = (@campaign_labels + @course_labels).uniq(&:id)
+    # The summary and chart totals describe program tags. Campaign-level tags
+    # are displayed separately and must not inflate that count.
+    @labels          = @course_labels
     respond_to do |format|
       format.html
       format.json { render json: tags_chart_data }

@@ -282,10 +282,12 @@ describe CampaignsController, type: :request do
   describe '#overview' do
     let(:user) { create(:user) }
     let(:campaign) { create(:campaign, description: 'New description') }
+    let(:label) { create(:label, labels: 'Campaign topic') }
 
     before do
       create(:campaigns_user, user_id: user.id, campaign_id: campaign.id,
                               role: CampaignsUsers::Roles::ORGANIZER_ROLE)
+      campaign.labels << label
       get "/campaigns/#{campaign.slug}/overview", params: { slug: campaign.slug }
     end
 
@@ -299,6 +301,12 @@ describe CampaignsController, type: :request do
 
     it 'shows properties of the campaign' do
       expect(response.body).to include(campaign.description)
+    end
+
+    it 'renders campaign Wikidata tags as links instead of chips' do
+      expect(response.body).to include("href='#{label.url}'")
+      expect(response.body).to include("class='wikidata-label-list'")
+      expect(response.body).not_to include("class='wikidata-tags-chip'")
     end
   end
 
@@ -673,17 +681,17 @@ describe CampaignsController, type: :request do
       expect(json['labels'].first['id']).to eq(label.id)
     end
 
-    it 'keeps the JSON total_labels consistent with the HTML summary' do
+    it 'counts only program labels in the HTML and JSON summaries' do
       campaign_only_label = create(:label, match: 'Q999')
       campaign.labels << campaign_only_label
 
       get "/campaigns/#{campaign.slug}/tags"
-      html_total = assigns(:labels).count
+      html_total = assigns(:course_labels).count
 
       get "/campaigns/#{campaign.slug}/tags.json"
       json_total = JSON.parse(response.body)['total_labels']
 
-      expect(html_total).to eq(2)
+      expect(html_total).to eq(1)
       expect(json_total).to eq(html_total)
     end
   end
