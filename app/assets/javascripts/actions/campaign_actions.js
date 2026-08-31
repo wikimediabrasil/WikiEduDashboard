@@ -123,12 +123,18 @@ const fetchFeaturedCampaigns = async (dispatch) => {
 };
 
 
-const fetchCampaignStatisticsPromise = async (userOnly, dispatch) => {
-  const featured_campaigns = await fetchFeaturedCampaigns(dispatch);
+const fetchCampaignStatisticsPromise = async (userOnly, dispatch, {
+  page, search, labelSearch, paginated = false
+} = {}) => {
+  const featured_campaigns = paginated ? [] : await fetchFeaturedCampaigns(dispatch);
   // newest limits the fetched campaigns to the 10 most recent ones
   // it is set to false if there are featured campaigns listed
   const newest = !(featured_campaigns.length > 0);
-  const response = await request(`/campaigns/statistics.json?user_only=${userOnly}&newest=${newest}`);
+  const params = new URLSearchParams({ user_only: userOnly, newest, paginated });
+  if (page) { params.set('page', page); }
+  if (search) { params.set('search', search); }
+  if (labelSearch) { params.set('label_search', labelSearch); }
+  const response = await request(`/campaigns/statistics.json?${params.toString()}`);
   if (!response.ok) {
     logErrorMessage(response);
     const data = await response.text();
@@ -136,16 +142,16 @@ const fetchCampaignStatisticsPromise = async (userOnly, dispatch) => {
     throw response;
   }
   const response_data = await response.json();
-  const campaigns = filterFeaturedCampaigns(response_data, featured_campaigns);
-  return { campaigns };
+  const campaigns = paginated ? response_data.campaigns : filterFeaturedCampaigns(response_data, featured_campaigns);
+  return { ...response_data, campaigns };
 };
 
 
 // this function returns the campaigns along with their statistics data
 // if userOnly is set to true, only campaigns the user has created will be returned
-export const fetchCampaignStatistics = (userOnly = false) => (dispatch) => {
+export const fetchCampaignStatistics = (userOnly = false, options = {}) => (dispatch) => {
   return (
-    fetchCampaignStatisticsPromise(userOnly, dispatch)
+    fetchCampaignStatisticsPromise(userOnly, dispatch, options)
       .then((data) => {
         dispatch({
           type: RECEIVE_CAMPAIGNS_WITH_STATS,

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSearchParams } from 'react-router-dom';
+import ReactPaginate from 'react-paginate';
 import { fetchAllCampaigns, fetchCampaignStatistics, sortCampaigns } from '../../actions/campaign_actions';
 import List from '../common/list';
 import Loading from '../common/loading';
@@ -9,12 +10,13 @@ import SearchBar from '../common/search_bar';
 import LabelSearchFilter from '../common/label_search_filter';
 import { fetchLabelsByMatch } from '../../utils/wikidata_label_search';
 
-const CampaignList = ({ keys, showSearch, RowElement, headerText, userOnly, showStatistics = false }) => {
-  const { all_campaigns, all_campaigns_loaded, sort } = useSelector(state => state.campaigns);
+const CampaignList = ({ keys, showSearch, RowElement, headerText, userOnly, showStatistics = false, paginated = false }) => {
+  const { all_campaigns, all_campaigns_loaded, pagination, sort } = useSelector(state => state.campaigns);
   const [searchParams, setSearchParams] = useSearchParams();
   const search = searchParams.get('search');
   const labelSearch = searchParams.get('label_search');
   const selectedMatches = labelSearch ? labelSearch.split(',') : [];
+  const page = Number(searchParams.get('page') || 1);
 
   const [selectedTags, setSelectedTags] = useState([]);
 
@@ -82,21 +84,27 @@ const CampaignList = ({ keys, showSearch, RowElement, headerText, userOnly, show
   };
 
   const onClickHandler = () => {
-    setSearchParams(buildSearchParams(selectedTags));
+    setSearchParams({ ...buildSearchParams(selectedTags), page: 1 });
   };
 
   const handleLabelChange = (tags) => {
     setSelectedTags(tags);
-    setSearchParams(buildSearchParams(tags));
+    setSearchParams({ ...buildSearchParams(tags), page: 1 });
+  };
+
+  const handlePageChange = ({ selected }) => {
+    const params = buildSearchParams(selectedTags);
+    params.page = selected + 1;
+    setSearchParams(params);
   };
 
   useEffect(() => {
     if (showStatistics) {
-      dispatch(fetchCampaignStatistics(userOnly));
+      dispatch(fetchCampaignStatistics(userOnly, { page, search, labelSearch, paginated }));
     } else {
       dispatch(fetchAllCampaigns());
     }
-  }, []);
+  }, [dispatch, labelSearch, page, paginated, search, showStatistics, userOnly]);
 
 
   if (!all_campaigns_loaded) {
@@ -153,6 +161,19 @@ const CampaignList = ({ keys, showSearch, RowElement, headerText, userOnly, show
         sortBy={sortBy}
         className="table--expandable table--hoverable"
       />
+      {paginated && pagination?.totalPages > 1 && (
+        <ReactPaginate
+          previousLabel={I18n.t('articles.previous')}
+          nextLabel={I18n.t('articles.next')}
+          breakLabel="..."
+          pageCount={pagination.totalPages}
+          marginPagesDisplayed={1}
+          pageRangeDisplayed={5}
+          onPageChange={handlePageChange}
+          forcePage={pagination.currentPage - 1}
+          containerClassName="pagination"
+        />
+      )}
     </div>
   );
 };

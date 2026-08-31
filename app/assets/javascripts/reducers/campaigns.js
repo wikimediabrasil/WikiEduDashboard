@@ -25,6 +25,7 @@ const initialState = {
   all_campaigns: [],
   isLoaded: false,
   all_campaigns_loaded: false,
+  pagination: null,
   sort: {
     key: null,
     sortKey: null,
@@ -48,7 +49,12 @@ export default function campaigns(state = initialState, action) {
       const newState = {
         ...state,
         all_campaigns: action.data.campaigns,
-        all_campaigns_loaded: true
+        all_campaigns_loaded: true,
+        pagination: action.data.total_pages ? {
+          currentPage: action.data.current_page,
+          totalPages: action.data.total_pages,
+          totalEntries: action.data.total_entries,
+        } : null,
       };
       return newState;
     }

@@ -244,13 +244,13 @@ class CampaignsController < ApplicationController
   end
 
   def statistics
-    user_only = params[:user_only]
-    newest = params[:newest]
-    # rubocop:disable Layout/LineLength
-    @campaigns = user_only == 'true' ? current_user.campaigns.includes(:labels) : Campaign.includes(:labels).all.order(created_at: :desc)
-    # rubocop:enable Layout/LineLength
-    @campaigns = @campaigns.limit(10) if newest == 'true'
-    render user_only == 'true' ? 'user_statistics' : 'statistics'
+    @campaigns = statistics_campaigns
+    if params[:paginated] == 'true'
+      @campaigns = @campaigns.paginate(page: params[:page], per_page: CAMPAIGNS_PER_PAGE)
+    else
+      @campaigns = @campaigns.limit(CAMPAIGNS_PER_PAGE) if params[:newest] == 'true'
+    end
+    render params[:user_only] == 'true' ? 'user_statistics' : 'statistics'
   end
 
   def featured_campaigns
@@ -279,6 +279,22 @@ class CampaignsController < ApplicationController
 
   def campaign_search
     "%#{Campaign.sanitize_sql_like(params[:search].downcase)}%"
+  end
+
+  def statistics_campaigns
+    campaigns = if params[:user_only] == 'true'
+                  current_user.campaigns.includes(:labels)
+                else
+                  Campaign.includes(:labels).order(created_at: :desc)
+                end
+    if params[:search].present?
+      campaigns = campaigns.where('lower(title) LIKE ?', campaign_search)
+    end
+    return campaigns unless params[:label_search].present?
+
+    campaigns.joins(:labels).where(
+      labels: { match: params[:label_search].split(',') }
+    ).distinct
   end
 
   def extract_program_filters

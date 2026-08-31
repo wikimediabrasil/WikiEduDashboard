@@ -636,6 +636,16 @@ describe CampaignsController, type: :request do
       expect(campaign_json['labels']).to include('test_label')
       expect(campaign_json['label_matches']).to include(label.match)
     end
+
+    it 'paginates campaign statistics when requested' do
+      10.times { |index| create(:campaign, title: "Campaign #{index}") }
+
+      get '/campaigns/statistics.json', params: { paginated: true, page: 2 }
+
+      json = JSON.parse(response.body)
+      expect(json['campaigns'].length).to eq(1)
+      expect(json).to include('current_page' => 2, 'total_pages' => 2, 'total_entries' => 11)
+    end
   end
 
   describe 'LookupsController campaign.json' do

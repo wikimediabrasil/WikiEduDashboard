@@ -1,5 +1,12 @@
 # frozen_string_literal: true
-json.cache! ["#{Time.zone}}-explore-campaigns-#{locale}", @campaigns], expires_in: 1.day do
+if @campaigns.respond_to?(:current_page)
+  json.current_page @campaigns.current_page.to_i
+  json.total_pages @campaigns.total_pages
+  json.total_entries @campaigns.total_entries
+end
+
+page = @campaigns.current_page if @campaigns.respond_to?(:current_page)
+json.cache! ["#{Time.zone}}-explore-campaigns-#{locale}", @campaigns, page], expires_in: 1.day do
   json.campaigns @campaigns do |campaign|
     presenter = CoursesPresenter.new(
       current_user:,
