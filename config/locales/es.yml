@@ -574,6 +574,7 @@ es:
     data_articles: Páginas editadas
     data_revisions: Datos de revisiones
     data_articles_info: Detalles sobre cada página rastreada editada por la campaña
+    data_all_info: Archivo ZIP con todos los datos disponibles de la campaña
     data_revisions_info: Detalles sobre cada una de las revisiones monitorizadas de
       la campaña
     data_instructors: Instructores
@@ -842,7 +843,7 @@ es:
     dismiss_survey: Descartar
     dismiss_survey_confirm: ¿Estás seguro de que quieres descartar permanentemente
       esta encuesta?
-    download_stats_data: Estadísticas de descargas
+    download_stats_data: Descargar estadísticas
     duration: Duración del curso
     edit_count: Recuento de ediciones
     edit_course_dates: Editar las fechas del curso

@@ -271,6 +271,7 @@ qqq:
   campaign:
     active_campaigns: Heading for the list of active campaigns
     add_organizer: Button to add an organizer
+    all_data: Label for the button that downloads a ZIP archive containing all available campaign data.
     all_campaigns: Button to view the list of all campaigns
     already_exists: Error shown when a new campaign has the same name or slug of another
       campaign.
@@ -292,6 +293,21 @@ qqq:
     course_removed: Message indicating a course was successfully removed from a campaign.
     create_campaign: Header for the page to create a new campaign
     create_my_campaign: Label for the button to create a new campaign
+    data_all_info: Description for the option to download all available campaign data as a ZIP archive.
+    data_articles: Label for the button that downloads data about pages edited by a campaign.
+    data_articles_info: Description for the option to download data about each tracked page edited by a campaign.
+    data_courses: Label for the button that downloads overview data for each course or program in a campaign.
+    data_courses_info: Description for the option to download basic metrics for each course or program in a campaign.
+    data_download_generating: Notification shown after requesting a campaign data download. The file is prepared asynchronously.
+    data_download_info: Heading of the modal used to download campaign data.
+    data_editor_usernames: Label for the button that downloads one editor username per line.
+    data_editor_usernames_info: Description for the option to download editor usernames, one per line.
+    data_editors_by_course: Label for the button that downloads enrolled editors and their courses or programs.
+    data_editors_by_course_info: Description for the option to download enrolled editors and their courses or programs.
+    data_instructors: Label for the button that downloads instructors or facilitators and their courses or programs.
+    data_instructors_info: Description for the option to download instructors or facilitators and their courses or programs.
+    data_wikidata: Label for the button that downloads Wikidata activity statistics for a campaign.
+    data_wikidata_info: Description for the option to download a detailed breakdown of Wikidata activity based on edit summaries.
     description: |-
       Label for the description field when creating a new campaign
       {{Identical|Description}}
@@ -428,6 +444,7 @@ qqq:
     course_description: |-
       Label for the number of courses in a campaign
       {{Identical|Course}}
+    download_stats_data: Label for the button that opens the modal to download statistics for a course or campaign.
     courses: |-
       Label for the number of courses in a campaign
       {{Identical|Course}}

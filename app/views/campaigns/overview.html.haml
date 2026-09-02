@@ -64,6 +64,8 @@
         .section-header
           %h3
             = t('application.details')
+          - if @editable
+            = link_to t('editable.edit'), edit_campaign_path(@campaign.slug), class: 'button dark'
         .module__data.extra-line-height
           %div
             - if @campaign.organizers.any?

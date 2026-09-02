@@ -3,6 +3,8 @@
 = javascript_include_tag '/assets/javascripts/jquery.min.js'
 = hot_javascript_tag 'campaigns'
 
+%div#react_root
+
 .container.dashboard
   %header
     %h1
@@ -18,5 +20,3 @@
 
     %div.create-modal-wrapper{class: @campaign.errors.any? || params[:create] ? 'show-create-modal' : 'hidden'}
       = render 'create_modal'
-
-%div#react_root
