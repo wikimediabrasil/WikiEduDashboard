@@ -545,6 +545,7 @@ en:
     data_articles: Pages edited
     data_revisions: Revisions data
     data_articles_info: Details about each tracked page edited by the campaign
+    data_all_info: ZIP archive with all available campaign data
     data_revisions_info: Details about each tracked revisions of the campaign
     data_instructors: Instructors
     data_instructors_info: List of instructors/facilitators and their courses/programs
