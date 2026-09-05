@@ -1,6 +1,6 @@
 import React from 'react';
 
-const DetailedCampaignRow = ({ campaign }) => {
+const DetailedCampaignRow = ({ campaign, showTags = false }) => {
   return (
     <tr>
       <td className="table-link-cell title">
@@ -21,9 +21,24 @@ const DetailedCampaignRow = ({ campaign }) => {
       <td className="table-link-cell references-human">
         <a href={`/campaigns/${campaign.slug}`}>{campaign.human_references_count}</a>
       </td>
-      <td className="table-link-cell views-human">
-        <a href={`/campaigns/${campaign.slug}`}>{campaign.human_view_sum}</a>
-      </td>
+      {showTags ? (
+        <td className="campaign-tags">
+          {(campaign.label_matches || []).length ? (
+            <div className="campaign-tags-list">
+              {campaign.label_matches.map((qid, index) => (
+                <a key={qid} href={`https://www.wikidata.org/wiki/${encodeURIComponent(qid)}`} target="_blank" rel="noopener noreferrer" className="campaign-tag">
+                  {campaign.labels?.[index] || qid}
+                  {campaign.labels?.[index] && campaign.labels[index] !== qid && <span className="campaign-tag-qid">{qid}</span>}
+                </a>
+              ))}
+            </div>
+          ) : <span aria-label={I18n.t('campaign.no_tags')}>—</span>}
+        </td>
+      ) : (
+        <td className="table-link-cell views-human">
+          <a href={`/campaigns/${campaign.slug}`}>{campaign.human_view_sum}</a>
+        </td>
+      )}
       <td className="table-link-cell students">
         <a href={`/campaigns/${campaign.slug}`}>{campaign.user_count}</a>
       </td>

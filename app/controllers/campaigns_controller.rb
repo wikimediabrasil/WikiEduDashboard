@@ -253,6 +253,11 @@ class CampaignsController < ApplicationController
     render params[:user_only] == 'true' ? 'user_statistics' : 'statistics'
   end
 
+  def suggestions
+    campaigns = params[:search].to_s.strip.length >= 2 ? statistics_campaigns.limit(8) : []
+    render json: { campaigns: campaigns.map { |campaign| campaign.slice(:title, :slug) } }
+  end
+
   def featured_campaigns
     setting = Setting.find_or_create_by(key: 'featured_campaigns')
     campaign_slugs = setting.value['campaign_slugs'] ||= []
@@ -288,13 +293,29 @@ class CampaignsController < ApplicationController
                   Campaign.includes(:labels).order(created_at: :desc)
                 end
     if params[:search].present?
-      campaigns = campaigns.where('lower(title) LIKE ?', campaign_search)
+      query = params[:search].strip
+      if query.match?(/\AQ[1-9]\d*\z/i)
+        tagged_ids = Campaign.joins(:labels).where(labels: { match: query.upcase }).select(:id)
+        campaigns = campaigns.where(id: tagged_ids)
+      else
+        campaigns = campaigns.where('lower(title) LIKE ?', campaign_search)
+      end
     end
+    start_date = campaign_creation_date(params[:creation_start])
+    end_date = campaign_creation_date(params[:creation_end])
+    campaigns = campaigns.where('campaigns.created_at >= ?', start_date.beginning_of_day) if start_date
+    campaigns = campaigns.where('campaigns.created_at <= ?', end_date.end_of_day) if end_date
     return campaigns unless params[:label_search].present?
 
     campaigns.joins(:labels).where(
       labels: { match: params[:label_search].split(',') }
     ).distinct
+  end
+
+  def campaign_creation_date(value)
+    Date.iso8601(value) if value.present?
+  rescue ArgumentError
+    nil
   end
 
   def extract_program_filters

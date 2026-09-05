@@ -269,6 +269,28 @@ qqq:
     milestones:
       title: Label for the Milestone section of a course page (Wiki Ed only)
   campaign:
+    no_tags: >-
+      Accessible text for a campaign without Wikidata tags in the Explore campaigns table. The visible cell contains a dash.
+    suggestions: >-
+      Accessible label for the list of matching campaigns suggested while typing a name or Wikidata QID in Explore.
+    filter_qid: >-
+      Label for the advanced campaign filter accepting Wikidata item identifiers (QIDs). Keep Wikidata and QID as proper technical names.
+    filter_qid_example: >-
+      Placeholder showing one Wikidata QID or a comma-separated list. Translate "or", but keep Q123, Q456 and the comma unchanged because they illustrate the accepted syntax.
+    filter_qid_help: >-
+      Help text for the advanced Wikidata filter in Explore. Multiple comma-separated QIDs match campaigns tagged with any of those items, not necessarily all of them.
+    explore_campaigns: >-
+      Main heading of the Explore campaigns page and link text leading back to that page. Campaigns group programs together.
+    explore_description: >-
+      Introductory sentence below the Explore campaigns heading, explaining that users can find campaigns and view their programs.
+    find_programs: >-
+      Accessible name of the global program search input. Programs are the activities grouped within campaigns.
+    search_by_name: >-
+      Placeholder and accessible name of the main Explore campaigns search input. Despite the key name, the input accepts either a campaign name or a Wikidata item identifier (QID).
+    created_from: >-
+      Accessible label for the inclusive lower date boundary of the campaign creation-date filter. This is when the campaign record was created, not when its activities start.
+    created_until: >-
+      Accessible label for the inclusive upper date boundary of the campaign creation-date filter. This is when the campaign record was created, not when its activities end.
     active_campaigns: Heading for the list of active campaigns
     add_organizer: Button to add an organizer
     all_campaigns: Button to view the list of all campaigns
@@ -363,12 +385,12 @@ qqq:
     search_programs_and_tags: Placeholder for the campaign navigation search. It can search program text or Wikidata tags.
     exclude_tag: Accessible label for changing an included tag into an exclusion filter. %{tag} is the translated Wikidata tag label.
     include_tag: Accessible label for changing an excluded tag back into an inclusion filter. %{tag} is the translated Wikidata tag label.
-    wikidata_tags: Label for filters that search for Wikidata tags.
     title: |-
       Label for the input to change the title of a campaign
       {{Identical|Title}}
     use_start_end_dates: Label for checkbox to enable start and end dates for a campaign
-    wikidata_tags: Label for the Wikidata tag selector input in the campaign creation form. Allows adding multiple semantic tags linked to Wikidata entities (e.g. "Sport" → Q349).
+    wikidata_tags: >-
+      Label for Wikidata tag filters and the campaign creation tag selector, and column heading for campaign tags in Explore. Tags link to Wikidata items and are displayed with their translated names and QIDs (for example, Sport and Q349).
   categories:
     name: '{{Identical|Name}}'
     category_name: '{{Identical|Category name}}'

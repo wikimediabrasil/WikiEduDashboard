@@ -458,6 +458,17 @@ pt-br:
     milestones:
       title: Marcos
   campaign:
+    no_tags: Sem etiquetas
+    suggestions: Campanhas sugeridas
+    filter_qid: QID do Wikidata
+    filter_qid_example: Q123 ou Q123, Q456
+    filter_qid_help: Filtre por etiquetas do Wikidata associadas às campanhas. Separe os QIDs por vírgulas para buscar qualquer um deles.
+    explore_campaigns: Explorar campanhas
+    explore_description: Encontre campanhas e consulte os programas que elas agrupam.
+    find_programs: Buscar programas
+    search_by_name: Buscar campanhas por nome ou QID do Wikidata
+    created_from: Campanha criada a partir de
+    created_until: Campanha criada até
     active_campaigns: Campanhas ativas
     add_organizer: Adicionar um organizador
     alert_article: Título do artigo

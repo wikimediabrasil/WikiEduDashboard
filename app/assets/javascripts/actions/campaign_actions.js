@@ -124,13 +124,15 @@ const fetchFeaturedCampaigns = async (dispatch) => {
 
 
 const fetchCampaignStatisticsPromise = async (userOnly, dispatch, {
-  page, search, labelSearch, paginated = false
+  page, search, labelSearch, creationStart, creationEnd, paginated = false
 } = {}) => {
   const featured_campaigns = paginated ? [] : await fetchFeaturedCampaigns(dispatch);
   // newest limits the fetched campaigns to the 10 most recent ones
   // it is set to false if there are featured campaigns listed
   const newest = !(featured_campaigns.length > 0);
   const params = new URLSearchParams({ user_only: userOnly, newest, paginated });
+  if (creationStart) params.set('creation_start', creationStart);
+  if (creationEnd) params.set('creation_end', creationEnd);
   if (page) { params.set('page', page); }
   if (search) { params.set('search', search); }
   if (labelSearch) { params.set('label_search', labelSearch); }

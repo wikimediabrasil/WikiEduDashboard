@@ -25,3 +25,85 @@
       width: 15px
       height: 15px
       margin-right: 8px
+
+.campaign-autocomplete
+  position relative
+
+.campaign-suggestions
+  position absolute
+  top 100%
+  left 0
+  right 0
+  z-index 10
+  background white
+  border 1px solid #ccc
+  border-radius 4px
+  box-shadow 0 3px 8px rgba(0, 0, 0, .12)
+  ul
+    list-style none
+    margin 0
+    padding 0
+  a
+    display block
+    padding 10px 15px
+    &:hover, &:focus
+      background #f0f1f8
+  p
+    padding 10px 15px
+    margin 0
+
+#campaign-advanced-filters
+  .campaign-filter-row
+    grid-template-columns 180px minmax(0, 1fr)
+  .campaign-qid-field
+    width 100%
+    max-width 395px
+    input
+      margin-bottom 0
+  .campaign-date-range
+    width 100%
+    max-width 457px
+    input
+      flex 1
+      min-width 0
+      width 0
+      margin-bottom 0
+  @media (max-width: 600px)
+    .campaign-filter-row
+      grid-template-columns minmax(0, 1fr)
+      row-gap 5px
+
+.campaign-tags-list
+  display flex
+  flex-wrap wrap
+  gap 5px
+  min-width 110px
+  max-width 240px
+
+.campaign-tag
+  display inline-flex
+  flex-direction column
+  padding 4px 8px
+  border 1px solid #ddd
+  border-radius 4px
+  background #f5f5f8
+  overflow-wrap anywhere
+
+.campaign-tag-qid
+  font-size 11px
+  color #666
+
+#campaigns_list .section-header
+  h2
+    margin-right auto
+  display flex
+  justify-content flex-end
+  align-items center
+  padding 0 0 16px
+  .sort-container
+    position static
+    float none
+    flex-shrink 0
+
+.main-page.explore-header h1
+  font-weight 700

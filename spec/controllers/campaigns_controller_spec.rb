@@ -628,6 +628,23 @@ describe CampaignsController, type: :request do
       campaign.labels << label
     end
 
+    it 'searches by QID in the main search field' do
+      label.update!(match: 'Q123')
+      get '/campaigns/statistics.json', params: { search: 'q123', paginated: true }
+      expect(JSON.parse(response.body)['campaigns'].map { |item| item['slug'] }).to eq([campaign.slug])
+    end
+
+    it 'suggests campaigns matching a QID and creation dates' do
+      label.update!(match: 'Q123')
+      campaign.update!(created_at: Time.zone.parse('2026-08-15'))
+      get '/campaigns/suggestions', params: { search: 'q123', creation_start: '2026-08-01' }
+      expect(JSON.parse(response.body)['campaigns']).to eq([
+        { 'title' => campaign.title, 'slug' => campaign.slug }
+      ])
+      get '/campaigns/suggestions', params: { search: 'q123', creation_start: '2026-09-01' }
+      expect(JSON.parse(response.body)['campaigns']).to eq([])
+    end
+
     it 'returns campaign statistics with labels' do
       get '/campaigns/statistics.json', params: { format: :json }
       expect(response.status).to eq(200)
@@ -635,6 +652,19 @@ describe CampaignsController, type: :request do
       campaign_json = json['campaigns'].find { |c| c['slug'] == campaign.slug }
       expect(campaign_json['labels']).to include('test_label')
       expect(campaign_json['label_matches']).to include(label.match)
+    end
+
+    it 'filters campaigns by creation date before pagination' do
+      campaign.update!(created_at: Time.zone.parse('2026-08-31 23:59:59'))
+      create(:campaign, created_at: Time.zone.parse('2026-09-01 00:00:00'))
+
+      get '/campaigns/statistics.json', params: {
+        paginated: true, creation_start: '2026-08-01', creation_end: '2026-08-31'
+      }
+
+      json = JSON.parse(response.body)
+      expect(json['campaigns'].map { |item| item['slug'] }).to eq([campaign.slug])
+      expect(json['total_entries']).to eq(1)
     end
 
     it 'paginates campaign statistics when requested' do

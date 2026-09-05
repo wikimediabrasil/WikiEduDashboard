@@ -534,6 +534,17 @@ es:
     milestones:
       title: Hitos
   campaign:
+    no_tags: Sin etiquetas
+    suggestions: Campañas sugeridas
+    filter_qid: QID de Wikidata
+    filter_qid_example: Q123 o Q123, Q456
+    filter_qid_help: Filtra por etiquetas de Wikidata asociadas a las campañas. Separa los QID con comas para buscar cualquiera de ellos.
+    explore_campaigns: Explorar campañas
+    explore_description: Encuentra campañas y consulta los programas que agrupan.
+    find_programs: Buscar programas
+    search_by_name: Buscar campañas por nombre o QID de Wikidata
+    created_from: Campaña creada desde
+    created_until: Campaña creada hasta
     active_campaigns: Campañas activas
     add_organizer: Añadir organizador
     alert_article: Título del artículo

@@ -499,6 +499,17 @@ en:
       title: Milestones
 
   campaign:
+    no_tags: No tags
+    suggestions: Suggested campaigns
+    filter_qid: Wikidata QID
+    filter_qid_example: Q123 or Q123, Q456
+    filter_qid_help: Filter by Wikidata tags attached to campaigns. Separate QIDs with commas to match any of them.
+    explore_campaigns: Explore campaigns
+    explore_description: Find campaigns and browse the programs they group together.
+    find_programs: Search programs
+    search_by_name: Search campaigns by name or Wikidata QID
+    created_from: Campaign created from
+    created_until: Campaign created until
     campaign_ores_plot:
       change_button: "Change in Structural Completeness"
       no_data: "No Structural Completeness data available"

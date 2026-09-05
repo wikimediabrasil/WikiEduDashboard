@@ -14,6 +14,8 @@ const CampaignList = ({ keys, showSearch, RowElement, headerText, userOnly, show
   const { all_campaigns, all_campaigns_loaded, pagination, sort } = useSelector(state => state.campaigns);
   const [searchParams, setSearchParams] = useSearchParams();
   const search = searchParams.get('search');
+  const creationStart = searchParams.get('creation_start');
+  const creationEnd = searchParams.get('creation_end');
   const labelSearch = searchParams.get('label_search');
   const selectedMatches = labelSearch ? labelSearch.split(',') : [];
   const page = Number(searchParams.get('page') || 1);
@@ -72,6 +74,8 @@ const CampaignList = ({ keys, showSearch, RowElement, headerText, userOnly, show
 
   const buildSearchParams = (tags) => {
     const params = {};
+    if (creationStart) params.creation_start = creationStart;
+    if (creationEnd) params.creation_end = creationEnd;
     if (inputRef?.current?.value) {
       params.search = inputRef.current.value;
     } else if (search) {
@@ -93,18 +97,18 @@ const CampaignList = ({ keys, showSearch, RowElement, headerText, userOnly, show
   };
 
   const handlePageChange = ({ selected }) => {
-    const params = buildSearchParams(selectedTags);
-    params.page = selected + 1;
+    const params = new URLSearchParams(searchParams);
+    params.set('page', selected + 1);
     setSearchParams(params);
   };
 
   useEffect(() => {
     if (showStatistics) {
-      dispatch(fetchCampaignStatistics(userOnly, { page, search, labelSearch, paginated }));
+      dispatch(fetchCampaignStatistics(userOnly, { page, search, labelSearch, paginated, creationStart, creationEnd }));
     } else {
       dispatch(fetchAllCampaigns());
     }
-  }, [dispatch, labelSearch, page, paginated, search, showStatistics, userOnly]);
+  }, [dispatch, creationStart, creationEnd, labelSearch, page, paginated, search, showStatistics, userOnly]);
 
 
   if (!all_campaigns_loaded) {
@@ -126,9 +130,9 @@ const CampaignList = ({ keys, showSearch, RowElement, headerText, userOnly, show
 
   return (
     <div className="container">
-      {headerText && (
+      {(headerText || paginated) && (
         <div className="section-header">
-          <h2>{headerText}</h2>
+          {headerText && <h2>{headerText}</h2>}
           <DropdownSortSelect keys={keys} sortSelect={sortBy}/>
         </div>
       )}

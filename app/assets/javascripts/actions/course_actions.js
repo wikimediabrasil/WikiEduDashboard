@@ -163,9 +163,21 @@ export const greetStudents = courseId => (dispatch) => {
 };
 
 
-export const searchPrograms = searchQuery => async (dispatch) => {
+export const searchPrograms = (filters) => async (dispatch) => {
   dispatch({ type: FETCH_COURSE_SEARCH_RESULTS });
-  const response = await request(`/courses/search.json?search=${searchQuery}`);
+  const searchParams = new URLSearchParams();
+  if (typeof filters === 'string') {
+    searchParams.set('search', filters);
+  } else {
+    Object.entries(filters).forEach(([key, value]) => {
+      if (Array.isArray(value)) {
+        value.forEach(item => searchParams.append(key, item));
+      } else if (value) {
+        searchParams.set(key, value);
+      }
+    });
+  }
+  const response = await request(`/courses/search.json?${searchParams.toString()}`);
   if (!response.ok) {
     const data = await response.text();
     return dispatch({ type: API_FAIL, data });

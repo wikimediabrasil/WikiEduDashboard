@@ -20,6 +20,8 @@ const TaggedCourseAlerts = lazy(() => import('../alerts/tagged_course_alerts.jsx
 const TaggedCoursesStats = lazy(() => import('../tagged_courses/TaggedCoursesStats.jsx'));
 const CampaignsHandler = lazy(() => import('../campaign/campaigns_handler.jsx'));
 const DetailedCampaignList = lazy(() => import('../campaign/detailed_campaign_list'));
+const SearchableCourseList = lazy(() => import('../course/searchable_course_list.jsx'));
+const WikiEdExplore = lazy(() => import('../explore/wiki_ed_explore.jsx'));
 const Explore = lazy(() => import('../explore/explore.jsx'));
 const TrainingApp = lazy(() => import('../../training/components/training_app.jsx'));
 const TrainingModuleComposer = lazy(() => import('../../training_module_composer/composer.jsx'));
@@ -77,7 +79,8 @@ const routes = () => {
         <Route path="/tagged_courses/:tag/programs" element={<TaggedCoursesStats/>}/>
         <Route index element={<DetailedCampaignList headerText={I18n.t('campaign.campaigns')} userOnly={true}/>} />
         <Route path="/dashboard" element={<DetailedCampaignList headerText={I18n.t('campaign.campaigns')} userOnly={true}/>} />
-        <Route path="/explore" element={<Explore dashboardTitle={window.dashboardTitle}/>} />
+        <Route path="/explore/programs" element={<SearchableCourseList/>} />
+        <Route path="/explore" element={Features.wikiEd ? <WikiEdExplore dashboardTitle={window.dashboardTitle}/> : <Explore/>} />
         <Route path="/active_courses" element={<ActiveCoursesHandler dashboardTitle={window.dashboardTitle}/>}/>
         <Route path="/courses_by_wiki/:wiki_url" element={<CoursesByWikiHandler />}/>
         <Route path="/revision_ai_scores_stats" element={<RevisionAiScoresStats />} />

@@ -87,12 +87,15 @@ class CoursesController < ApplicationController
   end
 
   def search
-    search_presenter = CoursesPresenter.new(
-      current_user:,
-      courses_list: Course.where(private: false)
-    )
-    @query = params[:search]
-    @courses = search_presenter.search_courses(@query)
+    @query = params[:search] || params[:title_query]
+    @courses = Course.where(private: false)
+    @courses = filter_search_by_text(@courses, @query)
+    if params[:campaign_id].present?
+      @courses = @courses.joins(:campaigns).where(campaigns: { id: params[:campaign_id] })
+    end
+    @courses = filter_search_by_tags(@courses)
+    @courses = filter_search_by_creation_date(@courses)
+    @courses = @courses.includes(:instructors).distinct.paginate(page: params[:page], per_page: 25)
   end
 
   ##############################
@@ -601,5 +604,42 @@ class CoursesController < ApplicationController
     return unless params.key? 'enroll'
     session['course_slug'] = @course.slug
     session['enroll_code'] = params['enroll'] || ''
+  end
+
+  def filter_search_by_text(scope, query)
+    return scope if query.blank?
+
+    escaped_query = Course.sanitize_sql_like(query.downcase)
+    scope.left_joins(:instructors).where(
+      'lower(courses.title) LIKE ? OR lower(courses.school) LIKE ? OR ' \
+      'lower(courses.term) LIKE ? OR lower(users.username) LIKE ?',
+      "%#{escaped_query}%", "%#{escaped_query}%", "%#{escaped_query}%", "%#{escaped_query}%"
+    )
+  end
+
+  def filter_search_by_tags(scope)
+    matches = Array(params[:tag]).filter_map { |match| WikidataLabelService.normalize_match(match) }
+    return scope if matches.empty?
+
+    scope.joins(:wikidata_labels).where(labels: { match: matches })
+  end
+
+  def filter_search_by_creation_date(scope)
+    start_date = parse_creation_date(params[:creation_start], :beginning_of_day)
+    end_date = parse_creation_date(params[:creation_end], :end_of_day)
+    return scope unless start_date || end_date
+
+    return scope.where(created_at: start_date..end_date) if start_date && end_date
+    return scope.where('courses.created_at >= ?', start_date) if start_date
+
+    scope.where('courses.created_at <= ?', end_date)
+  end
+
+  def parse_creation_date(value, boundary)
+    return if value.blank?
+
+    Date.parse(value).public_send(boundary)
+  rescue ArgumentError
+    nil
   end
 end

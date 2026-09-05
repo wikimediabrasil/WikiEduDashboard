@@ -2,7 +2,9 @@ import React from 'react';
 import CampaignList from './campaign_list';
 import DetailedCampaignRow from './detailed_campaign_row';
 
-const DetailedCampaignList = ({ headerText, userOnly }) => {
+const TaggedCampaignRow = props => <DetailedCampaignRow {...props} showTags />;
+
+const DetailedCampaignList = ({ headerText, userOnly, paginated = false, showTags = false }) => {
   const keys = {
     title: {
       label: I18n.t('campaign.campaigns'),
@@ -30,11 +32,19 @@ const DetailedCampaignList = ({ headerText, userOnly }) => {
       desktop_only: false,
       info_key: 'metrics.references_doc'
     },
-    view_sum: {
-      label: I18n.t('metrics.view'),
-      desktop_only: false,
-      info_key: 'courses.view_doc'
-    },
+    ...(showTags ? {
+      labels: {
+        label: I18n.t('campaign.wikidata_tags'),
+        desktop_only: false,
+        sortable: false
+      }
+    } : {
+      view_sum: {
+        label: I18n.t('metrics.view'),
+        desktop_only: false,
+        info_key: 'courses.view_doc'
+      }
+    }),
     user_count: {
       label: I18n.t('users.editors'),
       desktop_only: false
@@ -47,7 +57,7 @@ const DetailedCampaignList = ({ headerText, userOnly }) => {
     };
   }
   return (
-    <CampaignList RowElement={DetailedCampaignRow} keys={keys} headerText={headerText} userOnly={userOnly} showStatistics/>
+    <CampaignList RowElement={showTags ? TaggedCampaignRow : DetailedCampaignRow} keys={keys} headerText={headerText} userOnly={userOnly} showStatistics paginated={paginated}/>
   );
 };
 

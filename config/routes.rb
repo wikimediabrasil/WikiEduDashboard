@@ -381,6 +381,7 @@ Rails.application.routes.draw do
   get 'campaigns/:slug/wikidata' => 'reports#campaign_wikidata_csv'
 
   # Campaigns
+  get 'campaigns/suggestions' => 'campaigns#suggestions', defaults: { format: 'json' }
   get 'campaigns/current/alerts' => 'campaigns#current_alerts', defaults: { format: 'html' }
   resources :campaigns, param: :slug, except: :show do
     member do
@@ -497,6 +498,7 @@ Rails.application.routes.draw do
 
   # Misc
   # get 'courses' => 'courses#index'
+  get 'explore/programs' => 'explore#index'
   get 'explore' => 'explore#index'
   get 'explore/search' => 'explore#search'
   get 'unsubmitted_courses' => 'unsubmitted_courses#index'
