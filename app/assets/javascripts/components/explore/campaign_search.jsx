@@ -1,6 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import request from '../../utils/request';
+import LabelSearchFilter from '../common/label_search_filter';
+
+const tagFromMatch = (match, label = match) => ({
+  match,
+  label,
+  description: '',
+  url: `https://www.wikidata.org/wiki/${match}`,
+});
 
 const CampaignSearch = () => {
   const [params, setParams] = useSearchParams();
@@ -12,6 +20,8 @@ const CampaignSearch = () => {
   const [suggestions, setSuggestions] = useState([]);
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
   const [suggestionsLoaded, setSuggestionsLoaded] = useState(false);
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [campaignTagOptions, setCampaignTagOptions] = useState([]);
 
   useEffect(() => {
     setSearch(params.get('search') || '');
@@ -21,6 +31,29 @@ const CampaignSearch = () => {
     if (params.get('label_search') || params.get('creation_start') || params.get('creation_end')) setAdvancedOpen(true);
     setSuggestionsOpen(false);
   }, [params]);
+
+  useEffect(() => {
+    request('/lookups/campaign.json')
+      .then(response => response.json())
+      .then((data) => {
+        const tagsByMatch = new Map();
+        (data.campaigns || []).forEach((campaign) => {
+          (campaign.label_matches || []).forEach((match, index) => {
+            if (match && !tagsByMatch.has(match)) {
+              tagsByMatch.set(match, tagFromMatch(match, campaign.labels?.[index] || match));
+            }
+          });
+        });
+        setCampaignTagOptions([...tagsByMatch.values()]);
+      })
+      .catch(() => setCampaignTagOptions([]));
+  }, []);
+
+  useEffect(() => {
+    const labelsByMatch = new Map(campaignTagOptions.map(tag => [tag.match, tag]));
+    setSelectedTags(qid.split(',').map(match => match.trim().toUpperCase()).filter(Boolean)
+      .map(match => labelsByMatch.get(match) || tagFromMatch(match)));
+  }, [qid, campaignTagOptions]);
 
   useEffect(() => {
     setSuggestions([]);
@@ -62,6 +95,12 @@ const CampaignSearch = () => {
     setSuggestionsOpen(false);
     setParams(next);
   };
+
+  const handleTagChange = (tags) => {
+    setSelectedTags(tags);
+    setQid(tags.map(tag => tag.match).join(','));
+  };
+
   return (
     <form className="explore-courses" onSubmit={submit}>
       <div className="form-fields">
@@ -97,7 +136,7 @@ const CampaignSearch = () => {
           <div className="form-row advanced-search-grid-small campaign-filter-row">
             <label htmlFor="campaign-qid">{I18n.t('campaign.filter_qid')}</label>
             <div className="campaign-qid-field">
-              <input id="campaign-qid" type="text" value={qid} onChange={event => setQid(event.target.value)} pattern="[Qq][1-9][0-9]*( *, *[Qq][1-9][0-9]*)*" placeholder={I18n.t('campaign.filter_qid_example')} aria-describedby="campaign-qid-help" title={I18n.t('campaign.filter_qid_help')} />
+              <LabelSearchFilter inputId="campaign-qid" selectedTags={selectedTags} onChange={handleTagChange} suggestedTags={campaignTagOptions} placeholder={I18n.t('campaign.filter_qid_example')} />
               <span id="campaign-qid-help" className="sr-only">{I18n.t('campaign.filter_qid_help')}</span>
             </div>
           </div>

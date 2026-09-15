@@ -507,7 +507,7 @@ en:
     explore_campaigns: Explore campaigns
     explore_description: Find campaigns and browse the programs they group together.
     find_programs: Search programs
-    search_by_name: Search campaigns by name or Wikidata QID
+    search_by_name: Search campaigns by name
     created_from: Campaign created from
     created_until: Campaign created until
     campaign_ores_plot:

@@ -4,7 +4,33 @@ import { searchLabelOptions } from '../../utils/wikidata_label_search';
 
 const removeIcon = String.fromCodePoint(0x2715);
 
-const LabelSearchFilter = ({ selectedTags, onChange, placeholder, inputName, inputId, initialQuery }) => {
+const normalizedText = text => (text || '')
+  .toString()
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .trim()
+  .toLowerCase();
+
+const matchingSuggestedTags = (suggestedTags, query) => {
+  const normalizedQuery = normalizedText(query);
+  if (!normalizedQuery) return [];
+
+  return suggestedTags.filter((tag) => (
+    normalizedText(tag.match).includes(normalizedQuery)
+    || normalizedText(tag.label).includes(normalizedQuery)
+  ));
+};
+
+const mergeSearchResults = (suggestedTags, wikidataTags) => {
+  const tagsByMatch = new Map();
+  // Campaign tags come first: they are known to return results in this search.
+  [...suggestedTags, ...wikidataTags].forEach((tag) => {
+    if (!tagsByMatch.has(tag.match)) tagsByMatch.set(tag.match, tag);
+  });
+  return [...tagsByMatch.values()];
+};
+
+const LabelSearchFilter = ({ selectedTags, onChange, placeholder, inputName, inputId, initialQuery, suggestedTags }) => {
   const [query, setQuery] = useState(initialQuery);
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -37,9 +63,13 @@ const LabelSearchFilter = ({ selectedTags, onChange, placeholder, inputName, inp
     searchRequestRef.current = requestId;
     setLoading(true);
     try {
-      const options = await searchLabelOptions(searchQuery);
+      const [wikidataOptions] = await Promise.all([searchLabelOptions(searchQuery)]);
       if (requestId !== searchRequestRef.current) return;
       const selectedMatches = new Set(selectedTags.map(tag => tag.match));
+      const options = mergeSearchResults(
+        matchingSuggestedTags(suggestedTags, searchQuery),
+        wikidataOptions
+      );
       const availableOptions = options.filter(option => !selectedMatches.has(option.match));
       setResults(availableOptions);
       setDropdownOpen(availableOptions.length > 0);
@@ -56,11 +86,15 @@ const LabelSearchFilter = ({ selectedTags, onChange, placeholder, inputName, inp
     const value = event.target.value;
     setQuery(value);
     clearTimeout(debounceRef.current);
+    // Ignore an in-flight Wikidata response as soon as the query changes.
+    searchRequestRef.current += 1;
+    const selectedMatches = new Set(selectedTags.map(tag => tag.match));
+    const localOptions = matchingSuggestedTags(suggestedTags, value)
+      .filter(option => !selectedMatches.has(option.match));
+    setResults(localOptions);
+    setDropdownOpen(localOptions.length > 0);
     if (value.trim().length < 2) {
-      searchRequestRef.current += 1;
       setLoading(false);
-      setResults([]);
-      setDropdownOpen(false);
       return;
     }
     debounceRef.current = setTimeout(() => runSearch(value.trim()), 350);
@@ -187,12 +221,19 @@ LabelSearchFilter.propTypes = {
   inputName: PropTypes.string,
   inputId: PropTypes.string,
   initialQuery: PropTypes.string,
+  suggestedTags: PropTypes.arrayOf(PropTypes.shape({
+    match: PropTypes.string.isRequired,
+    label: PropTypes.string.isRequired,
+    description: PropTypes.string,
+    url: PropTypes.string,
+  })),
 };
 
 LabelSearchFilter.defaultProps = {
   inputName: undefined,
   inputId: undefined,
   initialQuery: '',
+  suggestedTags: [],
 };
 
 export default LabelSearchFilter;

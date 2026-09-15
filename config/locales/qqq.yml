@@ -286,7 +286,7 @@ qqq:
     find_programs: >-
       Accessible name of the global program search input. Programs are the activities grouped within campaigns.
     search_by_name: >-
-      Placeholder and accessible name of the main Explore campaigns search input. Despite the key name, the input accepts either a campaign name or a Wikidata item identifier (QID).
+      Placeholder and accessible name of the main Explore campaigns search input. Wikidata item identifiers (QIDs) are filtered separately through the advanced filter.
     created_from: >-
       Accessible label for the inclusive lower date boundary of the campaign creation-date filter. This is when the campaign record was created, not when its activities start.
     created_until: >-

@@ -466,7 +466,7 @@ pt-br:
     explore_campaigns: Explorar campanhas
     explore_description: Encontre campanhas e consulte os programas que elas agrupam.
     find_programs: Buscar programas
-    search_by_name: Buscar campanhas por nome ou QID do Wikidata
+    search_by_name: Buscar campanhas por nome
     created_from: Campanha criada a partir de
     created_until: Campanha criada até
     active_campaigns: Campanhas ativas
