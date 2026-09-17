@@ -618,10 +618,18 @@ class CoursesController < ApplicationController
   end
 
   def filter_search_by_tags(scope)
-    matches = Array(params[:tag]).filter_map { |match| WikidataLabelService.normalize_match(match) }
-    return scope if matches.empty?
+    included_matches = Array(params[:tag]).filter_map { |match| WikidataLabelService.normalize_match(match) }
+    excluded_matches = Array(params[:excluded_tag]).filter_map { |match| WikidataLabelService.normalize_match(match) }
 
-    scope.joins(:wikidata_labels).where(labels: { match: matches })
+    if included_matches.present?
+      scope = scope.joins(:wikidata_labels).where(labels: { match: included_matches })
+    end
+    if excluded_matches.present?
+      excluded_label_ids = Label.where(match: excluded_matches).select(:id)
+      excluded_course_ids = CoursesLabels.where(label_id: excluded_label_ids).select(:course_id)
+      scope = scope.where.not(id: excluded_course_ids)
+    end
+    scope
   end
 
   def filter_search_by_creation_date(scope)

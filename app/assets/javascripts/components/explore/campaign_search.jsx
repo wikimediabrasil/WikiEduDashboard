@@ -150,7 +150,24 @@ const CampaignSearch = () => {
           </div>
         </div>}
       </div>
-      <div className="form-actions"><button className="button" type="submit">{I18n.t('campaign.search')}</button></div>
+      <div className="form-actions">
+        <button className="button" type="submit">{I18n.t('campaign.search')}</button>
+        <button
+          className="button button--clear"
+          type="button"
+          onClick={() => {
+            setSearch('');
+            setQid('');
+            setStart('');
+            setEnd('');
+            setSelectedTags([]);
+            setAdvancedOpen(false);
+            setParams(new URLSearchParams());
+          }}
+        >
+          {I18n.t('form_search.clear')}
+        </button>
+      </div>
     </form>
   );
 };

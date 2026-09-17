@@ -29,14 +29,18 @@ const SearchableCourseList = () => {
   const { results, loaded, sort } = useSelector(state => state.course_search_results);
   const dispatch = useDispatch();
   const tagMatches = searchParams.getAll('tag');
-  const [advancedOpen, setAdvancedOpen] = useState(Boolean(searchParams.get('campaign_id') || searchParams.get('creation_start') || searchParams.get('creation_end') || tagMatches.length));
+  const excludedTagMatches = searchParams.getAll('excluded_tag');
+  const [advancedOpen, setAdvancedOpen] = useState(Boolean(searchParams.get('campaign_id') || searchParams.get('creation_start') || searchParams.get('creation_end') || tagMatches.length || excludedTagMatches.length));
   const [title, setTitle] = useState(searchParams.get('title_query') || searchParams.get('search') || '');
   const [campaignId, setCampaignId] = useState(searchParams.get('campaign_id') || '');
   const [creationStart, setCreationStart] = useState(searchParams.get('creation_start') || '');
   const [creationEnd, setCreationEnd] = useState(searchParams.get('creation_end') || '');
-  const [selectedTags, setSelectedTags] = useState(tagMatches.map(match => ({ match, label: match, description: '', url: '' })));
+  const [selectedTags, setSelectedTags] = useState([
+    ...tagMatches.map(match => ({ match, label: match, description: '', url: '', excluded: false })),
+    ...excludedTagMatches.map(match => ({ match, label: match, description: '', url: '', excluded: true })),
+  ]);
   const [campaignOptions, setCampaignOptions] = useState([]);
-  const hasFilters = Boolean(searchParams.get('title_query') || searchParams.get('search') || searchParams.get('campaign_id') || searchParams.get('creation_start') || searchParams.get('creation_end') || tagMatches.length);
+  const hasFilters = Boolean(searchParams.get('title_query') || searchParams.get('search') || searchParams.get('campaign_id') || searchParams.get('creation_start') || searchParams.get('creation_end') || tagMatches.length || excludedTagMatches.length);
 
   useEffect(() => {
     request('/lookups/campaign.json')
@@ -45,14 +49,25 @@ const SearchableCourseList = () => {
       .catch(() => setCampaignOptions([]));
   }, []);
   useEffect(() => {
-    if (!tagMatches.length) return;
-    fetchLabelsByMatch(tagMatches).then((labels) => {
+    const allTagMatches = [...new Set([...tagMatches, ...excludedTagMatches])];
+    if (!allTagMatches.length) return;
+    fetchLabelsByMatch(allTagMatches).then((labels) => {
       const byMatch = Object.fromEntries(labels.map(label => [label.match, label]));
-      setSelectedTags(tagMatches.map(match => byMatch[match] || { match, label: match, description: '', url: '' }));
+      setSelectedTags([
+        ...tagMatches.map(match => ({ ...(byMatch[match] || { match, label: match, description: '', url: '' }), excluded: false })),
+        ...excludedTagMatches.map(match => ({ ...(byMatch[match] || { match, label: match, description: '', url: '' }), excluded: true })),
+      ]);
     }).catch(() => {});
   }, []);
 
-  const getFilters = () => ({ title_query: title, campaign_id: campaignId, creation_start: creationStart, creation_end: creationEnd, tag: selectedTags.map(tag => tag.match) });
+  const getFilters = () => ({
+    title_query: title,
+    campaign_id: campaignId,
+    creation_start: creationStart,
+    creation_end: creationEnd,
+    tag: selectedTags.filter(tag => !tag.excluded).map(tag => tag.match),
+    excluded_tag: selectedTags.filter(tag => tag.excluded).map(tag => tag.match),
+  });
   const fetchResults = () => {
     const filters = getFilters();
     const params = new URLSearchParams();
@@ -64,9 +79,16 @@ const SearchableCourseList = () => {
     setCampaignId(searchParams.get('campaign_id') || '');
     setCreationStart(searchParams.get('creation_start') || '');
     setCreationEnd(searchParams.get('creation_end') || '');
-    setSelectedTags(searchParams.getAll('tag').map(match => ({ match, label: match, description: '', url: '' })));
+    setSelectedTags([
+      ...searchParams.getAll('tag').map(match => ({ match, label: match, description: '', url: '', excluded: false })),
+      ...searchParams.getAll('excluded_tag').map(match => ({ match, label: match, description: '', url: '', excluded: true })),
+    ]);
     if (hasFilters) {
-      dispatch(searchPrograms({ ...Object.fromEntries(searchParams), tag: searchParams.getAll('tag') }));
+      dispatch(searchPrograms({
+        ...Object.fromEntries(searchParams),
+        tag: searchParams.getAll('tag'),
+        excluded_tag: searchParams.getAll('excluded_tag'),
+      }));
     }
   }, [searchParams, dispatch]);
 
@@ -86,7 +108,24 @@ const SearchableCourseList = () => {
             <div className="form-row advanced-search-grid-small"><label>{I18n.t('courses.creation_date')}</label><div className="flex-input-group"><input type="date" value={creationStart} onChange={event => setCreationStart(event.target.value)} /><span>-</span><input type="date" value={creationEnd} onChange={event => setCreationEnd(event.target.value)} /></div></div>
           </div>}
         </div>
-        <div className="form-actions"><button className="button" type="submit">{I18n.t('campaign.search')}</button></div>
+        <div className="form-actions">
+          <button className="button" type="submit">{I18n.t('campaign.search')}</button>
+          <button
+            className="button button--clear"
+            type="button"
+            onClick={() => {
+              setTitle('');
+              setCampaignId('');
+              setCreationStart('');
+              setCreationEnd('');
+              setSelectedTags([]);
+              setAdvancedOpen(false);
+              setSearchParams(new URLSearchParams());
+            }}
+          >
+            {I18n.t('form_search.clear')}
+          </button>
+        </div>
       </form>
       {hasFilters && !loaded && <Loading />}
       {hasFilters && loaded && <CourseList keys={keys} courses={results} none_message={I18n.t('application.no_results', { query: searchParams.get('title_query') || searchParams.get('search') || '' })} sortBy={key => dispatch(sortCourseSearchResults(key))} RowElement={CourseRow} />}
