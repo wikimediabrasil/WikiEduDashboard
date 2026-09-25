@@ -52,6 +52,12 @@
 # Author: Yupik
 ---
 es:
+  pagination:
+    previous: "Anterior"
+    next: "Siguiente"
+    page: "Página %{current} de %{total}"
+  user_profiles:
+    no_filtered_articles: "Ningún artículo coincide con los filtros seleccionados."
   number:
     human:
       decimal_units:

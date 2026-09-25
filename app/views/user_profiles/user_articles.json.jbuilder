@@ -32,5 +32,8 @@ json.articles_by_course articles_by_course.map do |course_id, article_courses|
   end
 end
 
-json.total_count @user_articles.count
+json.total_count @total_count
+json.unfiltered_count @unfiltered_count
+json.wiki_options @wiki_options
+json.newness_options @newness_options
 json.filtered_by_course @course_id.present?

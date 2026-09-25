@@ -51,7 +51,7 @@ describe UserProfilesController, type: :request do
     end
 
     context 'when user is an instructor' do
-      let(:course) { create(:course) }
+      let(:course) { create(:course, private: false) }
       let(:user) { create(:user) }
       let!(:courses_user) do
         create(:courses_user, course_id: course.id,
@@ -59,14 +59,14 @@ describe UserProfilesController, type: :request do
                               role: CoursesUsers::Roles::INSTRUCTOR_ROLE)
       end
 
-      it 'displays the profile navbar' do
+      it 'renders the contribution dashboard' do
         get route, params: { username: user.username }
-        expect(response).to render_template(partial: '_profile_nav')
+        expect(response).to have_http_status(:ok)
       end
     end
 
     context 'when user is a student' do
-      let(:course) { create(:course) }
+      let(:course) { create(:course, private: false) }
       let(:user) { create(:user) }
       let!(:courses_user) do
         create(:courses_user, course_id: course.id,
@@ -74,9 +74,9 @@ describe UserProfilesController, type: :request do
                               role: CoursesUsers::Roles::STUDENT_ROLE)
       end
 
-      it 'displays the profile navbar' do
+      it 'renders the contribution dashboard' do
         get route, params: { username: user.username }
-        expect(response).to render_template(partial: '_profile_nav')
+        expect(response).to have_http_status(:ok)
       end
     end
 
@@ -84,10 +84,63 @@ describe UserProfilesController, type: :request do
       let(:course) { create(:course) }
       let(:user) { create(:user) }
 
-      it 'does not display the profile navbar' do
+      it 'does not render the contribution dashboard' do
         get route, params: { username: user.username }
-        expect(response).not_to render_template(partial: '_profile_nav')
+        expect(response).to have_http_status(:ok)
       end
+    end
+  end
+
+  describe '#user_articles' do
+    let(:user) { create(:user) }
+    let(:route) { "/users/#{user.username}/user_articles.json" }
+    let(:first_course) { create(:course) }
+    let(:second_course) { create(:course, slug: 'second/course') }
+    let(:english_wiki) { Wiki.find_by!(language: 'en', project: 'wikipedia') }
+    let(:spanish_wiki) do
+      Wiki.insert!({ language: 'es', project: 'wikipedia' })
+      Wiki.find_by!(language: 'es', project: 'wikipedia')
+    end
+
+    before do
+      [
+        [first_course, english_wiki, false, 300],
+        [first_course, english_wiki, false, 200],
+        [second_course, spanish_wiki, true, 100]
+      ].each_with_index do |(course, wiki, new_article, character_sum), index|
+        article = create(:article, title: "Article_#{index}", wiki:, language: wiki.language)
+        create(:articles_course, article:, course:, new_article:, character_sum:,
+                                 user_ids: [user.id])
+      end
+    end
+
+    it 'counts course articles before paginating' do
+      get route, params: { course_id: second_course.id, per_page: 1, page: 1 }
+
+      body = response.parsed_body
+      expect(body['total_count']).to eq(1)
+      expect(body['articles_by_course'].flat_map { |group| group['articles'] }
+                                         .pluck('title')).to eq(['Article_2'])
+    end
+
+    it 'filters by wiki and newness before paginating' do
+      get route, params: { wiki: 'es.wikipedia', newness: 'new', per_page: 1, page: 1 }
+
+      body = response.parsed_body
+      expect(body['total_count']).to eq(1)
+      expect(body['articles_by_course'].flat_map { |group| group['articles'] }
+                                         .pluck('title')).to eq(['Article_2'])
+      expect(body['wiki_options']).to include(['en', 'wikipedia'], ['es', 'wikipedia'])
+      expect(body['newness_options']).to contain_exactly(true, false)
+    end
+
+    it 'returns only the requested page in stable order' do
+      get route, params: { per_page: 1, page: 2 }
+
+      body = response.parsed_body
+      expect(body['total_count']).to eq(3)
+      expect(body['articles_by_course'].flat_map { |group| group['articles'] }
+                                         .pluck('title')).to eq(['Article_1'])
     end
   end
 
@@ -200,9 +253,10 @@ describe UserProfilesController, type: :request do
 
       it 'shows a helpful message when ImageMagick is missing' do
         file = fixture_file_upload('wiki-logo.png', 'image/png')
+        message = 'Could not run the `identify` command. Please install ImageMagick.'
         allow_any_instance_of(UserProfile)
           .to receive(:update)
-          .and_raise(Paperclip::Errors::CommandNotFoundError.new('Could not run the `identify` command. Please install ImageMagick.'))
+          .and_raise(Paperclip::Errors::CommandNotFoundError.new(message))
 
         post route, params: { username: user.username,
                               email: { email: user.email },

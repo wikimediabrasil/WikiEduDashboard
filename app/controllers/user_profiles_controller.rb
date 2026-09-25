@@ -20,23 +20,13 @@ class UserProfilesController < ApplicationController
   def user_articles
     return render json: { error: 'User not found' }, status: :not_found unless @user
 
-    begin
-      @user_articles = ArticlesCourses
-                        .where('user_ids LIKE ?', "%- #{@user.id}\n%")
-                        .joins(:article, :course)
-                        .where(courses: { private: false })
-                        .where(articles: { deleted: false, namespace: Article::Namespaces::MAINSPACE })
-                        .includes(:article, :course)
-                        .includes(article: :wiki)
-                        .order(character_sum: :desc)
-
-      @course_id = params[:course_id]
-      @user_articles = @user_articles.where(course_id: @course_id) if @course_id.present?
-
-      @user_revisions = {}
-    rescue StandardError => e
-      render json: { error: e.message, backtrace: e.backtrace.first(5) }, status: :internal_server_error
-    end
+    scope = user_articles_scope
+    prepare_user_article_filters(scope)
+    paginate_user_articles(filter_user_articles(scope))
+    @user_revisions = {}
+  rescue StandardError => e
+    render json: { error: e.message, backtrace: e.backtrace.first(5) },
+           status: :internal_server_error
   end
 
   def show
@@ -109,4 +99,41 @@ class UserProfilesController < ApplicationController
   end
 
   private
+
+  def user_articles_scope
+    ArticlesCourses.where('user_ids LIKE ?', "%- #{@user.id}\n%")
+                   .joins(:article, :course)
+                   .where(courses: { private: false })
+                   .where(articles: { deleted: false,
+                                      namespace: Article::Namespaces::MAINSPACE })
+  end
+
+  def prepare_user_article_filters(scope)
+    @unfiltered_count = scope.count
+    @wiki_options = scope.joins(article: :wiki).distinct.pluck('wikis.language', 'wikis.project')
+    @newness_options = scope.distinct.pluck(:new_article)
+    @course_id = params[:course_id]
+  end
+
+  def paginate_user_articles(scope)
+    @total_count = scope.count
+    per_page = (params[:per_page] || 20).to_i.clamp(1, 100)
+    page = [(params[:page] || 1).to_i, 1].max
+    @user_articles = scope.includes(:course, article: :wiki)
+                          .order(character_sum: :desc, id: :desc)
+                          .limit(per_page).offset((page - 1) * per_page)
+  end
+
+  def filter_user_articles(scope)
+    scope = scope.where(course_id: @course_id) if @course_id.present?
+    scope = scope.where(new_article: true) if params[:newness] == 'new'
+    scope = scope.where(new_article: false) if params[:newness] == 'existing'
+    return scope if params[:wiki].blank? || params[:wiki] == 'all'
+
+    language, project = params[:wiki].split('.', 2)
+    scope = scope.joins(article: :wiki)
+    return scope.where(wikis: { language:, project: }) if project
+
+    scope.where(wikis: { project: language })
+  end
 end

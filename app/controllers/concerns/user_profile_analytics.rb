@@ -41,61 +41,7 @@ module UserProfileAnalytics
   end
 
   def get_articles_by_language
-    # Group the user's individual contributions by the home wiki of each course
-    # they were enrolled in as a student. This keeps the per-language totals
-    # consistent with the top-level "Words Added" / "References Added" /
-    # "Articles Edited" metrics, which are all computed per-user from
-    # CoursesUsers#character_sum_ms / #references_count and the user-filtered
-    # ArticlesCourses records.
-    courses_users = @user.courses_users
-                         .includes(course: :home_wiki)
-                         .joins(:course)
-                         .where(courses: { private: false })
-                         .where(role: CoursesUsers::Roles::STUDENT_ROLE)
-
-    course_ids = courses_users.map(&:course_id).uniq
-    return [] if course_ids.empty?
-
-    # Per-user, per-course article counts (mainspace, non-deleted), matching
-    # the scope used by IndividualStatisticsTimeslicePresenter#individual_article_count.
-    articles_count_by_course = ArticlesCourses
-                                 .where('user_ids LIKE ?', "%- #{@user.id}\n%")
-                                 .where(course_id: course_ids)
-                                 .joins(:article)
-                                 .where(articles: { deleted: false,
-                                                    namespace: Article::Namespaces::MAINSPACE })
-                                 .group(:course_id)
-                                 .count
-
-    grouped = {}
-    courses_users.each do |cu|
-      wiki = cu.course.home_wiki
-      language = wiki&.language || 'unknown'
-      project = wiki&.project || 'unknown'
-      key = "#{language}-#{project}"
-
-      grouped[key] ||= {
-        language:,
-        project:,
-        character_sum: 0,
-        references_count: 0,
-        article_count: 0
-      }
-
-      grouped[key][:character_sum] += cu.character_sum_ms.to_i
-      grouped[key][:references_count] += cu.references_count.to_i
-      grouped[key][:article_count] += articles_count_by_course[cu.course_id].to_i
-    end
-
-    grouped.values.map do |v|
-      {
-        language: v[:language],
-        project: v[:project],
-        word_count: WordCount.from_characters(v[:character_sum]),
-        references_count: v[:references_count],
-        article_count: v[:article_count]
-      }
-    end.sort_by { |v| -v[:word_count] }
+    GetUserContributionsByLanguage.new(@user).result
   end
 
   def public_courses
@@ -138,7 +84,7 @@ module UserProfileAnalytics
 
   def set_user
     # Per MediaWiki convention, underscores in username urls represent spaces
-    username = CGI.unescape(params[:username]).tr('_', ' ')
+    username = CGI.unescape(params[:username].to_s).tr('_', ' ')
     @user = User.find_by(username:)
   end
 

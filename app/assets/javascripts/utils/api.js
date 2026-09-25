@@ -80,8 +80,9 @@ const API = {
     return response.json();
   },
 
-  async fetchUserArticles(username) {
-    const response = await request(`/users/${username}/user_articles.json`);
+  async fetchUserArticles(username, params = {}) {
+    const queryString = stringify(params);
+    const response = await request(`/users/${username}/user_articles.json${queryString ? '?' + queryString : ''}`);
 
     await ensureOk(response);
     return response.json();

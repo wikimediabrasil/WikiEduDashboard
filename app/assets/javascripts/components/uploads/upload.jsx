@@ -14,7 +14,7 @@ const FALLBACK_HEIGHT = 240;
 const MISSING_IMAGE_PLACEHOLDER = '/assets/images/deleted_image.svg';
 
 const parseDimension = (value) => {
-  const parsed = parseInt(value, 10);
+  const parsed = parseInt(value);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 };
 

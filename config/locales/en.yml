@@ -32,6 +32,14 @@ en:
           trillion: T
           quadrillion: Q
 
+  pagination:
+    previous: "Previous"
+    next: "Next"
+    page: "Page %{current} of %{total}"
+
+  user_profiles:
+    no_filtered_articles: "No articles match the selected filters."
+
   accessibility:
     number_field: This is a number field. The buttons rendered by most browsers will increment and decrement the input.
 

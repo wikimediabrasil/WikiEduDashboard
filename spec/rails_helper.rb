@@ -14,13 +14,22 @@ require 'capybara/rspec'
 require 'capybara-screenshot/rspec'
 
 Capybara.register_driver :selenium do |app|
-  chrome_args = %w[no-sandbox disable-gpu --window-size=1200,1200]
-  chrome_args.prepend('--headless=new') unless ENV['HEADED']
-  options = Selenium::WebDriver::Chrome::Options.new(args: chrome_args)
-  Capybara::Selenium::Driver.new(app,
-                                 browser: :chrome,
-                                 options:,
-                                 clear_local_storage: false) # Persist local storage across tests
+  if ENV['BROWSER'] == 'firefox'
+    options = Selenium::WebDriver::Firefox::Options.new
+    options.add_argument('-headless') unless ENV['HEADED']
+    Capybara::Selenium::Driver.new(app,
+                                   browser: :firefox,
+                                   options:,
+                                   clear_local_storage: false)
+  else
+    chrome_args = %w[no-sandbox disable-gpu --window-size=1200,1200]
+    chrome_args.prepend('--headless=new') unless ENV['HEADED']
+    options = Selenium::WebDriver::Chrome::Options.new(args: chrome_args)
+    Capybara::Selenium::Driver.new(app,
+                                   browser: :chrome,
+                                   options:,
+                                   clear_local_storage: false) # Persist local storage across tests
+  end
 end
 
 Rails.cache.clear

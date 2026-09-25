@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Link, useParams } from 'react-router-dom';
 import API from '../../utils/api.js';
@@ -37,54 +37,11 @@ const wikiFilterToValue = (wikiFilter) => {
   return wikiFilter.project;
 };
 
-const matchesWikiFilter = (article, wikiFilter) => {
-  if (!wikiFilter || wikiFilter.project === 'all') return true;
-
-  const articleLanguage = article.language || article.wiki_language || null;
-  const articleProject = article.project || null;
-  return articleLanguage === wikiFilter.language && articleProject === wikiFilter.project;
-};
-
-const matchesNewnessFilter = (article, newnessFilter) => {
-  switch (newnessFilter) {
-    case 'new':
-      return !!article.new_article;
-    case 'existing':
-      return !article.new_article;
-    default:
-      return true;
-  }
-};
-
-const getWikiOptions = (articles) => {
-  const seen = new Set();
-  const options = [];
-
-  articles.forEach((article) => {
-    const language = article.language || article.wiki_language || '';
-    const project = article.project || '';
-    if (!project) return;
-
+const getWikiOptions = (wikis) => {
+  return wikis.map(([language, project]) => {
     const value = language ? `${language}.${project}` : project;
-    if (seen.has(value)) return;
-
-    seen.add(value);
-    options.push({ value, label: value });
-  });
-
-  return options.sort((a, b) => a.label.localeCompare(b.label));
-};
-
-const summarizeArticles = (articles) => {
-  return articles.reduce((totals, article) => ({
-    word_count: totals.word_count + (Number(article.word_count) || 0),
-    references_count: totals.references_count + (Number(article.references_count) || 0),
-    articles_edited: totals.articles_edited + 1,
-  }), {
-    word_count: 0,
-    references_count: 0,
-    articles_edited: 0,
-  });
+    return { value, label: value };
+  }).sort((a, b) => a.label.localeCompare(b.label));
 };
 
 const updateSearchParams = (filter, value) => {
@@ -108,81 +65,67 @@ const UserDetails = ({ username }) => {
   const [coursesData, setCoursesData] = useState([]);
   const [wikiFilter, setWikiFilter] = useState(() => wikiValueToFilter(getSearchParam('wiki', defaultParams.wiki)));
   const [newnessFilter, setNewnessFilter] = useState(() => getSearchParam('newness', defaultParams.newness));
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [unfilteredCount, setUnfilteredCount] = useState(0);
+  const [wikiOptions, setWikiOptions] = useState([]);
+  const [newnessOptions, setNewnessOptions] = useState([]);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
 
-    API.fetchUserArticles(username)
+    API.fetchUserArticles(username, {
+      page: currentPage,
+      per_page: 20,
+      wiki: wikiFilterToValue(wikiFilter),
+      newness: newnessFilter
+    })
       .then((data) => {
         if (cancelled) return;
         setCoursesData(data.articles_by_course || []);
+        setTotalCount(data.total_count || 0);
+        setUnfilteredCount(data.unfiltered_count || 0);
+        setWikiOptions(getWikiOptions(data.wiki_options || []));
+        setNewnessOptions(data.newness_options || []);
         setLoading(false);
       })
       .catch(() => {
         if (cancelled) return;
         setCoursesData([]);
+        setTotalCount(0);
+        setUnfilteredCount(0);
+        setWikiOptions([]);
+        setNewnessOptions([]);
         setLoading(false);
       });
     return () => {
       cancelled = true;
     };
-  }, [username]);
+  }, [username, currentPage, wikiFilter, newnessFilter]);
 
-  const allArticles = useMemo(
-    () => coursesData.flatMap(courseGroup => (courseGroup.articles || [])),
-    [coursesData]
-  );
-
-  const wikiOptions = useMemo(() => getWikiOptions(allArticles), [allArticles]);
-  const newnessFilterEnabled = useMemo(
-    () => allArticles.some(a => a.new_article) && allArticles.some(a => !a.new_article),
-    [allArticles]
-  );
-
-  useEffect(() => {
-    if (!newnessFilterEnabled && newnessFilter !== 'both') {
-      setNewnessFilter('both');
-      updateSearchParams('newness', 'both');
-    }
-  }, [newnessFilterEnabled, newnessFilter]);
-
-  const filteredCoursesData = useMemo(() => {
-    const activeNewnessFilter = newnessFilterEnabled ? newnessFilter : 'both';
-
-    return coursesData
-      .map((courseGroup) => {
-        const filteredArticles = (courseGroup.articles || []).filter((article) => {
-          return matchesWikiFilter(article, wikiFilter) && matchesNewnessFilter(article, activeNewnessFilter);
-        });
-
-        if (filteredArticles.length === 0) return null;
-
-        const summary = summarizeArticles(filteredArticles);
-        return {
-          ...courseGroup,
-          word_count: summary.word_count,
-          references_count: summary.references_count,
-          articles_edited: summary.articles_edited,
-          articles: filteredArticles,
-        };
-      })
-      .filter(Boolean);
-  }, [coursesData, wikiFilter, newnessFilter, newnessFilterEnabled]);
-
-  const hasAnyArticles = allArticles.length > 0;
-  const hasNoFilteredResults = hasAnyArticles && filteredCoursesData.length === 0;
+  const newnessFilterEnabled = newnessOptions.includes(true) && newnessOptions.includes(false);
+  const hasNoFilteredResults = unfilteredCount > 0 && totalCount === 0;
 
   const onWikiChange = (e) => {
     const value = e.target.value;
     updateSearchParams('wiki', value);
     setWikiFilter(wikiValueToFilter(value));
+    setCurrentPage(1);
   };
 
   const onNewnessChange = (e) => {
     const value = e.target.value;
     updateSearchParams('newness', value);
     setNewnessFilter(value);
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= Math.ceil(totalCount / 20)) {
+      setCurrentPage(newPage);
+      window.scrollTo(0, 0);
+    }
   };
 
   if (loading) {
@@ -255,7 +198,7 @@ const UserDetails = ({ username }) => {
           ← {I18n.t('users.back_to_profile')}
         </Link>
       </div>
-      {coursesData.length === 0 ? (
+      {unfilteredCount === 0 ? (
         <div className="user-articles__empty-state">
           <h3>{title}</h3>
           <p>{I18n.t('user_profiles.no_articles_edited')}</p>
@@ -317,11 +260,11 @@ const UserDetails = ({ username }) => {
           {hasNoFilteredResults ? (
             <div className="user-articles__empty-state">
               <h3>{title}</h3>
-              <p>No articles match the selected filters.</p>
+              <p>{I18n.t('user_profiles.no_filtered_articles')}</p>
             </div>
           ) : (
             <div className="user-articles-list">
-              {filteredCoursesData.map(courseGroup => (
+              {coursesData.map(courseGroup => (
                 <section key={courseGroup.course_slug} className="course-articles-group user-details-course">
                   <div className="user-details-course__header">
                     <div>
@@ -368,6 +311,30 @@ const UserDetails = ({ username }) => {
                   </div>
                 </section>
               ))}
+              {totalCount > 20 && (
+                <div className="user-articles__pagination" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '16px', marginTop: '24px', marginBottom: '24px' }}>
+                  <button
+                    type="button"
+                    className="button border ghost small"
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    {I18n.t('pagination.previous')}
+                  </button>
+                  <span className="user-articles__page-info">
+                    {I18n.t('pagination.page', { current: currentPage, total: Math.ceil(totalCount / 20) })}
+                  </span>
+                  <button
+                    type="button"
+                    className="button border ghost small"
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage >= Math.ceil(totalCount / 20)}
+                  >
+                    {I18n.t('pagination.next')}
+                  </button>
+                </div>
+              )}
+
             </div>
           )}
           <div className="user-articles__footer">
