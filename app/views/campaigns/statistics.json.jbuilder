@@ -1,11 +1,14 @@
 # frozen_string_literal: true
 json.cache! ["#{Time.zone}}-explore-campaigns-#{locale}", @campaigns], expires_in: 1.day do
+  label_translations = WikidataLabelService.translations_for(@campaigns.flat_map(&:labels))
   json.campaigns @campaigns do |campaign|
     presenter = CoursesPresenter.new(
       current_user:,
       campaign_param: campaign.slug
     )
     json.call(campaign, :id, :title, :slug)
+    json.labels campaign.labels.map { |label| label_translations[label.match] || label.labels }
+    json.label_matches campaign.labels.map(&:match)
     json.call(
       presenter,
       :course_count,

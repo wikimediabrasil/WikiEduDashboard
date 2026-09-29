@@ -28,7 +28,9 @@ describe 'JS error detection', type: :feature, js: true, js_error_expected: true
       document.head.appendChild(s);
     JS
 
-    click_link 'Home'
+    # The intentional error may open the development overlay and intercept clicks.
+    # Navigate directly while still checking that the error survives navigation.
+    visit find_link('Home')[:href]
     expect(page).to have_content 'My Dashboard'
 
     # Call the same method the after(:each) hook uses. If this stops catching

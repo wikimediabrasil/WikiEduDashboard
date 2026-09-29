@@ -24,6 +24,8 @@ require 'csv'
 class Campaign < ApplicationRecord
   has_many :campaigns_courses, class_name: 'CampaignsCourses', dependent: :destroy
   has_many :campaigns_users, class_name: 'CampaignsUsers', dependent: :destroy
+  has_many :campaigns_labels, class_name: 'CampaignsLabels', dependent: :destroy
+  has_many :labels, through: :campaigns_labels
   has_many :courses, through: :campaigns_courses
   has_many :nonprivate_courses, -> { nonprivate },
            through: :campaigns_courses, source: :course

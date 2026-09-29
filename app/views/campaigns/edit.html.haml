@@ -103,6 +103,24 @@
                 = @campaign.default_passcode
               = text_field(:campaign, :default_passcode, required: false, class: 'rails_editable-input')
 
+            .campaign-labels.form-group.rails_editable-field
+              %label
+                = succeed ':' do
+                  = t('campaign.wikidata_tags')
+              %span.rails_editable-content
+                - if @campaign.labels.any?
+                  .wikidata-tags-chips
+                    - @campaign.labels.each do |label|
+                      %span.wikidata-tags-chip
+                        %a.wikidata-tags-chip__link{href: label.url, target: '_blank', rel: 'noopener', title: label.description}
+                          = label.labels
+                          %span.wikidata-tags-chip__qnum= label.match
+                - else
+                  %span —
+              %span.rails_editable-input
+                .campaign-wikidata-tags-mount{data: {initial_tags: @campaign.labels.map { |l| { qNumber: l.match, label: l.labels, url: l.url, description: l.description.to_s } }.to_json }}
+                = hidden_field_tag('campaign[sync_wikidata_tags]', '1')
+
             .campaign-use-dates.form-group.rails_editable-field
               - use_dates = @campaign.start || @campaign.end
               %label

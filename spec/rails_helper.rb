@@ -17,6 +17,7 @@ Capybara.register_driver :selenium do |app|
   chrome_args = %w[no-sandbox disable-gpu --window-size=1200,1200]
   chrome_args.prepend('--headless=new') unless ENV['HEADED']
   options = Selenium::WebDriver::Chrome::Options.new(args: chrome_args)
+  options.binary = ENV['CHROME_BIN'] if ENV['CHROME_BIN']
   Capybara::Selenium::Driver.new(app,
                                  browser: :chrome,
                                  options:,
@@ -43,7 +44,8 @@ end
 
 Capybara.save_path = 'tmp/screenshots/'
 Capybara.server = :puma, { Silent: true }
-Capybara.default_max_wait_time = 10
+# Allow slower local browser/database environments to use a bounded wait.
+Capybara.default_max_wait_time = Integer(ENV.fetch('CAPYBARA_MAX_WAIT_TIME', '10'), 10)
 # Requires supporting ruby files with custom matchers and macros, etc, in
 # spec/support/ and its subdirectories. Files matching `spec/**/*_spec.rb` are
 # run as spec files by default. This means that files in spec/support that end

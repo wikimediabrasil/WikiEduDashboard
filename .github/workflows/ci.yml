@@ -116,6 +116,11 @@ jobs:
             cp config/application.example.yml config/application.yml
             cp config/database.example.yml config/database.yml
             bundle exec rake parallel:create[3] parallel:load_schema[3]
+            # Apply migrations newer than the checked-in schema to every worker database.
+            # Run sequentially so schema dumps cannot overwrite each other.
+            for test_number in "" 2 3; do
+              TEST_ENV_NUMBER="$test_number" bundle exec rake db:migrate
+            done
 
       - name: Check eager loading (catch autoloading issues)
         env:
