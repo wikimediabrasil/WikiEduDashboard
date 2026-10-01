@@ -145,16 +145,25 @@ nav.top-nav
     display inherit
     align-items center
 
-.top-nav__main-links
+nav.top-nav .top-nav__main-links
   display flex
   flex-wrap nowrap
   justify-content flex-start
+  height 100%
   margin 0
   padding 0
   li
+    display flex
+    height 100%
     margin-left 25px
-  a
+  li > a
+    display flex
+    align-items center
+    box-sizing border-box
+    height 100%
     margin 0
+    padding 0
+    border-bottom 3px solid transparent
   span
     display inherit
 .top-nav__site-logo
@@ -207,13 +216,19 @@ nav.top-nav
     text-align left
 
 
-body.fixed-nav
-  padding-top $nav_height
+body.fixed-nav, body.course-page
+  padding-top 0
   nav.top-nav
-    position fixed
+    position static
+    top 0
 
-body.course-page nav.top-nav
-  position relative
+  nav.ham-nav
+    position static
+    top 0
+
+  .hamburger_menu_wrapper .bm-menu-wrap
+    top $nav_height
+    height 'calc(100% - %s)' % $nav_height
 
 nav
   background #fff
@@ -290,7 +305,7 @@ nav.ham-nav
   line-height 1
 
   +below(desktop)
-    position fixed
+    position static
 
   .container
     height $nav_height
