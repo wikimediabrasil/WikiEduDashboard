@@ -152,7 +152,7 @@
 
 		// h3 → h2 promotion (for accessible heading hierarchy) made the
 		// "Contribution Statistics" header larger. Preserve the prior size.
-		> h2
+		.user-profile__stats-header h2
 			font-size 1.563em
 
 		#inner_statistics
@@ -172,6 +172,17 @@
 
 	#training-status
 		padding-top 30px
+
+.user-profile__stats-header
+	display flex
+	align-items center
+	justify-content space-between
+	flex-wrap wrap
+	gap 12px
+	.user-articles__downloads
+		display flex
+		flex-wrap wrap
+		gap 8px
 
 // making user profile pages responsive
 @media only screen and (max-width: 500px)

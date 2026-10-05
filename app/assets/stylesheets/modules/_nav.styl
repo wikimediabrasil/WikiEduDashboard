@@ -30,14 +30,15 @@ nav.top-nav
 
 
   .container
-    // min-height (not fixed height) so the nav can grow when items
-    // wrap onto a second row at high browser zoom. flex-wrap lets
-    // them actually wrap instead of being crushed. WCAG 1.4.4.
-    min-height $nav_height
-    display flex
-    flex-wrap wrap
+    max-width none
+    width 100%
+    height $nav_height
+    padding-left 15px
+    padding-right 15px
+    display grid
+    grid-template-columns 35px minmax(0, 1fr) max-content
+    column-gap 15px
     align-items center
-    justify-content space-around
 
   .notifications
     a
@@ -103,9 +104,11 @@ nav.top-nav
 
 .top-nav__login-links
   display flex
+  flex-wrap nowrap
   justify-content flex-end
   align-items: center
-  margin-left auto
+  margin-left 0
+  white-space nowrap
   b
     +below(desktop)
       display none
@@ -144,15 +147,27 @@ nav.top-nav
     display inherit
     align-items center
 
-.top-nav__main-links
+nav.top-nav .top-nav__main-links
   display flex
-  justify-content flex-start
+  flex-wrap nowrap
+  justify-content flex-end
+  height 100%
   margin 0
   padding 0
+  min-width 0
+  white-space nowrap
   li
-    margin-left 25px
-  a
+    display flex
+    height 100%
+    margin-left 10px
+  li > a
+    display flex
+    align-items center
+    box-sizing border-box
+    height 100%
     margin 0
+    padding 0
+    border-bottom 3px solid transparent
   span
     display inherit
 .top-nav__site-logo
@@ -205,13 +220,19 @@ nav.top-nav
     text-align left
 
 
-body.fixed-nav
-  padding-top $nav_height
+body.fixed-nav, body.course-page
+  padding-top 0
   nav.top-nav
-    position fixed
+    position static
+    top 0
 
-body.course-page nav.top-nav
-  position relative
+  nav.ham-nav
+    position static
+    top 0
+
+  .hamburger_menu_wrapper .bm-menu-wrap
+    top $nav_height
+    height 'calc(100% - %s)' % $nav_height
 
 nav
   background #fff
@@ -288,7 +309,7 @@ nav.ham-nav
   line-height 1
 
   +below(desktop)
-    position fixed
+    position static
 
   .container
     height $nav_height

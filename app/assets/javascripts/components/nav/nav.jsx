@@ -54,7 +54,7 @@ const Nav = () => {
     return !!window.location.pathname.match(/courses/);
   };
 
-  const isSmallScreen = dimensions.width < 920;
+  const isSmallScreen = dimensions.width < 1140;
 
   return (
     <div>

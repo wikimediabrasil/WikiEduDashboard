@@ -2255,6 +2255,9 @@ en:
       bell: Notifications
 
   downloads:
+    available_in_bell: Your file is ready. Go to the bell notifications to download it.
+    csv: Download CSV
+    json: Download JSON
     title: Downloads
     none: You have no downloads yet.
     generating: Generating…
