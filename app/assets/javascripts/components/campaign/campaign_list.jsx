@@ -35,7 +35,7 @@ const CampaignList = ({ keys, showSearch, RowElement, headerText, userOnly, show
   }, [labelSearch]);
 
   const filteredCampaigns = all_campaigns.filter((campaign) => {
-    if (showSearch) {
+    if (showSearch && !paginated) {
       if (search && !campaign.title.toLowerCase().includes(search.toLowerCase())) {
         return false;
       }
@@ -60,7 +60,6 @@ const CampaignList = ({ keys, showSearch, RowElement, headerText, userOnly, show
   };
 
   if (sort.key) {
-
     for (const key of Object.keys(keys)) {
       if (key === sort.key) {
         keys[sort.key].order = (sort.sortKey) ? 'asc' : 'desc';
@@ -102,7 +101,7 @@ const CampaignList = ({ keys, showSearch, RowElement, headerText, userOnly, show
     if (showStatistics) {
       dispatch(fetchCampaignStatistics(userOnly, { page, search, labelSearch, paginated }));
     } else {
-      dispatch(fetchAllCampaigns());
+      dispatch(fetchAllCampaigns(page, search));
     }
   }, [dispatch, labelSearch, page, paginated, search, showStatistics, userOnly]);
 
@@ -110,6 +109,7 @@ const CampaignList = ({ keys, showSearch, RowElement, headerText, userOnly, show
   if (!all_campaigns_loaded) {
     return <Loading/>;
   }
+
   const campaignElements = filteredCampaigns.map(campaign => <RowElement campaign={campaign} key={campaign.slug}/>);
 
   const getNoResultsMessage = () => {

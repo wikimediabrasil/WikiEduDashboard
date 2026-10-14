@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import InstructorStats from './instructor_stats.jsx';
 import StudentStats from './student_stats.jsx';
 import DropdownSortSelect from '../common/dropdown_sort_select';
+import ProfileDownloadButtons from './profile_download_buttons.jsx';
 
 const defaultParams = {
   wiki: 'all'
@@ -141,21 +142,15 @@ const ContributionStats = ({ params, stats, statsGraphsData }) => {
     }
   }, [wikiFilter, wikiOptions]);
 
-  const downloadCsvLabel = I18n.t('downloads.csv');
-  const downloadJsonLabel = I18n.t('downloads.json');
-
   return (
     <div id="statistics">
       <div className="user-articles__header">
-        <h3>{I18n.t('users.contribution_statistics')}</h3>
-        <div className="user-articles__downloads">
-          <button type="button" className="button border ghost small">
-            {downloadCsvLabel}
-          </button>
-          <button type="button" className="button border ghost small">
-            {downloadJsonLabel}
-          </button>
-        </div>
+        <h2>{I18n.t('users.contribution_statistics')}</h2>
+        <ProfileDownloadButtons
+          username={params.username}
+          section="statistics"
+          data={{ username: params.username, ...stats, articles_by_language: filteredArticlesByLanguage }}
+        />
       </div>
       {showWikiFilter && (
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '12px', marginBottom: '24px' }}>
@@ -181,7 +176,7 @@ const ContributionStats = ({ params, stats, statsGraphsData }) => {
       {/* Stats by Language/Project */}
       {filteredArticlesByLanguage.length > 0 && (
         <div className="user-articles__header" style={{ marginTop: '30px' }}>
-          <h5 className="user_stats__title">{I18n.t('users.contributions_by_language')}</h5>
+          <h3 className="user_stats__title">{I18n.t('users.contributions_by_language')}</h3>
         </div>
       )}
       {filteredArticlesByLanguage.length > 0 && (
@@ -212,7 +207,7 @@ const ContributionStats = ({ params, stats, statsGraphsData }) => {
       )}
       {articlesByLanguage.length > 0 && filteredArticlesByLanguage.length === 0 && (
         <div className="user-articles__empty-state" style={{ marginTop: '24px' }}>
-          <p>No articles match the selected filter.</p>
+          <p>{I18n.t('user_profiles.no_articles_match')}</p>
         </div>
       )}
     </div>

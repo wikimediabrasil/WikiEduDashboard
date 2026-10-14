@@ -72,7 +72,7 @@ RSpec.describe LabelsController, type: :controller do
     describe 'POST #create' do
       it 'creates a new label and redirects' do
         expect {
-          post :create, params: { label: { labels: 'New Label', url: 'http://example.com' } }
+          post :create, params: { label: { labels: 'New Label', match: 'Q987654321' } }
         }.to change(Label, :count).by(1)
         expect(response).to redirect_to(label_path(Label.last))
       end

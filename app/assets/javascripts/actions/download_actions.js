@@ -1,81 +1,69 @@
 import { ADD_DOWNLOAD, UPDATE_DOWNLOAD, REMOVE_DOWNLOAD, MARK_DOWNLOADS_READ } from '../constants';
+import { pollReportCsv } from '../utils/csv_polling_utils';
 
-const INITIAL_POLL_DELAY_MS = 100; // First check after 100ms for small files
-const POLL_INTERVAL_MS = 1000; // Then check every 1 second
-const MAX_POLL_ATTEMPTS = 300; // Max 5 minutes of polling
-
-// Tracks in-flight polling timers, keyed by download id, so that polling
+// Tracks in-flight polling cancellations, keyed by download id, so that polling
 // keeps running independently of whether any component is mounted.
 const activePolls = {};
-const pollAttempts = {};
 
 export const addDownload = download => ({ type: ADD_DOWNLOAD, download });
 export const updateDownload = (id, changes) => ({ type: UPDATE_DOWNLOAD, id, changes });
-export const removeDownload = id => ({ type: REMOVE_DOWNLOAD, id });
-export const markDownloadsRead = () => ({ type: MARK_DOWNLOADS_READ });
-
-const isStillGenerating = async (response) => {
-  // If the file exists, the response will be a binary/CSV file, not text/plain
-  // Only text/plain responses with the "generating" message mean it's still pending
-  const contentType = response.headers.get('content-type') || '';
-  if (!contentType.includes('text/plain')) {
-    // It's a CSV file (application/octet-stream or text/csv), so it's ready
-    return false;
+export const removeDownload = (id) => {
+  if (activePolls[id]) {
+    activePolls[id]();
+    delete activePolls[id];
   }
-  const text = await response.text();
-  return text.includes('This file is being generated');
+  return { type: REMOVE_DOWNLOAD, id };
 };
-
-const hasActivePoll = id => Object.prototype.hasOwnProperty.call(activePolls, id);
-
-const stopPolling = (id) => {
-  clearTimeout(activePolls[id]);
-  delete activePolls[id];
-  delete pollAttempts[id];
-};
+export const markDownloadsRead = () => ({ type: MARK_DOWNLOADS_READ });
 
 // Starts (or resumes polling for) a CSV download. The polling itself lives
 // here rather than in a component, so it survives modal closes and route changes.
-export const startDownload = ({ id, href, label }) => async (dispatch) => {
-  if (hasActivePoll(id)) { return; }
+export const startDownload = ({ id, href, label, onGenerating }) => (dispatch, getState) => {
+  // Already polling, e.g. resumed after a page load. Don't poll twice, but still
+  // let the caller know the file is generating.
+  if (activePolls[id]) {
+    if (onGenerating) { onGenerating(); }
+    return;
+  }
 
-  dispatch(addDownload({ id, href, label, status: 'pending', createdAt: Date.now() }));
+  const state = getState ? getState() : null;
+  const existingItem = state?.downloads?.items?.find(item => item.id === id);
 
-  pollAttempts[id] = 0;
+  if (existingItem) {
+    dispatch(updateDownload(id, { status: 'pending' }));
+  } else {
+    dispatch(addDownload({ id, href, label, status: 'pending', createdAt: Date.now() }));
+  }
 
-  const poll = async () => {
-    pollAttempts[id]++;
-
-    try {
-      const response = await fetch(href, { credentials: 'include' });
-
-      if (!response.ok) {
-        throw new Error(`Download request failed with status ${response.status}`);
-      }
-
-      if (await isStillGenerating(response)) {
-        // Still generating, check if we've exceeded max attempts
-        if (pollAttempts[id] >= MAX_POLL_ATTEMPTS) {
-          stopPolling(id);
-          dispatch(updateDownload(id, { status: 'error' }));
-        } else {
-          // Schedule only after this request finishes to avoid overlapping polls.
-          activePolls[id] = setTimeout(poll, POLL_INTERVAL_MS);
+  let hasNotifiedGenerating = false;
+  const cancel = pollReportCsv(href, {
+    onGenerating: (data) => {
+      if (!hasNotifiedGenerating) {
+        hasNotifiedGenerating = true;
+        if (onGenerating) {
+          onGenerating(data);
         }
-        return;
       }
-
-      stopPolling(id);
-
-      const filename = response.url.split('/').pop() || `${label}.csv`;
-
-      dispatch(updateDownload(id, { status: 'ready', downloadUrl: response.url, filename }));
-    } catch {
-      stopPolling(id);
-      dispatch(updateDownload(id, { status: 'error' }));
+    },
+    onReady: (data) => {
+      delete activePolls[id];
+      const filename = data.url.split('/').pop() || `${label}.csv`;
+      dispatch(updateDownload(id, { status: 'ready', downloadUrl: data.url, filename }));
+    },
+    onError: (err) => {
+      delete activePolls[id];
+      const status = err?.reason === 'timeout' ? 'timeout' : 'error';
+      dispatch(updateDownload(id, { status }));
     }
-  };
+  });
 
-  // First check immediately after a short delay for small files
-  activePolls[id] = setTimeout(poll, INITIAL_POLL_DELAY_MS);
+  activePolls[id] = cancel;
+};
+
+// Polling stops when the page unloads, so downloads restored as 'pending' from
+// localStorage need their polling restarted on each page load.
+export const resumePendingDownloads = () => (dispatch, getState) => {
+  getState().downloads.items
+    .filter(item => item.status === 'pending')
+    .forEach(item => dispatch(startDownload(item)));
 };

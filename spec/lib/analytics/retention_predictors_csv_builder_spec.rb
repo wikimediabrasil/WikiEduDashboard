@@ -4,6 +4,8 @@ require 'rails_helper'
 require "#{Rails.root}/lib/analytics/retention_predictors_csv_builder"
 
 describe RetentionPredictorsCsvBuilder do
+  include RetentionApiStubs
+
   let(:wiki1) { Wiki.find_or_create_by(language: 'en', project: 'wikipedia') }
   let(:wiki2) { Wiki.find_or_create_by(language: 'es', project: 'wikipedia') }
   let(:user1) { create(:user, username: 'user1') }
@@ -16,42 +18,6 @@ describe RetentionPredictorsCsvBuilder do
     course.wikis = course_wikis
     create(:courses_user, course:, user: user1, role: CoursesUsers::Roles::STUDENT_ROLE)
     create(:courses_user, course:, user: user2, role: CoursesUsers::Roles::STUDENT_ROLE)
-  end
-
-  # Builds a stub MediaWiki API response object for a list of edit Times.
-  def response_for(times, continue: nil)
-    contribs = times.map { |t| { 'timestamp' => t.utc.strftime('%Y-%m-%dT%H:%M:%SZ') } }
-    instance_double(MediawikiApi::Response).tap do |response|
-      allow(response).to receive(:data).and_return('usercontribs' => contribs)
-      allow(response).to receive(:[]).with('continue').and_return(continue)
-    end
-  end
-
-  # One page of a user's pre-course contributions, out of `total` of them.
-  # Pages at the real API's 500-per-page limit, so the builder's
-  # stop-counting-at-the-threshold pagination gets exercised for real.
-  def prior_edits_response(total, params)
-    offset = (params['uccontinue'] || params[:uccontinue]).to_i
-    remaining = total - offset
-    page = [remaining, 500].min
-    continue = remaining > page ? { 'uccontinue' => (offset + page).to_s } : nil
-    response_for([Time.zone.now] * page, continue:)
-  end
-
-  # Stubs WikiApi.new(wiki) for both queries the builder makes. The during-course
-  # timeline query is bounded by :ucend; the pre-course edit count query is not,
-  # which is how the stub tells them apart. `contribs_by_user` maps
-  # username => [Time, ...]; `prior_edits` maps username => edit count.
-  def stub_wiki(wiki, contribs_by_user, prior_edits = {})
-    api = instance_double(WikiApi)
-    allow(WikiApi).to receive(:new).with(wiki).and_return(api)
-    allow(api).to receive(:query) do |params|
-      if params.key?(:ucend)
-        response_for(contribs_by_user.fetch(params[:ucuser], []))
-      else
-        prior_edits_response(prior_edits.fetch(params[:ucuser], 0), params)
-      end
-    end
   end
 
   let(:table) { CSV.parse(described_class.new(course).generate_csv) }
@@ -189,17 +155,17 @@ describe RetentionPredictorsCsvBuilder do
   describe 'long-term Wikipedians' do
     let(:course) { create(:course, start: 130.days.ago, end: 100.days.ago) }
 
-    context 'when a participant edited 1000+ times before the course' do
+    context 'when a participant edited 500+ times before the course' do
       before do
         e = course.end
         timeline = [e - 10.days, e + 5.days, e + 70.days]
         stub_wiki(wiki1, { 'user1' => timeline, 'user2' => timeline },
-                  { 'user1' => 1000 })
+                  { 'user1' => 500 })
       end
 
       it 'reports them in the detail block, flagged and capped at the threshold' do
         expect(detail_row('user1'))
-          .to eq(['user1', '1', '5', '1', '1', '1000+', 'yes', '0', nil])
+          .to eq(['user1', '1', '5', '1', '1', '500+', 'yes', '0', nil])
       end
 
       it 'leaves them out of every summary aggregate' do
@@ -213,15 +179,15 @@ describe RetentionPredictorsCsvBuilder do
       end
     end
 
-    context 'when a participant edited just under 1000 times before the course' do
+    context 'when a participant edited just under 500 times before the course' do
       before do
-        stub_wiki(wiki1, { 'user1' => [] }, { 'user1' => 999 })
+        stub_wiki(wiki1, { 'user1' => [] }, { 'user1' => 499 })
       end
 
       it 'reports the exact count and counts them as an ordinary participant' do
-        # 999 spans two pages of contributions, so the count is only right if
+        # 499 spans two pages of contributions, so the count is only right if
         # pagination continued past the first page.
-        expect(detail_row('user1')&.at(5)).to eq('999')
+        expect(detail_row('user1')&.at(5)).to eq('499')
         expect(detail_row('user1')&.at(6)).to be_nil
         expect(summary_value('participants')).to eq('2')
         expect(summary_value('long-term Wikipedians (excluded from all counts)')).to eq('0')
@@ -232,12 +198,12 @@ describe RetentionPredictorsCsvBuilder do
       let(:course_wikis) { [wiki1, wiki2] }
 
       before do
-        stub_wiki(wiki1, { 'user1' => [] }, { 'user1' => 600 })
-        stub_wiki(wiki2, { 'user1' => [] }, { 'user1' => 500 })
+        stub_wiki(wiki1, { 'user1' => [] }, { 'user1' => 300 })
+        stub_wiki(wiki2, { 'user1' => [] }, { 'user1' => 200 })
       end
 
       it 'sums them across wikis to reach the threshold' do
-        expect(detail_row('user1')&.at(5)).to eq('1000+')
+        expect(detail_row('user1')&.at(5)).to eq('500+')
         expect(detail_row('user1')&.at(6)).to eq('yes')
       end
     end
@@ -245,7 +211,7 @@ describe RetentionPredictorsCsvBuilder do
     context 'when every participant is a long-term Wikipedian' do
       before do
         stub_wiki(wiki1, { 'user1' => [], 'user2' => [] },
-                  { 'user1' => 1000, 'user2' => 1000 })
+                  { 'user1' => 500, 'user2' => 500 })
       end
 
       it 'leaves the aggregates blank rather than reporting a column of zeros' do
@@ -268,7 +234,7 @@ describe RetentionPredictorsCsvBuilder do
                               role: CoursesUsers::Roles::STUDENT_ROLE)
         e = course.end
         stub_wiki(wiki1, { 'user1' => [e - 10.days], 'user2' => [e - 10.days] },
-                  { 'user1' => 1000 })
+                  { 'user1' => 500 })
       end
 
       it 'excludes them from the returning column, not just the first-course one' do

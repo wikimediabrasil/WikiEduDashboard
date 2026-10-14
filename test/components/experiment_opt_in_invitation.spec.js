@@ -86,10 +86,14 @@ describe('ExperimentOptInInvitation', () => {
 
   const installCopy = {
     install_title: 'Install the tool',
+    install_explanation: 'This is **why** you are asked to do this.',
     install_message: 'Paste this line into your common.js.',
     install_button: 'Open my common.js',
+    install_copy_button: 'Copy it',
+    install_copied: 'On your clipboard',
     install_verify_button: "I've saved it",
-    install_not_found: 'Not found yet.'
+    install_not_found: 'Not found yet.',
+    install_help: '[Stuck? Read the FAQ](/faq/32)'
   };
 
   const installInvitation = userscript => ({
@@ -113,6 +117,39 @@ describe('ExperimentOptInInvitation', () => {
     expect(container.textContent).toContain('Paste this line into your common.js.');
     const link = container.querySelector('.experiment-opt-in__actions a');
     expect(link.getAttribute('href')).toContain('action=edit');
+  });
+
+  it('explains the install step, as Markdown, above the instructions', async () => {
+    request.mockResolvedValue(installInvitation({
+      install_url: 'https://en.wikipedia.org/w/index.php?title=User:S/common.js&action=edit',
+      import_line: 'importScript("x");'
+    }));
+    const container = await renderComponent(eligibleCourse, student);
+    const explanation = container.querySelector('.experiment-opt-in__explanation');
+    expect(explanation.textContent).toContain('why you are asked to do this');
+    expect(explanation.querySelector('strong').textContent).toEqual('why');
+    const text = container.textContent;
+    expect(text.indexOf('why you are asked')).toBeLessThan(text.indexOf('Paste this line'));
+  });
+
+  it('copies the import line to the clipboard and says so', async () => {
+    const importLine = "importScript('User:Sage_(Wiki_Ed)/wickie.js');";
+    request.mockResolvedValue(installInvitation({
+      install_url: 'https://en.wikipedia.org/w/index.php?title=User:S/common.js&action=edit',
+      import_line: importLine
+    }));
+    const writeText = jest.fn().mockResolvedValue();
+    global.navigator.clipboard = { writeText };
+
+    const container = await renderComponent(eligibleCourse, student);
+    const copyButton = container.querySelector('.experiment-opt-in__copy-button');
+    expect(copyButton.textContent).toEqual('Copy it');
+    await act(async () => { copyButton.click(); });
+    await flush();
+
+    expect(writeText).toHaveBeenCalledWith(importLine);
+    expect(copyButton.textContent).toEqual('On your clipboard');
+    delete global.navigator.clipboard;
   });
 
   it('closes for good once a re-check finds the script installed', async () => {
@@ -148,5 +185,33 @@ describe('ExperimentOptInInvitation', () => {
     expect(container.querySelector('.experiment-opt-in__panel')).not.toBeNull();
     expect(container.querySelector('.experiment-opt-in__not-found').textContent)
       .toEqual('Not found yet.');
+  });
+
+  it('links to the installation walkthrough and troubleshooting FAQ', async () => {
+    request.mockResolvedValue(installInvitation({
+      install_url: 'https://en.wikipedia.org/w/index.php?title=User:S/common.js&action=edit',
+      import_line: 'importScript("x");'
+    }));
+    const container = await renderComponent(eligibleCourse, student);
+    const link = container.querySelector('.experiment-opt-in__help a');
+    expect(link.getAttribute('href')).toEqual('/faq/32');
+    expect(link.textContent).toEqual('Stuck? Read the FAQ');
+  });
+
+  it('leaves the site and course navs usable during the install step', async () => {
+    const nav = document.createElement('div');
+    nav.className = 'course_navigation';
+    nav.getBoundingClientRect = () => ({ bottom: 112 });
+    document.body.appendChild(nav);
+    request.mockResolvedValue(installInvitation({
+      install_url: 'https://en.wikipedia.org/w/index.php?title=User:S/common.js&action=edit',
+      import_line: 'importScript("x");'
+    }));
+    const container = await renderComponent(eligibleCourse, student);
+    const overlay = container.querySelector('.experiment-opt-in--install');
+    expect(overlay.getAttribute('aria-modal')).toBeNull();
+    expect(overlay.style.top).toEqual('112px');
+    expect(document.body.classList).toContain('experiment-install-open');
+    nav.remove();
   });
 });

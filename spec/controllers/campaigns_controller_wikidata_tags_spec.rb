@@ -3,6 +3,18 @@
 require 'rails_helper'
 
 describe CampaignsController, type: :request do
+  before do
+    entities = {
+      'Q349' => { labels: { en: { value: 'sport' } },
+                  descriptions: { en: { value: 'competitive physical activity' } } },
+      'Q638' => { labels: { en: { value: 'music' } },
+                  descriptions: { en: { value: 'art form whose medium is sound' } } }
+    }
+    stub_request(:get, WikidataLabelService::WIKIDATA_API)
+      .with(query: hash_including('action' => 'wbgetentities'))
+      .to_return(status: 200, body: { entities: }.to_json)
+  end
+
   describe '#create with wikidata_tags' do
     let(:admin) { create(:admin) }
 

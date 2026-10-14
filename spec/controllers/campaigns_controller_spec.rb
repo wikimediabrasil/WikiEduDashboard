@@ -8,6 +8,50 @@ describe CampaignsController, type: :request do
       get '/campaigns'
       expect(response.status).to eq(200)
     end
+
+    context 'with json format' do
+      before do
+        30.times do |i|
+          create(:campaign, title: "Campaign #{i + 1}", slug: "campaign_#{i + 1}")
+        end
+      end
+
+      it 'returns 10 campaigns per page and pagination metadata' do
+        get '/campaigns.json', params: { page: 1 }
+        expect(response.status).to eq(200)
+        body = JSON.parse(response.body)
+        expect(body['campaigns'].length).to eq(10)
+        expect(body['total_pages']).to eq((Campaign.count / 10.0).ceil)
+        expect(body['current_page']).to eq(1)
+      end
+
+      it 'returns the remaining campaigns on the last page' do
+        total = Campaign.count
+        last_page = (total / 10.0).ceil
+        get '/campaigns.json', params: { page: last_page }
+        expect(response.status).to eq(200)
+        body = JSON.parse(response.body)
+        expect(body['campaigns'].length).to eq(total - ((last_page - 1) * 10))
+        expect(body['current_page']).to eq(last_page)
+      end
+
+      it 'filters campaigns by search query' do
+        get '/campaigns.json', params: { search: 'Campaign 10' }
+        expect(response.status).to eq(200)
+        body = JSON.parse(response.body)
+        expect(body['campaigns'].length).to eq(1)
+        expect(body['campaigns'].first['title']).to eq('Campaign 10')
+      end
+
+      it 'includes campaign statistics attributes' do
+        get '/campaigns.json', params: { page: 1 }
+        expect(response.status).to eq(200)
+        campaign = JSON.parse(response.body)['campaigns'].first
+        expect(campaign).to include('course_count', 'new_article_count', 'article_count',
+                                    'word_count', 'references_count', 'view_sum',
+                                    'user_count', 'creation_date', 'human_course_count')
+      end
+    end
   end
 
   describe '#create' do
@@ -640,11 +684,12 @@ describe CampaignsController, type: :request do
     it 'paginates campaign statistics when requested' do
       10.times { |index| create(:campaign, title: "Campaign #{index}") }
 
+      total = Campaign.count
       get '/campaigns/statistics.json', params: { paginated: true, page: 2 }
 
       json = JSON.parse(response.body)
-      expect(json['campaigns'].length).to eq(1)
-      expect(json).to include('current_page' => 2, 'total_pages' => 2, 'total_entries' => 11)
+      expect(json['campaigns'].length).to eq(total - 10)
+      expect(json).to include('current_page' => 2, 'total_pages' => 2, 'total_entries' => total)
     end
   end
 

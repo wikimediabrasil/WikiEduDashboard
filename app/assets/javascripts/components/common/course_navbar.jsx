@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import GetHelpButton from './get_help_button.jsx';
+import StudentViewToggle from '../course/student_view_toggle.jsx';
 import CourseUtils from '../../utils/course_utils.js';
 import { BLOCK_KIND_RESOURCES } from '../../constants/timeline';
 
@@ -12,7 +13,7 @@ const hasResourcesBlock = weeks => weeks.some(
   week => (week.blocks || []).some(block => block.kind === BLOCK_KIND_RESOURCES)
 );
 
-const CourseNavbar = ({ course, location, currentUser, courseLink, weeks = [] }) => {
+const CourseNavbar = ({ course, location, currentUser, courseLink, weeks = [], isViewingAsStudent = false }) => {
   // ///////////////////////
   // Course title/breadcrumb
   // ///////////////////////
@@ -76,6 +77,18 @@ const CourseNavbar = ({ course, location, currentUser, courseLink, weeks = [] })
     );
   }
 
+  // Instructor-facing class progress; the endpoint behind it enforces the same
+  // roles (anyone who can edit the course).
+  let assignments;
+  if (course.assignments_tab_enabled && currentUser?.isAdvancedRole) {
+    const assignmentsLink = `${courseLink}/assignments`;
+    assignments = (
+      <div className="nav__item" id="assignments-link">
+        <p><NavLink to={assignmentsLink} className={({ isActive }) => (isActive ? 'active' : '')}>{I18n.t('assignments_tab.label')}</NavLink></p>
+      </div>
+    );
+  }
+
   // //////////////
   // Common tabs //
   // //////////////
@@ -96,6 +109,17 @@ const CourseNavbar = ({ course, location, currentUser, courseLink, weeks = [] })
     );
   }
 
+  // Student view is switched on from the Home tab's Actions panel. While it's on,
+  // the switch is here on every tab, so it's easy to switch off.
+  let studentViewToggle;
+  if (isViewingAsStudent) {
+    studentViewToggle = (
+      <div className="nav__button" id="student-view-toggle">
+        <StudentViewToggle courseSlug={course.slug} />
+      </div>
+    );
+  }
+
   return (
     <div className="container">
       {courseLinkElement}
@@ -105,6 +129,7 @@ const CourseNavbar = ({ course, location, currentUser, courseLink, weeks = [] })
         </div>
         {timeline}
         {users}
+        {assignments}
         <div className="nav__item" id="articles-link">
           <p><NavLink to={articlesLink} className={({ isActive }) => (isActive ? 'active' : '')}>{CourseUtils.i18n('articles_short', course.wiki_string_prefix)}</NavLink></p>
         </div>
@@ -119,6 +144,7 @@ const CourseNavbar = ({ course, location, currentUser, courseLink, weeks = [] })
         </div>
         {resources}
         {getHelp}
+        {studentViewToggle}
       </nav>
     </div>
   );
@@ -129,6 +155,7 @@ CourseNavbar.propTypes = {
   location: PropTypes.object,
   currentUser: PropTypes.object,
   courseLink: PropTypes.string,
+  isViewingAsStudent: PropTypes.bool,
   weeks: PropTypes.array
 };
 

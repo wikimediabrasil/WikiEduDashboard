@@ -1,26 +1,44 @@
 import { ADD_DOWNLOAD, UPDATE_DOWNLOAD, REMOVE_DOWNLOAD, MARK_DOWNLOADS_READ } from '../constants';
 
-const STORAGE_KEY = 'wiki_edu_downloads';
+const STORAGE_KEY_PREFIX = 'wiki_edu_downloads';
+export const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
-const uniqueCompletedDownloads = (items) => {
-  const seenIds = new Set();
-  return items.filter((item) => {
-    if (item.status === 'pending' || seenIds.has(item.id)) { return false; }
-    seenIds.add(item.id);
-    return true;
-  });
+export const getCurrentUserKey = () => {
+  if (typeof document !== 'undefined') {
+    const main = document.getElementById('main');
+    const userId = main?.getAttribute('data-user-id');
+    if (userId) {
+      return userId;
+    }
+    const navRoot = document.getElementById('nav_root');
+    const username = navRoot?.getAttribute('data-username');
+    if (username) {
+      return username;
+    }
+  }
+  return 'guest';
 };
 
-const getInitialState = () => {
+export const getStorageKey = (userKey = getCurrentUserKey()) => {
+  return `${STORAGE_KEY_PREFIX}_${userKey}`;
+};
+
+export const isExpired = (item) => {
+  if (!item || !item.createdAt) return false;
+  return (Date.now() - item.createdAt) > ONE_WEEK_MS;
+};
+
+export const getInitialState = (storageKey = getStorageKey()) => {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = typeof localStorage !== 'undefined' ? localStorage.getItem(storageKey) : null;
     if (stored) {
       const parsed = JSON.parse(stored);
-      // Only restore downloads that are 'ready' or 'error' (not 'pending')
-      // Pending downloads are lost on page reload since polling can't resume
+      // Restore downloads that have not expired (> 1 week, matching CsvCleanupWorker).
+      // 'pending' ones are kept too; resumePendingDownloads picks their polling back up.
+      const items = (Array.isArray(parsed.items) ? parsed.items : []).filter(item => !isExpired(item));
       return {
-        items: uniqueCompletedDownloads(Array.isArray(parsed.items) ? parsed.items : []),
-        unreadCount: Number.isInteger(parsed.unreadCount) ? parsed.unreadCount : 0
+        items,
+        unreadCount: Math.min(parsed.unreadCount || 0, items.length)
       };
     }
   } catch (e) {
@@ -32,9 +50,11 @@ const getInitialState = () => {
   };
 };
 
-const saveToLocalStorage = (state) => {
+export const saveToLocalStorage = (state, storageKey = getStorageKey()) => {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(storageKey, JSON.stringify(state));
+    }
   } catch (e) {
     console.error('Failed to save downloads to localStorage:', e);
   }

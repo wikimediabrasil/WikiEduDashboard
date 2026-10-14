@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import Modal from '../common/modal.jsx';
 import request from '../../utils/request';
@@ -25,6 +25,8 @@ const ExperimentOptInInvitation = ({ course, current_user }) => {
   // hidden | choice | install | working
   const [phase, setPhase] = useState('hidden');
   const [checked, setChecked] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [navBottom, setNavBottom] = useState(0);
 
   const eligible = !!(course && course.id && course.research_experiment_open_to_students
     && current_user && current_user.isStudent);
@@ -76,6 +78,16 @@ const ExperimentOptInInvitation = ({ course, current_user }) => {
     }
   };
 
+  // Put the import line on the clipboard, so the student only has to paste it
+  // on the common.js edit form. If the browser withholds clipboard access, the
+  // line is still there to copy by hand.
+  const copyImportLine = () => {
+    if (!navigator.clipboard) return;
+    navigator.clipboard.writeText(userscript.import_line)
+      .then(() => setCopied(true))
+      .catch(logErrorMessage);
+  };
+
   // Re-read the student's common.js. Once the line is there the server stops
   // returning an install payload and the modal closes for good.
   const recheck = async () => {
@@ -94,18 +106,61 @@ const ExperimentOptInInvitation = ({ course, current_user }) => {
     }
   };
 
+  // Students often get stuck on the install step, so it leaves the site nav
+  // (FAQ search) and the course nav (Get Help button) usable: the overlay starts
+  // below the course nav, and the body class lifts the course nav above the
+  // overlay so the Get Help dropdown is not hidden behind it. A layout effect,
+  // so the overlay is never painted over the nav before it is measured.
+  useLayoutEffect(() => {
+    if (phase !== 'install') return undefined;
+    const body = document.querySelector('body');
+    const measure = () => {
+      const nav = document.querySelector('.course_navigation');
+      setNavBottom(nav ? Math.max(0, nav.getBoundingClientRect().bottom) : 0);
+    };
+    measure();
+    body.classList.add('experiment-install-open');
+    window.addEventListener('resize', measure);
+    return () => {
+      body.classList.remove('experiment-install-open');
+      window.removeEventListener('resize', measure);
+    };
+  }, [phase]);
+
   if (phase === 'hidden' || phase === 'working' || !invitation) return null;
 
   const { copy } = invitation;
 
   if (phase === 'install') {
     return (
-      <Modal modalClass="experiment-opt-in" ariaLabelledBy="experiment-opt-in-title">
+      <Modal
+        modalClass="experiment-opt-in experiment-opt-in--install"
+        ariaLabelledBy="experiment-opt-in-title"
+        ariaModal={false}
+        style={{ top: navBottom }}
+      >
         <div className="experiment-opt-in__panel">
           <h2 id="experiment-opt-in-title">{copy.install_title}</h2>
+          {copy.install_explanation && (
+            <div
+              className="experiment-opt-in__explanation"
+              dangerouslySetInnerHTML={{ __html: md.render(copy.install_explanation) }}
+            />
+          )}
           <div dangerouslySetInnerHTML={{ __html: md.render(copy.install_message || '') }} />
-          <pre className="experiment-opt-in__snippet">{userscript.import_line}</pre>
+          <div className="experiment-opt-in__snippet-row">
+            <pre className="experiment-opt-in__snippet">{userscript.import_line}</pre>
+            <button className="button experiment-opt-in__copy-button" onClick={copyImportLine}>
+              {copied ? copy.install_copied : copy.install_copy_button}
+            </button>
+          </div>
           {checked && <p className="experiment-opt-in__not-found">{copy.install_not_found}</p>}
+          {copy.install_help && (
+            <div
+              className="experiment-opt-in__help"
+              dangerouslySetInnerHTML={{ __html: md.render(copy.install_help) }}
+            />
+          )}
           <div className="experiment-opt-in__actions">
             <a
               href={userscript.install_url}

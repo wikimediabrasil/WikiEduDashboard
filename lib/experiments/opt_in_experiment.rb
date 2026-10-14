@@ -41,9 +41,11 @@ class OptInExperiment
   # en.yml) so this ephemeral experiment text stays out of the translation
   # pipeline; the controller hands it to the React component. Returns a hash
   # with keys: :title, :message, :consent_form, :opt_in, :opt_out,
-  # :install_title, :install_message, :install_button, :install_verify_button,
-  # :install_not_found (the :message, :consent_form and :install_message values
-  # are Markdown).
+  # :install_title, :install_explanation, :install_message, :install_button,
+  # :install_copy_button, :install_copied, :install_verify_button,
+  # :install_not_found, and optionally :install_help (the :message,
+  # :consent_form, :install_explanation, :install_message and :install_help
+  # values are Markdown).
   def student_invitation_copy
     raise NotImplementedError
   end
@@ -99,7 +101,74 @@ class OptInExperiment
     :opted_out
   end
 
+  # A user's student enrollments that this experiment has, or could have, a
+  # participation record for, each mapped to that record (nil when the student
+  # has not responded).
+  def student_participations(user)
+    student_enrollments(user).index_with { |courses_user| participation(courses_user) }
+  end
+
+  # Opts a student out on their behalf (from the admin page, at their request)
+  # in every course this experiment covers, including eligible courses they
+  # have not been invited in yet, so a later instructor opt-in does not invite
+  # them. Only this experiment's records are touched.
+  def opt_out_student(user)
+    student_enrollments(user).each { |courses_user| handle_student_opt_out(courses_user) }
+  end
+
+  # Announce a confirmed opt-in to the experiment's external data collection
+  # server, if it has one. Called asynchronously (ExperimentEnrollmentWorker)
+  # after the student opts in; must be safe to retry.
+  def report_enrollment(_experiment_courses_user); end
+
+  # Copy for the standalone instructor opt-in page reached from invitation
+  # emails (Experiments::InstructorOptInController). Lives here for the same
+  # reason as student_invitation_copy. Returns a hash with keys: :title,
+  # :description, :opt_in_label, :opt_out_label, :course_list_intro,
+  # :opted_in_flash, :opted_out_flash, :no_courses.
+  def instructor_invitation_copy
+    raise NotImplementedError
+  end
+
+  def eligible_instructed_courses(user)
+    user.instructed_courses.select { |course| eligible_course?(course) }
+  end
+
+  # The instructor's recorded choice for one course: :opted_in, :opted_out, or
+  # nil when they have not chosen yet.
+  def course_choice(course)
+    return :opted_in if course.tag?(opted_in_tag)
+    return :opted_out if course.tag?(opted_out_tag)
+    nil
+  end
+
+  # An instructor's choice from the standalone page applies to all their
+  # eligible courses at once, overwriting any earlier wizard choice: the tag
+  # upsert mirrors WizardTimelineManager#add_tags' exclusive-key semantics, so
+  # the two entry points remain interchangeable and the latest explicit choice
+  # always wins.
+  def handle_instructor_opt_in(user)
+    tag_instructed_courses(user, opted_in_tag)
+  end
+
+  def handle_instructor_opt_out(user)
+    tag_instructed_courses(user, opted_out_tag)
+  end
+
   private
+
+  # Includes an ineligible course only if the student already has a record for
+  # it, e.g. one whose term changed after they responded.
+  def student_enrollments(user)
+    user.courses_users.where(role: CoursesUsers::Roles::STUDENT_ROLE).includes(:course)
+        .select { |cu| eligible_course?(cu.course) || participation(cu) }
+  end
+
+  def tag_instructed_courses(user, value)
+    eligible_instructed_courses(user).each do |course|
+      Tag.find_or_initialize_by(course:, key: tag_key).update!(tag: value)
+    end
+  end
 
   def upsert_participation(courses_user, status)
     record = ExperimentCoursesUser.find_or_initialize_by(

@@ -65,6 +65,24 @@ class Features
     !ENV['mailgun_key'].nil?
   end
 
+  # Gates the LTIAAS-mediated Canvas integration: launch endpoints,
+  # NRPS/AGS sync workers, and the Block/Wizard hooks that enqueue them.
+  # Default false so production stays inert until LTIAAS is registered
+  # with a live Canvas instance and the env var is flipped explicitly.
+  def self.canvas_integration?
+    ENV['canvas_integration_enabled'] == 'true'
+  end
+
+  # Gates legacy (LTI 1.1) launches, on top of canvas_integration?. The
+  # Dashboard terminates 1.1 launches itself and issues the consumer keys, so
+  # this is the whole opt-in, per deployment: with it off, the launch endpoint
+  # and the credentials page 404 and the config XML is not served. Off by
+  # default: a legacy launch is refused until an operator turns it on (see
+  # LtiLegacyLaunchesController and LtiLaunchSession#build_lti_session).
+  def self.lti_legacy_launches?
+    ENV['lti_legacy_launches_enabled'] == 'true'
+  end
+
   def self.site_notice
     Rails.cache.fetch('site_notice') do
       site_notice = Setting.find_by(key: 'site_notice')&.value.presence || {}

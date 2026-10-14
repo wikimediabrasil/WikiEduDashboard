@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'tempfile'
 require 'zip'
 require_dependency "#{Rails.root}/lib/analytics/campaign_csv_builder"
 require_dependency "#{Rails.root}/lib/analytics/course_csv_builder"
@@ -8,14 +9,15 @@ require_dependency "#{Rails.root}/lib/analytics/course_students_csv_builder"
 require_dependency "#{Rails.root}/lib/analytics/course_articles_csv_builder"
 require_dependency "#{Rails.root}/lib/analytics/course_wikidata_csv_builder"
 require_dependency "#{Rails.root}/lib/analytics/retention_predictors_csv_builder"
-require_dependency "#{Rails.root}/app/controllers/reports_controller"
+require_dependency "#{Rails.root}/lib/analytics/report_csv_store"
 require_dependency "#{Rails.root}/app/workers/csv_cleanup_worker"
 require_dependency "#{Rails.root}/lib/analytics/all_courses_and_instructors_csv_builder"
 require_dependency "#{Rails.root}/lib/analytics/system_csv_builder"
+require_dependency "#{Rails.root}/lib/analytics/system_stats_csv_builder"
 
 class ReportCsvWorker
   include Sidekiq::Worker
-  sidekiq_options queue: 'daily_update', lock: :until_executed
+  sidekiq_options queue: 'report_csv', lock: :until_executed
 
   # Generate the csv for the given source (course or campaign)
   # if type is global, then can access source as nil
@@ -23,26 +25,34 @@ class ReportCsvWorker
     perform_async(source&.id, filename, type, include_course, filters.to_json)
   end
 
+  def self.campaign_csv_name(campaign, type, course: false)
+    slug = campaign.respond_to?(:slug) ? campaign.slug : campaign.to_s
+    course_segment = course ? '-with_courses' : ''
+    "#{slug}-#{type}#{course_segment}-#{Time.zone.today}.csv".tr('/', '-')
+  end
+
+  def self.campaign_zip_name(campaign)
+    slug = campaign.respond_to?(:slug) ? campaign.slug : campaign.to_s
+    "#{slug}-campaign-data-#{Time.zone.today}.zip".tr('/', '-')
+  end
+
   def perform(id, filename, type, include_course, filters_json = '{}')
     parsed_filters = JSON.parse(filters_json).symbolize_keys
     if type == 'campaign_all'
-      write_file(filename, to_campaign_zip(id))
+      write_campaign_zip(id, filename)
     else
-      data =
-        if type == 'all_courses_and_instructors'
-          all_courses_and_instructors_csv
-        elsif type == 'system_csv'
-          to_system_csv(parsed_filters)
-        elsif course_report?(type)
-          to_course_csv(type, id)
-        else
-          to_campaign_csv(type, id, include_course)
-        end
-
+      data = report_data(type, id, include_course, parsed_filters)
       write_csv(filename, data)
     end
-
     CsvCleanupWorker.perform_at(1.week.from_now, filename)
+  end
+
+  def write_campaign_zip(campaign_id, filename)
+    Tempfile.create(['campaign_zip', '.zip']) do |tempfile|
+      tempfile.close
+      stream_campaign_zip(campaign_id, tempfile.path)
+      write_csv(filename, tempfile)
+    end
   end
 
   def to_campaign_csv(type, campaign_id, include_course)
@@ -63,23 +73,47 @@ class ReportCsvWorker
     end
   end
 
-  def to_campaign_zip(campaign_id)
+  def stream_campaign_zip(campaign_id, output_path)
     campaign = Campaign.find(campaign_id)
     builder = CampaignCsvBuilder.new(campaign)
-    csv_files = {
-      'students.csv' => campaign.users_to_csv(:students),
-      'students-by-course.csv' => campaign.users_to_csv(:students, course: true),
-      'instructors-by-course.csv' => campaign.users_to_csv(:instructors, course: true),
-      'courses.csv' => builder.courses_to_csv,
-      'pages-edited.csv' => builder.articles_to_csv
-    }
+    csv_entries = campaign_zip_entries(campaign, builder)
 
-    Zip::OutputStream.write_buffer do |zip|
-      csv_files.each do |filename, data|
-        zip.put_next_entry(filename)
-        zip.write(data)
+    Zip::OutputStream.open(output_path) do |zip|
+      csv_entries.each do |entry_name, store_name, generator|
+        zip.put_next_entry(entry_name)
+        zip.write(fetch_or_build_csv(store_name, generator))
       end
-    end.string
+    end
+  end
+
+  def campaign_zip_entries(campaign, builder)
+    [
+      ['students.csv', campaign_csv_name(campaign, 'campaign_students'),
+       -> { campaign.users_to_csv(:students) }],
+      ['students-by-course.csv',
+       campaign_csv_name(campaign, 'campaign_students', course: true),
+       -> { campaign.users_to_csv(:students, course: true) }],
+      ['instructors-by-course.csv',
+       campaign_csv_name(campaign, 'campaign_instructors', course: true),
+       -> { campaign.users_to_csv(:instructors, course: true) }],
+      ['courses.csv', campaign_csv_name(campaign, 'campaign_courses'),
+       -> { builder.courses_to_csv }],
+      ['pages-edited.csv', campaign_csv_name(campaign, 'campaign_articles'),
+       -> { builder.articles_to_csv }]
+    ]
+  end
+
+  def campaign_csv_name(campaign, type, course: false)
+    self.class.campaign_csv_name(campaign, type, course:)
+  end
+
+  def fetch_or_build_csv(filename, generator)
+    return ReportCsvStore.read(filename) if ReportCsvStore.exists?(filename)
+
+    data = generator.call
+    ReportCsvStore.write(filename, data)
+    CsvCleanupWorker.perform_at(1.week.from_now, filename)
+    data
   end
 
   def to_course_csv(type, course_id)
@@ -110,15 +144,31 @@ class ReportCsvWorker
     SystemCsvBuilder.new(filters:).generate_csv
   end
 
-  private
-
-  def write_csv(filename, data)
-    write_file(filename, data)
+  def to_system_daily_stats_csv(filters)
+    SystemStatsCsvBuilder.new(
+      start_date: filters[:start_date],
+      end_date: filters[:end_date]
+    ).generate_csv
   end
 
-  def write_file(filename, data)
-    FileUtils.mkdir_p "public#{ReportsController::CSV_PATH}"
-    File.binwrite "public#{ReportsController::CSV_PATH}/#{filename}", data
+  private
+
+  def report_data(type, id, include_course, filters)
+    if type == 'all_courses_and_instructors'
+      all_courses_and_instructors_csv
+    elsif type == 'system_csv'
+      to_system_csv(filters)
+    elsif type == 'system_daily_stats_csv'
+      to_system_daily_stats_csv(filters)
+    elsif course_report?(type)
+      to_course_csv(type, id)
+    else
+      to_campaign_csv(type, id, include_course)
+    end
+  end
+
+  def write_csv(filename, data)
+    ReportCsvStore.write(filename, data)
   end
 
   def course_report?(type)

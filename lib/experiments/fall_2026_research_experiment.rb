@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_dependency "#{Rails.root}/lib/experiments/opt_in_experiment"
+require_dependency "#{Rails.root}/lib/experiments/wickie_api"
 
 # The Fall 2026 research study ("Ribeiro experiment").
 #
@@ -14,13 +15,14 @@ class Fall2026ResearchExperiment < OptInExperiment
   # The userscript students install. As a user JS page it is editable only by its
   # owner and interface admins, so the code participants run cannot be altered by
   # anyone else.
-  USERSCRIPT_PAGE = 'User:Sage_(Wiki_Ed)/fall2026experiment.js'
+  USERSCRIPT_PAGE = 'User:Sage_(Wiki_Ed)/wickie.js'
 
   USERSCRIPT_IMPORT_LINE = "importScript('#{USERSCRIPT_PAGE}');"
 
-  # Student-facing invitation copy, shown in a modal. `message`, `consent_form`
-  # and `install_message` are rendered as Markdown. Kept here (not in en.yml) so
-  # this ephemeral experiment text stays out of the translation pipeline.
+  # Student-facing invitation copy, shown in a modal. `message`, `consent_form`,
+  # `install_explanation`, `install_message` and `install_help` are rendered as
+  # Markdown. Kept here (not in en.yml) so this ephemeral experiment text stays
+  # out of the translation pipeline.
   STUDENT_INVITATION_COPY = {
     title: 'Research Study',
     message: <<~MESSAGE,
@@ -36,16 +38,52 @@ class Fall2026ResearchExperiment < OptInExperiment
     opt_in: 'I consent',
     opt_out: 'No',
     install_title: 'Install the experiment script',
+    # Shown above the step-by-step instruction, to say what this step is for
+    # before the student is handed a line of JavaScript to paste.
+    install_explanation: <<~EXPLANATION,
+      Thank you for opting in to our research project! To enable the features we're studying, you'll need to install the `wickie.js` script for your Wikipedia account. (This is the only extra step you'll need to take. Nothing will be downloaded to your device.)
+    EXPLANATION
     install_message: <<~INSTALL,
-      To enable the experiment, copy the line below, click 'Install script', paste it to your common.js page, then "Publish changes".
+      To enable the experiment, copy the line below, click 'Install script', paste it to your common.js page, then "Publish changes". (If you see an error message, make sure you're logged on en.wikipedia.org.)
     INSTALL
+    # Pointer to the illustrated walkthrough and troubleshooting FAQ, for
+    # students who get stuck on this step.
+    install_help: '[(Walkthrough and troubleshooting FAQ)](/faq/32)',
     install_button: 'Install script',
+    install_copy_button: 'Copy',
+    install_copied: 'Copied!',
     install_verify_button: 'Verify experiment script',
     install_not_found: "We couldn't find the expected experiment script installed on your account."
   }.freeze
 
+  # The assignment wizard panel that presents this experiment to instructors.
+  # The standalone instructor opt-in page (reached from invitation emails)
+  # reuses its title, description, and option labels so the two entry points
+  # cannot drift apart.
+  WIZARD_PANEL = YAML.safe_load(
+    File.read("#{Rails.root}/config/wizard/researchwrite/wizard.yml")
+  ).find { |panel| panel['key'] == 'fall_2026_research_optin' }.freeze
+
+  INSTRUCTOR_INVITATION_COPY = {
+    title: WIZARD_PANEL['title'],
+    description: WIZARD_PANEL['description'],
+    opt_in_label: WIZARD_PANEL['options']
+      .find { |option| option['tag'] == "#{SLUG}_opted_in" }['title'],
+    opt_out_label: WIZARD_PANEL['options']
+      .find { |option| option['tag'] == "#{SLUG}_opted_out" }['title'],
+    course_list_intro: 'Your choice will apply to all of your Fall 2026 courses:',
+    opted_in_flash: 'Thank you! Your Fall 2026 courses are opted in to the research experiment.',
+    opted_out_flash: 'You have opted out. No experiment invitations will be shown ' \
+                     'to your students.',
+    no_courses: "You don't have any Fall 2026 courses that are eligible for this experiment."
+  }.freeze
+
   def slug
     SLUG
+  end
+
+  def instructor_invitation_copy
+    INSTRUCTOR_INVITATION_COPY
   end
 
   def eligible_course?(course)
@@ -60,6 +98,20 @@ class Fall2026ResearchExperiment < OptInExperiment
   # invited yet.
   def student_invitations_open?
     Features.fall_2026_research_student_optin?
+  end
+
+  # The study's data collection server must learn of each enrollment before the
+  # student's userscript first runs: the script asks the server whether its user
+  # is a participant, and stays inert for anyone it doesn't recognize.
+  def handle_student_opt_in(courses_user)
+    record = super
+    ExperimentEnrollmentWorker.schedule(record)
+    record
+  end
+
+  def report_enrollment(experiment_courses_user)
+    WickieApi.new.enroll(username: experiment_courses_user.user.username,
+                         course_slug: experiment_courses_user.course.slug)
   end
 
   def userscript_import_line

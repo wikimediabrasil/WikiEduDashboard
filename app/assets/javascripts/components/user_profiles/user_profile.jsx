@@ -8,8 +8,10 @@ import { fetchStats } from '../../actions/user_profile_actions.js';
 import { fetchUserTrainingStatus } from '../../actions/training_status_actions';
 import Loading from '../common/loading.jsx';
 import UserTrainingStatus from './user_training_status.jsx';
-import request from '../../utils/request';
+import request, { ensureOk } from '../../utils/request';
 import UserDetails from './user_details.jsx';
+import Notifications from '../common/notifications.jsx';
+import ProfileNav from './profile_nav.jsx';
 
 const UserProfile = () => {
   const dispatch = useDispatch();
@@ -25,9 +27,13 @@ const UserProfile = () => {
   const getData = () => {
     const statsdataUrl = `/users/${username}/stats_graphs.json`;
     request(statsdataUrl)
+      .then(resp => ensureOk(resp))
       .then(resp => resp.json())
       .then((data) => {
         setStatsGraphsData(data);
+      })
+      .catch(() => {
+        // statsGraphsData stays unset; see Sentry issue PEONY-2NQ.
       });
   };
 
@@ -43,6 +49,8 @@ const UserProfile = () => {
 
   return (
     <div className="user-profile-container">
+      <Notifications />
+      <ProfileNav username={params.username} />
       <Routes>
         <Route
           index
@@ -58,7 +66,7 @@ const UserProfile = () => {
         />
         <Route
           path="training"
-          element={<UserTrainingStatus trainingModules={userTrainingStatus} />}
+          element={<UserTrainingStatus trainingModules={userTrainingStatus} username={params.username} />}
         />
         <Route
           path="stats/:metric"

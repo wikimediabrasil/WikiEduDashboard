@@ -1,16 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-// import ArticleUtils from '../../utils/article_utils';
+import ArticleUtils from '../../utils/article_utils';
 
-const ByStudentsStats = ({ username: _username, stats: _stats, maxProject: _maxProject }) => {
-  // const uploads_in_use_count = ArticleUtils.projectSuffix(maxProject, 'uploads_in_use_count');
+const ByStudentsStats = ({ username, stats, maxProject }) => {
+  const uploads_in_use_count = ArticleUtils.projectSuffix(maxProject, 'uploads_in_use_count');
 
   return (
     <div className="user_stats">
-      {/* <h5>
+      <h3>
         {I18n.t('user_profiles.instructors_student_impact', { username })}
-      </h5> */}
-      {/* <div className="stat-display">
+      </h3>
+      <div className="stat-display">
         <div className="stat-display__stat">
           <div className="stat-display__value">
             {stats.word_count}
@@ -72,7 +72,7 @@ const ByStudentsStats = ({ username: _username, stats: _stats, maxProject: _maxP
             </p>
           </div>
         </div>
-      </div> */}
+      </div>
     </div>
   );
 };

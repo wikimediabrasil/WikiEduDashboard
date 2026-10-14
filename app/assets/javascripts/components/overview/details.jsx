@@ -175,6 +175,7 @@ const Details = createReactClass({
     let academic_system;
     let online;
     let eventSyncTooltip;
+    let eventSyncLink;
 
     if (Features.wikiEd) {
       staff = <WikiEdStaff {...this.props} />;
@@ -195,6 +196,22 @@ const Details = createReactClass({
             </p>
           </div>
         </div>
+      );
+    }
+
+    if (eventSync) {
+      const eventCenterUrl = `https://meta.wikimedia.org/wiki/Special:EventDetails/${eventSync}`;
+      eventSyncLink = (
+        <p>
+          <span className="text-input-component__label">
+            <strong>{I18n.t('courses.event_center_link')}: </strong>
+          </span>
+          <span>
+            <a href={eventCenterUrl} target="_blank" rel="noopener noreferrer">
+              {I18n.t('courses.view_event_center_page')}
+            </a>
+          </span>
+        </p>
       );
     }
 
@@ -618,6 +635,7 @@ const Details = createReactClass({
               {title}
               {term}
               {academic_system}
+              {eventSyncLink}
               {wikiSelector}
               {multiWikiSelector}
               {namespaceSelector}

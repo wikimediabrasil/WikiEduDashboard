@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-describe ReportsController, '#system_csv', type: :request do
+describe ReportsController, '#system_csv', :report_csv_files, type: :request do
   let(:admin) { create(:admin) }
   let(:user) { create(:user) }
   let(:en_wiki) { Wiki.get_or_create(language: 'en', project: 'wikipedia') }
@@ -18,10 +18,6 @@ describe ReportsController, '#system_csv', type: :request do
 
   before do
     stub_wiki_validation
-  end
-
-  after do
-    FileUtils.remove_dir('public/system/analytics') if File.directory?('public/system/analytics')
   end
 
   context 'when not signed in' do
@@ -44,18 +40,11 @@ describe ReportsController, '#system_csv', type: :request do
     before { login_as admin }
 
     describe 'without filters' do
-      it 'enqueues a background job and returns 202 with generating status' do
+      it 'handles full export lifecycle and returns ready status with URL' do
         expect(CsvCleanupWorker).to receive(:perform_at)
         get '/system_csv'
         expect(response).to have_http_status(:accepted)
-        json = response.parsed_body
-        expect(json['status']).to eq('generating')
-      end
-
-      it 'returns ready status with URL on second request after generation' do
-        expect(CsvCleanupWorker).to receive(:perform_at)
-        get '/system_csv'
-        expect(response).to have_http_status(:accepted)
+        expect(response.parsed_body['status']).to eq('generating')
 
         get '/system_csv'
         expect(response).to have_http_status(:ok)

@@ -2,6 +2,7 @@
 
 class UserProfilesController < ApplicationController
   include UserProfileAnalytics
+  include UserProfileCallbacks
   respond_to :html, :json
 
   before_action :set_user
@@ -20,23 +21,10 @@ class UserProfilesController < ApplicationController
   def user_articles
     return render json: { error: 'User not found' }, status: :not_found unless @user
 
-    begin
-      @user_articles = ArticlesCourses
-                        .where('user_ids LIKE ?', "%- #{@user.id}\n%")
-                        .joins(:article, :course)
-                        .where(courses: { private: false })
-                        .where(articles: { deleted: false, namespace: Article::Namespaces::MAINSPACE })
-                        .includes(:article, :course)
-                        .includes(article: :wiki)
-                        .order(character_sum: :desc)
-
-      @course_id = params[:course_id]
-      @user_articles = @user_articles.where(course_id: @course_id) if @course_id.present?
-
-      @user_revisions = {}
-    rescue StandardError => e
-      render json: { error: e.message, backtrace: e.backtrace.first(5) }, status: :internal_server_error
-    end
+    @user_articles = fetch_user_articles(params[:course_id])
+    course_ids = @user_articles.map(&:course_id).uniq
+    @user_article_stats = fetch_user_article_stats(course_ids)
+    @courses_with_acuwt = courses_with_acuwt(course_ids)
   end
 
   def show
@@ -67,7 +55,7 @@ class UserProfilesController < ApplicationController
       flash[:error] = (@user.errors.full_messages + @user_profile.errors.full_messages).join(', ')
     end
   rescue Paperclip::Errors::CommandNotFoundError
-    flash[:error] = 'Unable to process uploaded image because ImageMagick is not installed.'
+    flash[:error] = I18n.t('users.imagemagick_not_installed')
   ensure
     user_profile_redirect
   end
@@ -82,7 +70,7 @@ class UserProfilesController < ApplicationController
                                               courses_list: @courses_list)
     @user_uploads = CommonsUpload.where(user_id: @user.id).order(uploaded_at: :desc).first(20)
     @max_project = max_project
-    
+
     # Get articles by language/project for stats
     @articles_by_language = get_articles_by_language
   end

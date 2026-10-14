@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import useOutsideClick from '../../hooks/useOutsideClick';
-import { markDownloadsRead, removeDownload } from '../../actions/download_actions.js';
+import { markDownloadsRead, removeDownload, startDownload } from '../../actions/download_actions.js';
 
 const statusLabel = (status) => {
   if (status === 'pending') { return I18n.t('downloads.generating'); }
@@ -26,7 +26,7 @@ const DownloadsBell = () => {
 
   return (
     <li ref={containerRef} aria-describedby="downloads-notification-message" className="notifications tooltip-trigger pop__container">
-      <button type="button" className="icon icon-notifications_bell downloads-bell" onClick={togglePopover} aria-label={I18n.t('downloads.aria_label')}>
+      <button type="button" className="icon icon-download_tray downloads-bell" onClick={togglePopover} aria-label={I18n.t('downloads.aria_label')}>
         {unreadCount > 0 ? (
           <span className="bubble red">
             <span id="downloads-notification-message" className="screen-reader">{I18n.t('downloads.new_downloads')}</span>
@@ -46,9 +46,22 @@ const DownloadsBell = () => {
               <div key={item.id} className={`downloads-list__item downloads-list__item--${item.status}`}>
                 <span className="downloads-list__label">{item.label}</span>
                 <span className="downloads-list__status">
-                  {item.status === 'ready' ? (
-                    <a href={item.downloadUrl} className="downloads-list__download-button">{I18n.t('downloads.download')}</a>
-                  ) : (
+                  {item.status === 'ready' && (
+                    <a href={item.downloadUrl} download={item.filename} className="downloads-list__download-button">{I18n.t('downloads.download')}</a>
+                  )}
+                  {item.status === 'timeout' && (
+                    <>
+                      <span className="downloads-list__status-text">{I18n.t('downloads.timeout')}</span>
+                      <button
+                        type="button"
+                        onClick={() => dispatch(startDownload(item))}
+                        className="downloads-list__retry-button button small"
+                      >
+                        {I18n.t('downloads.retry')}
+                      </button>
+                    </>
+                  )}
+                  {item.status !== 'ready' && item.status !== 'timeout' && (
                     statusLabel(item.status)
                   )}
                 </span>

@@ -12,8 +12,7 @@ class ErrorsController < ApplicationController
                      :check_for_unsupported_browser,
                      :check_onboarded,
                      :set_locale,
-                     :set_paper_trail_whodunnit,
-                     :authorize_rmp
+                     :set_paper_trail_whodunnit
 
   def file_not_found
     @message = not_found_message

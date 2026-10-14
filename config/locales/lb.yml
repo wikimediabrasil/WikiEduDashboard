@@ -22,6 +22,7 @@ lb:
   application:
     back: Zeréck
     cancel: Ofbriechen
+    close: Zoumaachen
     next: Nächst
     cookie_consent_acknowledge: Ech verstinn
     cookie_consent_see_more: Fir méi ze wëssen.
@@ -85,6 +86,8 @@ lb:
     explore_examples: Beispiller entdecken
     review_orientation: Orientatioun nokucken
     blog_headline: Rezent Neiegkeete vu Wiki Education
+    tooltip:
+      alt: Méi Informatiounen
   home:
     explore: Entdecken
     log_in: Mat Wikipedia aloggen
@@ -232,6 +235,7 @@ lb:
       existéiert net.
     username_label: Wikipedia-Benotzernumm
     username_or_url_label: Wikipedia-Benotzernumm oder URL
+    preview_label: 'Virschau vun neien URLen:'
     sandbox_label: Sandkaul
   blocks:
     milestones:
@@ -256,10 +260,13 @@ lb:
     confirm_course_removal: Sidd Dir sécher, datt Dir „%{title}“ aus der Campagne
       „%{campaign_title}“ eraushuele wëllt?
     course: Cours
+    export: Exportéieren
     course_removed_and_deleted: „%{title}“ gouf geläscht an aus der „%{campaign_title}“-Campagne
       entfernt.
     course_removed_but_not_deleted: „%{title}“ gouf aus „%{campaign_title}“ entfernt,
       mee nach net geläscht, well et nach Deel vun anere Kampagnen ass
+    data_download_generating: De Fichier gëtt elo generéiert. Dir kritt Bescheed gesot,
+      soubal e prett ass, fir erofgelueden ze ginn.
     data_articles: Geännert Säiten
     data_wikidata: Wikidata-Statistiken
     default_passcode: Standard-Passcode
@@ -311,6 +318,8 @@ lb:
     campaign_articles: '%{title} Artikelen'
     campaign_courses: '%{title} Coursen'
     campaign_users: '%{title} Auteuren'
+    confirm_course_deletion: Sidd Dir sécher, datt Dir de Cours mam Titel %{title}
+      läsche wëllt? Wa jo, tippt den Titel vum Cours a fir virunzefueren.
     course: Cours
     course_type_label: 'Typ:'
     course_description: Coursen
@@ -576,6 +585,16 @@ lb:
     author: Auteur
     cookbook: Kachbuch
     index: Index
+  report_cards:
+    campaign: Campagne
+    courses: Coursen
+    download_csv: Als CSV eroflueden
+    groups:
+      general: Allgemeng
+      after: Nom Cours
+    columns:
+      title: Cours
+      participants: Participanten
   recent_activity:
     article_title: Titel
     datetime: Datum/Zäit
@@ -606,6 +625,7 @@ lb:
     common_settings_components:
       headings:
         default_campaign_setting: Standardcampagne
+        site_notice_preview: Live-Virschau
       buttons:
         add_admin_button: Admin derbäisetzen
         add_special_user_button: Spezielle Benotzer derbäisetzen
@@ -668,6 +688,7 @@ lb:
     title: Chronologie
     view_full_timeline: Kompletten Zäitplang weisen
     week_number: Woch %{number}
+    sandbox_mode: Sandkaul-Modus
   training:
     continue: Virufueren (%{progress})
     start: Ufank
@@ -688,10 +709,14 @@ lb:
     exercise_sandbox: Übungssandkaul
     take_your_time: Huelt Iech wgl. Zäit!
     close: ZOUMAACHEN
+    article_title_input:
+      modal_title: Wat fir een Artikel hutt Dir geännert?
   claim_verification:
     no_articles: Keng Artikelen disponibel
     step_heading: 'Schrëtt %{number}: %{name}'
     form:
+      verification_example:
+        lead: 'Hei ass e Beispill:'
       edit_response: Äntwert änneren
       submit_failed: Feeler! Är Äntwert gouf net gespäichert.
     admin:
@@ -820,6 +845,8 @@ lb:
     no_notifications: Dir hutt keng nei Notifikatiounen.
     aria_label:
       bell: Notifikatiounen
+  downloads:
+    ready: Prett
   survey:
     email:
       headline: Bonjour %{username}
@@ -885,4 +912,41 @@ lb:
     program_date: Programmdatum
     from: "Vun"
     to: "Bis"
+  lms_integration:
+    time_ago: viru(n) %{time_ago}
+    my_account_link: 'Äre Kont:'
+  lti_integrations:
+    course: Cours
+    installed: Installéiert
+  lti:
+    beta_feedback:
+      link: Feedback schécken
+    deep_link:
+      unavailable_header: Net disponibel
+    student_overview:
+      my_articles: Meng Artikelen
+      empty: Keng Wikipedia-Aktivitéiten
+    connect_identity:
+      dashboard_account: Wikipedia-Kont
+    identity:
+      signed_in_as: 'Wikipedia-Kont: %{username}'
+    assignment_view:
+      open_on_wikipedia: Op Wikipedia opmaachen
+      hide: Verstoppen
+      sandbox_preview:
+        loading: …
+        not_found: Keng Sandkaul fonnt
+      roster:
+        username: Benotzernumm
+        status: Status
+        sandbox: Sandkaul
+      article_work:
+        characters: Zeechen derbäigesat
+        references: Referenzen derbäigesat
+        revisions: Ännerungen
+        pages:
+          bibliography: Bibliographie
+      student:
+        your_sandbox: Är Sandkaul
+        your_article: Ären Artikel
 ...
