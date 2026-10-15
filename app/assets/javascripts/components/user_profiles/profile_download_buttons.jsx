@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { profileCsv } from '../../utils/user_profile_export';
+import { addDownload, updateDownload } from '../../actions/download_actions';
+import store from '../util/create_store';
 
 const ProfileDownloadButtons = ({ username, section, data }) => {
   const download = (format) => {
@@ -10,6 +12,10 @@ const ProfileDownloadButtons = ({ username, section, data }) => {
     const url = URL.createObjectURL(blob);
     const safeUsername = username.replace(/[^\p{L}\p{N}_-]/gu, '_');
     const filename = `${safeUsername}_${section}.${format}`;
+    const id = `profile-${username}-${section}-${format}`;
+
+    store?.dispatch(addDownload({ id, label: filename, status: 'pending', createdAt: Date.now() }));
+    store?.dispatch(updateDownload(id, { status: 'ready', downloadUrl: url, filename }));
 
     const link = document.createElement('a');
     link.href = url;

@@ -24,6 +24,9 @@ const DownloadsBell = () => {
     }
   };
 
+  // Keep the open popover visible while its last download is dismissed.
+  if (items.length === 0 && !isOpen) { return null; }
+
   return (
     <li ref={containerRef} aria-describedby="downloads-notification-message" className="notifications tooltip-trigger pop__container">
       <button type="button" className="icon icon-download_tray downloads-bell" onClick={togglePopover} aria-label={I18n.t('downloads.aria_label')}>

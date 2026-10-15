@@ -10,6 +10,26 @@
 .users.table thead th
   white-space nowrap
 
+.users.table > tbody > tr.students > td:first-child
+  min-width 250px
+
+@media only screen and (max-width: 1200px)
+  .users.table > thead > tr > th,
+  .users.table > tbody > tr > td
+    padding-left 10px
+    padding-right 10px
+
+  .users.table > thead > tr > th:last-child .tooltip
+    left auto
+    right 0
+
+@media only screen and (max-width: 1100px)
+  .users.table > tbody > tr.students > td:first-child
+    min-width 150px
+
+  .users.table > tbody > tr.students > td.col-review-status
+    min-width 110px
+
 .redlink
   color $warning_text
 
