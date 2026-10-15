@@ -44,20 +44,20 @@ describe('DownloadsBell', () => {
     document.body.removeChild(container);
   });
 
-  test('keeps the download icon visible when there are no downloads', () => {
+  test('renders nothing when there are no downloads', () => {
     renderBell([]);
-    expect(container.querySelector('.downloads-bell')).not.toBeNull();
+    expect(container.querySelector('.downloads-bell')).toBeNull();
   });
 
-  test('renders the download icon when there are downloads', () => {
-    renderBell([readyItem]);
+  test('renders the download icon when a download is requested', () => {
+    renderBell([{ ...readyItem, status: 'pending' }]);
     const button = container.querySelector('.downloads-bell');
     expect(button).not.toBeNull();
     expect(button.classList).toContain('icon-download_tray');
     expect(button.classList).not.toContain('icon-notifications_bell');
   });
 
-  test('keeps the empty panel open after dismissal and the icon visible after closing', () => {
+  test('keeps the empty panel open after dismissal, then hides the icon when closed', () => {
     renderBell([readyItem]);
     act(() => container.querySelector('.downloads-bell').click());
     expect(container.querySelector('.pop--downloads.open')).not.toBeNull();
@@ -67,6 +67,6 @@ describe('DownloadsBell', () => {
     expect(container.querySelector('.downloads-list__empty')).not.toBeNull();
 
     act(() => container.querySelector('.downloads-bell').click());
-    expect(container.querySelector('.downloads-bell')).not.toBeNull();
+    expect(container.querySelector('.downloads-bell')).toBeNull();
   });
 });

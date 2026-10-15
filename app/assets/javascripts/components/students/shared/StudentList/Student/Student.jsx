@@ -123,7 +123,7 @@ const Student = createReactClass({
 
     return (
       <tr className="students">
-        <td onClick={this.openStudentDetailsView} style={{ minWidth: '250px' }}>
+        <td onClick={this.openStudentDetailsView}>
           <div className="name">
             <StudentUsername current_user={current_user} student={student} />
           </div>
