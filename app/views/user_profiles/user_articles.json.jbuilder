@@ -25,7 +25,7 @@ json.articles_by_course articles_by_course.map do |_course_id, article_courses|
       else
         char_sum = nil
         refs_count = nil
-        is_new = false
+        is_new = nil
       end
     end
 

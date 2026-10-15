@@ -2284,7 +2284,6 @@ en:
       bell: Notifications
 
   downloads:
-    available_in_bell: Your file is ready. Go to the download notification.
     title: Downloads
     none: You have no downloads yet.
     generating: Generating…

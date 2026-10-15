@@ -50,9 +50,9 @@ const matchesWikiFilter = (article, wikiFilter) => {
 const matchesNewnessFilter = (article, newnessFilter) => {
   switch (newnessFilter) {
     case 'new':
-      return !!article.new_article;
+      return article.new_article === true;
     case 'existing':
-      return !article.new_article;
+      return article.new_article === false;
     default:
       return true;
   }
@@ -139,7 +139,7 @@ const UserDetails = ({ username }) => {
 
   const wikiOptions = useMemo(() => getWikiOptions(allArticles), [allArticles]);
   const newnessFilterEnabled = useMemo(
-    () => allArticles.some(a => a.new_article) && allArticles.some(a => !a.new_article),
+    () => allArticles.some(a => a.new_article === true) && allArticles.some(a => a.new_article === false),
     [allArticles]
   );
 
@@ -152,21 +152,41 @@ const UserDetails = ({ username }) => {
 
   const filteredCoursesData = useMemo(() => {
     const activeNewnessFilter = newnessFilterEnabled ? newnessFilter : 'both';
-    const isFiltered = wikiFilter.project !== 'all' || activeNewnessFilter !== 'both';
 
     return coursesData
       .map((courseGroup) => {
-        const filteredArticles = (courseGroup.articles || []).filter((article) => {
+        const totalArticles = courseGroup.articles || [];
+        const filteredArticles = totalArticles.filter((article) => {
           return matchesWikiFilter(article, wikiFilter) && matchesNewnessFilter(article, activeNewnessFilter);
         });
 
         if (filteredArticles.length === 0) return null;
 
+        const allCourseArticlesIncluded = filteredArticles.length === totalArticles.length;
         const summary = summarizeArticles(filteredArticles);
+
+        let wordCount;
+        if (allCourseArticlesIncluded) {
+          wordCount = courseGroup.word_count;
+        } else if (filteredArticles.some(a => a.word_count == null)) {
+          wordCount = null;
+        } else {
+          wordCount = summary.word_count;
+        }
+
+        let referencesCount;
+        if (allCourseArticlesIncluded) {
+          referencesCount = courseGroup.references_count;
+        } else if (filteredArticles.some(a => a.references_count == null)) {
+          referencesCount = null;
+        } else {
+          referencesCount = summary.references_count;
+        }
+
         return {
           ...courseGroup,
-          word_count: isFiltered ? summary.word_count : courseGroup.word_count,
-          references_count: isFiltered ? summary.references_count : courseGroup.references_count,
+          word_count: wordCount,
+          references_count: referencesCount,
           articles_edited: filteredArticles.length,
           articles: filteredArticles,
         };
@@ -187,6 +207,16 @@ const UserDetails = ({ username }) => {
     }
     return 'en.wikipedia.org';
   }, [wikiFilter, allArticles]);
+
+  const contribUrl = useMemo(() => {
+    if (wikiFilter && wikiFilter.project && wikiFilter.project !== 'all') {
+      return `https://${toWikiDomain(wikiFilter)}/wiki/Special:Contributions/${encodedUsername}`;
+    }
+    if (!Features.wikiEd) {
+      return `https://guc.toolforge.org/?user=${encodedUsername}`;
+    }
+    return `https://${contribWikiDomain}/wiki/Special:Contributions/${encodedUsername}`;
+  }, [wikiFilter, contribWikiDomain, encodedUsername]);
 
   const hasAnyArticles = allArticles.length > 0;
   const hasNoFilteredResults = hasAnyArticles && filteredCoursesData.length === 0;
@@ -248,11 +278,12 @@ const UserDetails = ({ username }) => {
     if (column === 'words') return <td className="user-details-table__value">{article.word_count != null ? article.word_count : '-'}</td>;
     if (column === 'references') return <td className="user-details-table__value">{article.references_count != null ? article.references_count : '-'}</td>;
     if (column === 'type') {
+      let typeLabel = '-';
+      if (article.new_article === true) typeLabel = I18n.t('user_profiles.status_new');
+      else if (article.new_article === false) typeLabel = I18n.t('user_profiles.status_edited');
       return (
         <td className="user-details-table__value">
-          {article.new_article
-            ? I18n.t('user_profiles.status_new')
-            : I18n.t('user_profiles.status_edited')}
+          {typeLabel}
         </td>
       );
     }
@@ -344,8 +375,8 @@ const UserDetails = ({ username }) => {
                       <p>
                         {summaryLabel}: {' '}
                         <strong>
-                          {metric === 'words' && (courseGroup.word_count || 0)}
-                          {metric === 'references' && (courseGroup.references_count || 0)}
+                          {metric === 'words' && (courseGroup.word_count != null ? courseGroup.word_count : '-')}
+                          {metric === 'references' && (courseGroup.references_count != null ? courseGroup.references_count : '-')}
                           {metric !== 'words' && metric !== 'references' && (courseGroup.articles_edited || 0)}
                         </strong>
                       </p>
@@ -386,7 +417,7 @@ const UserDetails = ({ username }) => {
             </div>
           )}
           <div className="user-articles__footer">
-            <a href={`https://${contribWikiDomain}/wiki/Special:Contributions/${encodedUsername}`} target="_blank" rel="noopener noreferrer" className="button dark">
+            <a href={contribUrl} target="_blank" rel="noopener noreferrer" className="button dark">
               {I18n.t('users.contributions_more')}
             </a>
           </div>

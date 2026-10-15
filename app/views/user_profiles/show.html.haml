@@ -4,8 +4,6 @@
   .profile_container
     = render 'user_profiles/user_form'
 
-
-
     #profile_details
       - if @last_courses_user
         #react_root{"data-isstudent" =>  @user.course_student? ? '{ "student": true }' : '{ "student": false }' , "data-isinstructor" =>  @user.course_instructor? ? '{ "instructor": true }' : '{ "instructor": false }'}

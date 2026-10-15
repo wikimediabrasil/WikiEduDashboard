@@ -146,7 +146,7 @@ describe 'User articles and language statistics', type: :request do
           expect(course_a['references_count']).to eq(1)
           expect(article_a['word_count']).to be_nil
           expect(article_a['references_count']).to be_nil
-          expect(article_a['new_article']).to be(false)
+          expect(article_a['new_article']).to be_nil
 
           data_b = json_for('/users/StudentB/user_articles.json')
           course_b = data_b['articles_by_course'].first
@@ -156,7 +156,7 @@ describe 'User articles and language statistics', type: :request do
           expect(course_b['references_count']).to eq(9)
           expect(article_b['word_count']).to be_nil
           expect(article_b['references_count']).to be_nil
-          expect(article_b['new_article']).to be(false)
+          expect(article_b['new_article']).to be_nil
         end
       end
 

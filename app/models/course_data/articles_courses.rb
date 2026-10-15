@@ -56,7 +56,6 @@ class ArticlesCourses < ApplicationRecord
     where(course:).where('user_ids LIKE ?', "%- #{user_id}\n%")
   end
 
-
   # Calculate articles courses that need a cache update. For courses with a huge number
   # of articles, updating all caches in every update can be heavy. In order to
   # speed up the cache update process, we calculate the articles courses that
