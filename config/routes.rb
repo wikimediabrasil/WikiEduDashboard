@@ -431,6 +431,9 @@ Rails.application.routes.draw do
 
   # Revision Feedback
   get '/revision_feedback' => 'revision_feedback#index'
+  get '/revision_feedback/revisions/:revision_id' => 'revision_feedback#revision'
+  post '/revision_feedback/revisions/:revision_id' => 'revision_feedback#create'
+  get '/revision_feedback/notifications' => 'revision_feedback#notifications'
 
   # Wizard
   get 'wizards' => 'wizard#wizard_index'

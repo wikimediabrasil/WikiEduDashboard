@@ -8,8 +8,9 @@ import DiffViewer from '@components/revisions/diff_viewer.jsx';
 import CourseUtils from '~/app/assets/javascripts/utils/course_utils';
 import { formatDateWithTime } from '../../../../../utils/date_utils';
 import { getArticleUrl, getDiffUrl } from '../../../../../utils/wiki_utils';
+import RevisionFeedback from './RevisionFeedback';
 
-export const RevisionRow = ({ course, index, revision, revisions, selectedIndex, student, wikidataLabels, showDiff }) => {
+export const RevisionRow = ({ course, currentUser, index, revision, revisions, selectedIndex, student, wikidataLabels, showDiff }) => {
   const article = revision.article;
   const label = wikidataLabels[article.title];
   const formattedTitle = CourseUtils.formattedArticleTitle(article, course.home_wiki, label);
@@ -35,13 +36,17 @@ export const RevisionRow = ({ course, index, revision, revisions, selectedIndex,
           selectedIndex={selectedIndex}
         />
       </td>
+      <td className="desktop-only-tc">
+        <RevisionFeedback revision={revision} course={course} editor={student} currentUser={currentUser} />
+      </td>
     </tr>
   );
 };
 
 RevisionRow.propTypes = {
   revision: PropTypes.object.isRequired,
-  index: PropTypes.number.isRequired
+  index: PropTypes.number.isRequired,
+  currentUser: PropTypes.object.isRequired
 };
 
 export default RevisionRow;

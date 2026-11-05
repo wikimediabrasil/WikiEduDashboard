@@ -6,7 +6,7 @@ import Contributions from './Contributions';
 import TrainingStatus from './TrainingStatus/TrainingStatus';
 
 export const StudentDrawer = ({
-  course, exerciseView, isOpen, revisions = [],
+  course, currentUser, exerciseView, isOpen, revisions = [],
   student, trainingModules = [], wikidataLabels
 }) => {
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -22,6 +22,7 @@ export const StudentDrawer = ({
             ? (
               <Contributions
                 course={course}
+                currentUser={currentUser}
                 revisions={revisions}
                 selectedIndex={selectedIndex}
                 showDiff={showDiff}
@@ -37,6 +38,7 @@ export const StudentDrawer = ({
 
 StudentDrawer.propTypes = {
   course: PropTypes.object,
+  currentUser: PropTypes.object,
   exerciseView: PropTypes.bool,
   student: PropTypes.object,
   isOpen: PropTypes.bool,

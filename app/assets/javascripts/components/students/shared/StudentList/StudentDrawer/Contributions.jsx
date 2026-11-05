@@ -6,10 +6,11 @@ import RevisionRow from './RevisionRow';
 import NoRevisionsRow from './NoRevisionsRow';
 import FullHistoryRow from './FullHistoryRow';
 
-export const Contributions = ({ course, revisions, selectedIndex, student, wikidataLabels, showDiff }) => {
+export const Contributions = ({ course, currentUser, revisions, selectedIndex, student, wikidataLabels, showDiff }) => {
   const rows = revisions.map((revision, index) => (
     <RevisionRow
       course={course}
+      currentUser={currentUser}
       index={index}
       key={index}
       revision={revision}
@@ -31,6 +32,7 @@ export const Contributions = ({ course, revisions, selectedIndex, student, wikid
           <th>{I18n.t('users.contributions')}</th>
           <th className="desktop-only-tc">{I18n.t('metrics.date_time')}</th>
           <th className="desktop-only-tc">{I18n.t('metrics.char_added')}</th>
+          <th className="desktop-only-tc" />
           <th className="desktop-only-tc" />
         </tr>
       </thead>
