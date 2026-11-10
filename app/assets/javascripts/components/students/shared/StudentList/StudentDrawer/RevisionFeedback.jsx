@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import API from '../../../../../utils/api';
 
@@ -18,13 +18,19 @@ const RevisionFeedback = ({ revision, course, editor, currentUser }) => {
     return [];
   };
 
-  const toggle = () => {
-    if (!open && !items) {
-      API.fetchRevisionFeedback(revision.revid, course.id, editor.id)
-        .then(data => setItems(feedbackItems(data)));
-    }
-    setOpen(!open);
-  };
+  useEffect(() => {
+    let active = true;
+    setItems(null);
+    setOpen(false);
+    setText('');
+    API.fetchRevisionFeedback(revision.revid, course.id, editor.id)
+      .then((data) => {
+        if (active) setItems(feedbackItems(data));
+      });
+    return () => { active = false; };
+  }, [revision.revid, course.id, editor.id]);
+
+  const toggle = () => setOpen(!open);
 
   const submit = (event) => {
     event.preventDefault();
@@ -37,17 +43,19 @@ const RevisionFeedback = ({ revision, course, editor, currentUser }) => {
 
   return (
     <>
-      <button type="button" className="button dark small" onClick={toggle}>
-        {I18n.t('courses.feedback')}
-      </button>
-      {open && (
+      {!(open && canWrite) && (
+        <button type="button" className="button dark small" onClick={toggle}>
+          {I18n.t('courses.feedback')}
+        </button>
+      )}
+      {(open || feedbackItems(items).length > 0) && (
         <div className="revision-feedback-panel">
           {feedbackItems(items).map(item => (
             <p key={item.id}>
               <strong>{item.author}</strong>: {item.text}
             </p>
           ))}
-          {canWrite && (
+          {open && canWrite && (
             <form onSubmit={submit}>
               <textarea aria-label={I18n.t('courses.feedback')} rows={4} value={text} onChange={event => setText(event.target.value)} />
               <input className="button dark small" type="submit" value={I18n.t('courses.feedback')} />
