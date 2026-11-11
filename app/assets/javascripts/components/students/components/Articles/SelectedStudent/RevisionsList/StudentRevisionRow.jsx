@@ -93,7 +93,14 @@ export const StudentRevisionRow = ({ course, isOpen, toggleDrawer, student, uplo
           </div>
         )}
       </td>
-      <td><button className="icon icon-arrow-toggle table-expandable-indicator" /></td>
+      <td>
+        <button
+          type="button"
+          className="icon icon-arrow-toggle table-expandable-indicator"
+          aria-label={I18n.t('users.contributions')}
+          aria-expanded={isOpen}
+        />
+      </td>
     </tr>
   );
 };

@@ -9,6 +9,7 @@ class CourseArticlesCsvBuilder
     @course = course
     set_users
     set_articles_edited
+    add_articles_without_timeslices if @course.finalized?
   end
 
   def generate_csv
@@ -47,6 +48,22 @@ class CourseArticlesCsvBuilder
     end
   end
   # rubocop:enable Metrics/AbcSize
+
+  # Finalized courses keep timeslices only for deleted articles (which have no
+  # articles_courses records), so the rows of the other articles come from
+  # articles_courses, which has no edit count (left blank) and no records for articles
+  # outside the tracked namespaces.
+  def add_articles_without_timeslices
+    @course.articles_courses.where(tracked: true).includes(article: :wiki).find_each do |ac|
+      next unless ac.article
+      next if @articles_edited.key?(ac.article_id)
+
+      @articles_edited[ac.article_id] = new_article_entry(ac).merge(
+        new_article: ac.new_article, characters: ac.character_sum, revisions: nil,
+        references: ac.references_count, usernames: ac.user_ids
+      )
+    end
+  end
 
   def new_article_entry(act)
     article = act.article
@@ -101,7 +118,19 @@ class CourseArticlesCsvBuilder
   # If the Article record is missing or the ACT is empty or it's untracked
   # then we don't want to take that ACT into account for the report.
   def valid_timeslice(act)
-    act.article && act.revision_count.positive? && act.tracked
+    act.article && act.revision_count.positive? && act.tracked && reported_namespace?(act.article)
+  end
+
+  # Finalized courses only report articles in tracked namespaces, as their other rows come
+  # from articles_courses
+  def reported_namespace?(article)
+    return true unless @course.finalized?
+    tracked_namespace_pairs.include?([article.wiki_id, article.namespace])
+  end
+
+  def tracked_namespace_pairs
+    @tracked_namespace_pairs ||=
+      @course.tracked_namespaces.map { |wiki_ns| [wiki_ns[:wiki].id, wiki_ns[:namespace]] }
   end
 
   def to_usernames(user_ids)

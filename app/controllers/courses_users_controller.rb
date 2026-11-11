@@ -3,6 +3,8 @@
 #= Controller for finding the course roles for a user
 class CoursesUsersController < ApplicationController
   respond_to :json
+  before_action :require_signed_in
+  before_action :require_self_or_admin, only: [:index]
 
   def index
     @courses_users = CoursesUsers
@@ -26,5 +28,12 @@ class CoursesUsersController < ApplicationController
     raise NotPermittedError unless current_user.can_edit?(courses_user.course)
     courses_user.unaccept!
     render json: { accepted_by_id: nil, accepted_at: nil }
+  end
+
+  private
+
+  def require_self_or_admin
+    return if current_user.admin?
+    raise NotPermittedError unless params['user_id'].to_i == current_user.id
   end
 end

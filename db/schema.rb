@@ -105,8 +105,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_07_120000) do
     t.integer "user_id", null: false
     t.integer "wiki_id", null: false
     t.index ["course_id", "article_id", "user_id", "wiki_id", "start", "end"], name: "index_acuwt_unique", unique: true
+    t.index ["course_id", "updated_at", "article_id"], name: "index_acuwt_on_course_id_updated_at_and_article_id"
     t.index ["course_id", "user_id"], name: "index_acuwt_on_course_id_and_user_id"
     t.index ["course_id", "wiki_id"], name: "index_acuwt_on_course_id_and_wiki_id"
+    t.index ["needs_update", "course_id"], name: "index_acuwt_on_needs_update_and_course_id"
   end
 
   create_table "articles", id: :integer, charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|

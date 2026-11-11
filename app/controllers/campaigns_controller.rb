@@ -10,10 +10,11 @@ class CampaignsController < ApplicationController
   before_action :set_campaign, only: %i[overview programs articles users edit
                                         update destroy add_organizer remove_organizer
                                         remove_course ores_plot
-                                        alerts active_courses tags]
+                                        alerts active_courses tags refresh_stats]
   before_action :require_create_permissions, only: [:create]
   before_action :require_write_permissions, only: %i[update destroy add_organizer
-                                                     remove_organizer remove_course edit]
+                                                     remove_organizer remove_course edit
+                                                     refresh_stats]
   before_action :add_campaign_index_breadcrumb, only: %i[index create]
 
   DETAILS_FIELDS = %w[title start end].freeze
@@ -39,7 +40,10 @@ class CampaignsController < ApplicationController
                   Campaign.find_by(slug: params[:slug])
                 end
     respond_to do |format|
-      format.json { set_presenter }
+      format.json do
+        set_presenter
+        @editable = current_user&.admin? || user_is_organizer?
+      end
     end
   end
 
@@ -74,6 +78,7 @@ class CampaignsController < ApplicationController
     respond_to do |format|
       format.html do
         set_page
+        reject_deep_page
         set_presenter
         # If there are more edited articles than the limit, we disable the feed of campaign articles
         if @presenter.too_many_articles?
@@ -268,8 +273,8 @@ class CampaignsController < ApplicationController
   end
 
   def refresh_stats
-    set_campaign
     @campaign.clear_course_sums_cache
+    @campaign.clear_articles_count_cache
 
     flash[:notice] = t('campaign.refresh_campaign_stats')
     redirect_to overview_campaign_path(@campaign.slug)
@@ -283,18 +288,18 @@ class CampaignsController < ApplicationController
 
   def statistics_campaigns
     campaigns = if params[:user_only] == 'true'
-                  current_user.campaigns.includes(:labels)
+                  current_user ? current_user.campaigns.includes(:labels) : Campaign.none
                 else
                   Campaign.includes(:labels).order(created_at: :desc)
                 end
-    if params[:search].present?
-      campaigns = campaigns.where('lower(title) LIKE ?', campaign_search)
-    end
+    campaigns = campaigns.where('lower(title) LIKE ?', campaign_search) if params[:search].present?
+    filter_by_labels(campaigns)
+  end
+
+  def filter_by_labels(campaigns)
     return campaigns unless params[:label_search].present?
 
-    campaigns.joins(:labels).where(
-      labels: { match: params[:label_search].split(',') }
-    ).distinct
+    campaigns.joins(:labels).where(labels: { match: params[:label_search].split(',') }).distinct
   end
 
   def extract_program_filters
@@ -397,6 +402,12 @@ class CampaignsController < ApplicationController
   def set_page
     @page = params[:page]&.to_i
     @page = nil unless @page&.positive?
+  end
+
+  # Before the presenter, so a rejected page never counts the articles.
+  def reject_deep_page
+    return unless @page && @page > CoursesPresenter::MAX_ARTICLE_PAGE
+    raise ActionController::RoutingError, 'Not Found'
   end
 
   def set_sort
