@@ -65,7 +65,7 @@ describe 'Instructor revision feedback', type: :request do
     end
 
     it 'prevents an instructor of another course from deleting feedback' do
-      login_as create(:instructor)
+      login_as create(:instructor, username: 'OtherInstructor')
       expect { delete "#{path}/#{item.id}", params: params, as: :json }
         .not_to change(RevisionFeedback, :count)
       expect(response).to have_http_status(:forbidden)
