@@ -397,6 +397,7 @@ revision_ai_scores_stats#index: admin
 revision_analytics#recent_uploads: public
 
 revision_feedback#index: public
+revision_feedback#destroy: editor # Restricted to course instructors.
 
 salesforce#create_media: admin
 salesforce#link: admin

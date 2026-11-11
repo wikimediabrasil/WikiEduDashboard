@@ -52,4 +52,20 @@ describe('revision feedback after reloading', () => {
     expect(container.querySelectorAll('input[type="submit"]')).toHaveLength(1);
     expect(container.textContent).toContain('Saved feedback');
   });
+  it('deletes a saved comment when the server permits deletion', async () => {
+    API.fetchRevisionFeedback.mockResolvedValue([
+      { id: 1, author: 'Instructor', text: 'Saved feedback', can_delete: true }
+    ]);
+    API.deleteRevisionFeedback.mockResolvedValue();
+    await act(async () => root.render(<RevisionFeedback {...props} />));
+    await act(async () => container.querySelector('.revision-feedback-panel button').click());
+    expect(API.deleteRevisionFeedback).toHaveBeenCalledWith(123, 8, 92, 1);
+    expect(container.textContent).not.toContain('Saved feedback');
+  });
+
+  it('hides deletion when the server does not permit it', async () => {
+    await act(async () => root.render(<RevisionFeedback {...props} />));
+    expect(container.querySelector('.revision-feedback-panel button')).toBeNull();
+  });
+
 });

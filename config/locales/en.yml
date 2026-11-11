@@ -36,6 +36,7 @@ en:
     number_field: This is a number field. The buttons rendered by most browsers will increment and decrement the input.
 
   application:
+    delete: Delete
     back: Back
     cancel: Cancel
     close: Close

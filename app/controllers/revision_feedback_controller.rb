@@ -7,8 +7,8 @@ require_dependency "#{Rails.root}/lib/wiki_api/article_content"
 class RevisionFeedbackController < ApplicationController
   include CourseHelper
 
-  before_action :require_signed_in, only: %i[revision create notifications]
-  before_action :set_course_and_editor, only: %i[revision create]
+  before_action :require_signed_in, only: %i[revision create destroy notifications]
+  before_action :set_course_and_editor, only: %i[revision create destroy]
   before_action :verify_access, only: [:create]
 
   def index
@@ -39,6 +39,15 @@ class RevisionFeedbackController < ApplicationController
     render json: serialize(item), status: :created
   end
 
+  def destroy
+    return head :forbidden unless current_user.instructor?(@course)
+
+    item = RevisionFeedback.find_by!(id: params[:id], course: @course, editor: @editor,
+                                     revision_id: params[:revision_id])
+    item.destroy!
+    head :no_content
+  end
+
   def notifications
     count = RevisionFeedback.where(course_id: params.require(:course_id),
                                    editor: current_user, read_at: nil).count
@@ -64,6 +73,7 @@ class RevisionFeedbackController < ApplicationController
 
   def serialize(item)
     { id: item.id, text: item.text, author: item.author.username,
-      created_at: item.created_at, read: item.read_at.present? }
+      created_at: item.created_at, read: item.read_at.present?,
+      can_delete: current_user.instructor?(@course) }
   end
 end
