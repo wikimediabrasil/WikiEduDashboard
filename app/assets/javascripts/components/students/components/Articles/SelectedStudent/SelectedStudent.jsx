@@ -63,6 +63,7 @@ export const SelectedStudent = ({
       <Header
         assignments={assignments}
         course={course}
+        currentUser={current_user}
         current_user={current_user}
         reviewing={reviewing}
         selected={selected}
@@ -128,6 +129,7 @@ export const SelectedStudent = ({
         key={`student-revisions-${selected.id}`}
         course={course}
         current_user={current_user}
+        currentUser={current_user}
         student={selected}
         wikidataLabels={wikidataLabels}
         userRevisions={userRevisions}

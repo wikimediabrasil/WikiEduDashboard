@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -14,8 +14,10 @@ import { fetchAssignments } from '~/app/assets/javascripts/actions/assignment_ac
 // helper functions
 import { processAssignments } from '@components/overview/my_articles/utils/processAssignments';
 import ArticleUtils from '../../../../utils/article_utils';
+import API from '../../../../utils/api';
 
 const MyArticlesContainer = ({ current_user }) => {
+  const [feedbackCount, setFeedbackCount] = useState(0);
   const dispatch = useDispatch();
 
   const assignments = useSelector(state => state.assignments.assignments);
@@ -28,6 +30,12 @@ const MyArticlesContainer = ({ current_user }) => {
       dispatch(fetchAssignments(course.slug));
     }
   }, []);
+
+  useEffect(() => {
+    if (current_user.isStudent) {
+      API.fetchRevisionFeedbackNotifications(course.id).then(data => setFeedbackCount(data.count));
+    }
+  }, [course.id, current_user.isStudent]);
 
   const {
     assigned,
@@ -56,6 +64,7 @@ const MyArticlesContainer = ({ current_user }) => {
   return (
     <div>
       <div className="module my-articles">
+        {feedbackCount > 0 && <p className="notice">{I18n.t('courses.feedback')} ({feedbackCount})</p>}
         {instructorMessage}
         <MyArticlesHeader
           assigned={assigned}
