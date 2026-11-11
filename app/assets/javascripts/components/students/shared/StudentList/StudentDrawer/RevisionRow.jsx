@@ -8,18 +8,20 @@ import DiffViewer from '@components/revisions/diff_viewer.jsx';
 import CourseUtils from '~/app/assets/javascripts/utils/course_utils';
 import { formatDateWithTime } from '../../../../../utils/date_utils';
 import { getArticleUrl, getDiffUrl } from '../../../../../utils/wiki_utils';
+import RevisionFeedback from './RevisionFeedback';
 
 export const RevisionRow = ({
-  course, current_user, index, revision, revisions, selectedIndex,
+  course, current_user, currentUser, index, revision, revisions, selectedIndex,
   student, wikidataLabels, showDiff, acceptance, onAccept, onUnaccept, onClear
 }) => {
+  const activeUser = currentUser || current_user;
   const article = revision.article;
   const label = wikidataLabels[article.title];
   const formattedTitle = CourseUtils.formattedArticleTitle(article, course.home_wiki, label);
   const articleUrl = getArticleUrl(revision.wiki, formattedTitle);
   const revisionDate = formatDateWithTime(revision.timestamp);
   const rowClass = revision.reverted ? 'revision-row revision-row--reverted' : 'revision-row';
-  const canAccept = current_user && current_user.isAdvancedRole;
+  const canAccept = activeUser && activeUser.isAdvancedRole;
 
   // Evaluation chip: wiki status (reverted) + instructor review shown independently.
   // Both can appear simultaneously — e.g. reverted + validated by instructor.
@@ -97,6 +99,9 @@ export const RevisionRow = ({
           onClear={onClear}
         />
       </td>
+      <td className="desktop-only-tc">
+        <RevisionFeedback revision={revision} course={course} editor={student} currentUser={activeUser} />
+      </td>
     </tr>
   );
 };
@@ -105,6 +110,7 @@ RevisionRow.propTypes = {
   revision: PropTypes.object.isRequired,
   index: PropTypes.number.isRequired,
   current_user: PropTypes.object,
+  currentUser: PropTypes.object,
   acceptance: PropTypes.object,
   onAccept: PropTypes.func,
   onUnaccept: PropTypes.func,

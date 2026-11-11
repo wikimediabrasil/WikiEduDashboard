@@ -69,6 +69,27 @@ const API = {
     return response.text();
   },
 
+  async fetchRevisionFeedback(revisionId, courseId, editorId) {
+    const response = await request(`/revision_feedback/revisions/${revisionId}?course_id=${courseId}&editor_id=${editorId}`);
+    await ensureOk(response);
+    return response.json();
+  },
+
+  async createRevisionFeedback(revisionId, courseId, editorId, text) {
+    const response = await request(`/revision_feedback/revisions/${revisionId}`, {
+      method: 'POST',
+      body: JSON.stringify({ course_id: courseId, editor_id: editorId, text })
+    });
+    await ensureOk(response);
+    return response.json();
+  },
+
+  async fetchRevisionFeedbackNotifications(courseId) {
+    const response = await request(`/revision_feedback/notifications?course_id=${courseId}`);
+    await ensureOk(response);
+    return response.json();
+  },
+
   async fetchUserProfileStats(username) {
     const response = await request(`/users/${username}/stats.json`);
 

@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 import CurrentStatus from './CurrentStatus';
 import AssignmentLinks from '@components/common/AssignmentLinks/AssignmentLinks.jsx';
 import ArticleViewer from '@components/common/ArticleViewer/containers/ArticleViewer.jsx';
+import Feedback from '@components/common/feedback.jsx';
 
 export const Assignment = ({ assignment, course, current_user, fetchArticleDetails, user, articleDetails }) => {
   const article = {
@@ -51,6 +52,14 @@ export const Assignment = ({ assignment, course, current_user, fetchArticleDetai
         {currentStatus}
       </td>
       <td className="article-actions">
+        {current_user.isAdvancedRole && (
+          <Feedback
+            assignment={assignment}
+            username={user.username}
+            current_user={current_user}
+            course={course}
+          />
+        )}
         <ArticleViewer
           article={article}
           course={course}

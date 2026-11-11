@@ -16,12 +16,14 @@ const ERROR_DISMISS_MS = 5000;
 const PAGE_SIZE = 10;
 
 export const Contributions = ({
-  course, revisions, selectedIndex, student, wikidataLabels, showDiff,
+  course, currentUser: propCurrentUser, current_user: propCurrentUserSnake,
+  revisions, selectedIndex, student, wikidataLabels, showDiff,
   revisionAcceptances,
   fetchRevisionAcceptances: doFetch, acceptRevision: doAccept, invalidateRevision: doInvalidate,
   unacceptRevision: doClear
 }) => {
-  const current_user = useSelector(getCurrentUser);
+  const storeCurrentUser = useSelector(getCurrentUser);
+  const current_user = propCurrentUser || propCurrentUserSnake || storeCurrentUser;
   const [reviewError, setReviewError] = useState(null);
   const [page, setPage] = useState(0);
 
@@ -59,6 +61,7 @@ export const Contributions = ({
       <RevisionRow
         course={course}
         current_user={current_user}
+        currentUser={current_user}
         index={globalIndex}
         key={mwRevId || globalIndex}
         revision={revision}
@@ -117,6 +120,7 @@ export const Contributions = ({
             <th className="desktop-only-tc contributions-th--center">{I18n.t('metrics.char_added')}</th>
             <th className="desktop-only-tc contributions-th--status">{I18n.t('revisions.status')}</th>
             <th className="desktop-only-tc contributions-th--evaluation">{I18n.t('revisions.evaluation')}</th>
+            <th className="desktop-only-tc" />
           </tr>
         </thead>
         <tbody>{rows}</tbody>
