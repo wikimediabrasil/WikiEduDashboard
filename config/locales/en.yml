@@ -63,6 +63,7 @@ en:
     log_in: Log in
     log_out: Log out
     my_dashboard: My Dashboard
+    navigation_menu: Navigation menu
     okay: Okay
     recent_activity: Recent Activity
     report_problem: Report a problem
@@ -583,6 +584,7 @@ en:
     data_editor_usernames_info: List of editor usernames, one per line
     data_wikidata: Wikidata stats
     data_wikidata_info: Detailed breakdown of Wikidata activity, based on edit summaries
+    data_include_private_courses: Include private courses
     default_course_type: Default Course Type
     default_passcode: Default Passcode
     default_passcode_explanation: "By default, new programs in this campaign should have:"
@@ -830,6 +832,7 @@ en:
       included.
     data_revisions_info: Revision data includes revision count of the course, revision id, article id, which pages are new and pageviews totals.
     data_download_info: Download data in CSV format.
+    data_download_generating: The file is being generated. You will be notified when it is ready to download.
     data_overview: Overview data
     data_overview_info: Overview data provides cumulative statistics for the whole project.
     data_edits: Edits data
@@ -926,6 +929,7 @@ en:
     leave_course: Leave course
     loading: Loading…
     milestones_none: This course does not currently have any milestones.
+    missing_expected_modules: Missing from timeline
     my_articles: My Articles
     my_articles_wikidata: My Items
     needs_update: Schedule Data Update
@@ -1731,6 +1735,12 @@ en:
     delete_timeline_and_start_over: Delete Timeline
     done: Done
     due_default: Due next week
+    due_date: Due date
+    due_date_default: Default
+    due_date_default_explanation: Default due dates are the end (Saturday) of the block's week in the Timeline.
+    due_date_modules_note: A default or manual due date is required for exercises and trainings.
+    due_date_none: No due date
+    due_date_specific: Set a date
     edit_titles: Edit Week Titles
     edit_titles_info: Edit week titles in timeline. Only weeks with scheduled meetings can be given custom titles. If any custom titles are used, weeks with no meetings will be dated instead of numbered.
     # FIXME: lego message. This one is hard to work around because it has inline components.
