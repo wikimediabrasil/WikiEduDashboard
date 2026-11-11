@@ -84,6 +84,14 @@ const API = {
     return response.json();
   },
 
+  async deleteRevisionFeedback(revisionId, courseId, editorId, id) {
+    const response = await request(`/revision_feedback/revisions/${revisionId}/${id}`, {
+      method: 'DELETE',
+      body: JSON.stringify({ course_id: courseId, editor_id: editorId })
+    });
+    await ensureOk(response);
+  },
+
   async fetchRevisionFeedbackNotifications(courseId) {
     const response = await request(`/revision_feedback/notifications?course_id=${courseId}`);
     await ensureOk(response);

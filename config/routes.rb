@@ -460,6 +460,7 @@ Rails.application.routes.draw do
   get '/revision_feedback' => 'revision_feedback#index'
   get '/revision_feedback/revisions/:revision_id' => 'revision_feedback#revision'
   post '/revision_feedback/revisions/:revision_id' => 'revision_feedback#create'
+  delete '/revision_feedback/revisions/:revision_id/:id' => 'revision_feedback#destroy'
   get '/revision_feedback/notifications' => 'revision_feedback#notifications'
 
   # Wizard

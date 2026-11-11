@@ -41,6 +41,12 @@ const RevisionFeedback = ({ revision, course, editor, currentUser }) => {
     });
   };
 
+  const remove = (id) => {
+    API.deleteRevisionFeedback(revision.revid, course.id, editor.id, id).then(() => {
+      setItems(existing => feedbackItems(existing).filter(item => item.id !== id));
+    });
+  };
+
   return (
     <>
       {!(open && canWrite) && (
@@ -53,6 +59,11 @@ const RevisionFeedback = ({ revision, course, editor, currentUser }) => {
           {feedbackItems(items).map(item => (
             <p key={item.id}>
               <strong>{item.author}</strong>: {item.text}
+              {item.can_delete && (
+                <button type="button" className="button small" onClick={() => remove(item.id)}>
+                  {I18n.t('application.delete')}
+                </button>
+              )}
             </p>
           ))}
           {open && canWrite && (

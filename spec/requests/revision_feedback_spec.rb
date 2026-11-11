@@ -44,4 +44,39 @@ describe 'Instructor revision feedback', type: :request do
       .not_to change(RevisionFeedback, :count)
     expect(response).to have_http_status(:forbidden)
   end
+  describe 'deleting feedback' do
+    let!(:item) do
+      RevisionFeedback.create!(course: course, editor: editor, author: instructor,
+                               revision_id: 123, text: 'Check the source')
+    end
+
+    it 'allows the course instructor to delete feedback' do
+      login_as instructor
+      expect { delete "#{path}/#{item.id}", params: params, as: :json }
+        .to change(RevisionFeedback, :count).by(-1)
+      expect(response).to have_http_status(:no_content)
+    end
+
+    it 'prevents the participant from deleting feedback' do
+      login_as editor
+      expect { delete "#{path}/#{item.id}", params: params, as: :json }
+        .not_to change(RevisionFeedback, :count)
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it 'prevents an instructor of another course from deleting feedback' do
+      login_as create(:instructor)
+      expect { delete "#{path}/#{item.id}", params: params, as: :json }
+        .not_to change(RevisionFeedback, :count)
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it 'does not delete feedback for a different revision' do
+      login_as instructor
+      expect { delete "/revision_feedback/revisions/456/#{item.id}", params: params, as: :json }
+        .not_to change(RevisionFeedback, :count)
+      expect(response).to have_http_status(:not_found)
+    end
+  end
+
 end
