@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_04_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_17_000000) do
   create_table "admin_course_notes", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "courses_id"
     t.string "title"
@@ -676,6 +676,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_04_000000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "status", default: "validated", null: false
+    t.text "revision_metadata"
     t.index ["course_id"], name: "index_revision_acceptances_on_course_id"
     t.index ["mw_rev_id", "wiki_id", "course_id"], name: "index_revision_acceptances_unique", unique: true
     t.index ["user_id"], name: "index_revision_acceptances_on_user_id"

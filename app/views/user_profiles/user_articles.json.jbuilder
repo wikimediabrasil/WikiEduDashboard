@@ -3,7 +3,19 @@
 # Group articles by course for UserDetails component
 articles_by_course = @user_articles.group_by(&:course_id)
 
-json.articles_by_course articles_by_course.map do |_course_id, article_courses|
+all_groups = articles_by_course.to_a + @reviewed_courses.map { |course| [course.id, nil] }
+json.articles_by_course all_groups do |course_id, article_courses|
+  if article_courses.nil?
+    course = @reviewed_courses.find { |entry| entry.id == course_id }
+    reviewed = SummarizeReviewedContributions.new(course:, user: @user).stats
+    json.course_id course.id
+    json.course_title course.title
+    json.course_slug course.slug
+    json.word_count reviewed[:word_count]
+    json.references_count reviewed[:references_count]
+    json.articles_edited reviewed[:article_count]
+    json.articles @reviewed_articles[course.id]
+  else
   course = article_courses.first.course
 
   articles_data = article_courses.map do |article_course|
@@ -76,5 +88,6 @@ json.articles_by_course articles_by_course.map do |_course_id, article_courses|
     json.language article_data[:language]
     json.project article_data[:project]
     json.wiki_language article_data[:wiki_language]
+  end
   end
 end

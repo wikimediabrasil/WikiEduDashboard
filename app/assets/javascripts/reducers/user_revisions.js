@@ -7,24 +7,27 @@ export default function userRevisions(state = initialState, action) {
     case RECEIVE_USER_REVISIONS: {
       // Merge wiki information, so that titles
       // can correctly show
-      const revisions = action.revisions.map(rev => ({
-        ...rev,
-        wiki: {
-          language: action.wiki.language,
-          project: action.wiki.project
-        },
-        article: {
-          title: rev.title,
-          language: action.wiki.language,
-          project: action.wiki.project
-        },
-        tags: rev.tags || [],
-        reverted: (rev.tags || []).includes('mw-reverted')
-      }));
+      const revisions = action.revisions.map((rev) => {
+        const wiki = rev.wiki || action.wiki;
+        return {
+          ...rev,
+          wiki,
+          article: {
+            title: rev.title,
+            language: wiki.language,
+            project: wiki.project
+          },
+          tags: rev.tags || [],
+          reverted: (rev.tags || []).includes('mw-reverted')
+        };
+      });
 
       return {
         ...state,
-        [action.username]: revisions
+        [action.courseSlug]: {
+          ...state[action.courseSlug],
+          [action.username]: revisions
+        }
       };
     }
     default:

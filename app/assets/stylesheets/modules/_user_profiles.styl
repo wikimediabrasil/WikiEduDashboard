@@ -633,9 +633,18 @@
 	margin-bottom 20px
 
 .user-details-course__stat
+	position relative
 	background #f7f8fc
 	border 1px solid #e4e7f2
 	padding 16px
+
+.user-details-course__stat-link
+	position absolute
+	inset 0
+
+	&:hover
+	&:focus-visible
+		outline 2px solid #575d99
 
 .user-details-course__stat-label
 	display block
@@ -647,9 +656,40 @@
 
 .user-details-course__stat-value
 	display block
+	margin 0
 	font-size 28px
 	font-weight 600
 	color #3f466b
+
+.profile-course-statistics
+	margin 32px 0
+
+	.user-details-course__header h4
+		font-size 24px
+
+	.user-details-course__stats
+		margin 16px 0 0
+
+.profile-student-summary
+	margin 24px 0
+
+	summary
+		cursor pointer
+		color #575d99
+
+.profile-wiki-contributions
+	margin 16px 0
+
+	h5
+		margin 0 0 8px
+
+	ul
+		list-style none
+		padding 0
+		margin 0
+		display flex
+		flex-wrap wrap
+		gap 8px 20px
 
 .user-details-table-wrap
 	overflow-x auto

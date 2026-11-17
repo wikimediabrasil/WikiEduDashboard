@@ -12,7 +12,7 @@ import RevisionFeedback from './RevisionFeedback';
 
 export const RevisionRow = ({
   course, current_user, currentUser, index, revision, revisions, selectedIndex,
-  student, wikidataLabels, showDiff, acceptance, onAccept, onUnaccept, onClear
+  student, wikidataLabels, showDiff, acceptance, suggested, onAccept, onUnaccept, onClear
 }) => {
   const activeUser = currentUser || current_user;
   const article = revision.article;
@@ -74,6 +74,7 @@ export const RevisionRow = ({
       <td>
         <p className="name">
           <a href={articleUrl} target="_blank">{formattedTitle}</a>
+          {suggested && <span> · {I18n.t('revisions.category_suggestion')}</span>}
         </p>
       </td>
       <td className="desktop-only-tc date"><a href={getDiffUrl(revision)} target="_blank">{revisionDate}</a></td>
@@ -112,6 +113,7 @@ RevisionRow.propTypes = {
   current_user: PropTypes.object,
   currentUser: PropTypes.object,
   acceptance: PropTypes.object,
+  suggested: PropTypes.bool,
   onAccept: PropTypes.func,
   onUnaccept: PropTypes.func,
   onClear: PropTypes.func

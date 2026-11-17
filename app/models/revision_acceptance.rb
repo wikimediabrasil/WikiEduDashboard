@@ -2,6 +2,7 @@
 
 #= Per-revision acceptance record for campaign contribution review
 class RevisionAcceptance < ApplicationRecord
+  serialize :revision_metadata, type: Hash
   belongs_to :course
   belongs_to :user
   belongs_to :accepted_by, class_name: 'User', foreign_key: :accepted_by_id

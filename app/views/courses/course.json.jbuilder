@@ -12,7 +12,7 @@ json.course do
             :closed?, :training_library_slug, :peer_review_count, :needs_update,
             :update_until, :withdrawn, :created_at)
 
-  json.wikis @course.wikis, :language, :project
+  json.wikis @course.wikis, :id, :language, :project
   json.namespaces format_wiki_namespaces(@course.course_wiki_namespaces)
   json.timeline_enabled @course.timeline_enabled?
   json.disable_student_emails @course.disable_student_emails?
@@ -30,6 +30,7 @@ json.course do
   json.stay_in_sandbox @course.stay_in_sandbox?
   json.no_sandboxes @course.no_sandboxes?
   json.retain_available_articles @course.retain_available_articles?
+  json.reviewed_contributions @course.reviewed_contributions?
   json.review_bibliography @course.review_bibliography?
   json.article_scoped @course.article_scoped_enabled?
   json.term @course.cloned_status == 1 ? '' : @course.term

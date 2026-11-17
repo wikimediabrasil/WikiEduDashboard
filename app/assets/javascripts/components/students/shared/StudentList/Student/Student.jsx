@@ -9,6 +9,7 @@ import { setUploadFilters } from '~/app/assets/javascripts/actions/uploads_actio
 import { fetchTrainingStatus } from '~/app/assets/javascripts/actions/training_status_actions';
 import { groupByAssignmentType } from '@components/util/helpers';
 import { ASSIGNED_ROLE, REVIEWING_ROLE } from '@constants/assignments';
+import { revisionKey } from '~/app/assets/javascripts/reducers/revision_acceptances';
 
 // Components
 import ContentAdded from './ContentAdded';
@@ -63,8 +64,8 @@ const Student = createReactClass({
 
     const revisions = userRevisions?.[student.username] || [];
     const total = revisions.length;
-    const validatedCount = revisions.filter(r => revisionAcceptances?.byMwRevId?.[r.mw_rev_id || r.revid]?.status === 'validated').length;
-    const invalidatedCount = revisions.filter(r => revisionAcceptances?.byMwRevId?.[r.mw_rev_id || r.revid]?.status === 'invalidated').length;
+    const validatedCount = revisions.filter(r => revisionAcceptances?.byMwRevId?.[revisionKey(r.wiki?.id || course.home_wiki?.id, r.mw_rev_id || r.revid)]?.status === 'validated').length;
+    const invalidatedCount = revisions.filter(r => revisionAcceptances?.byMwRevId?.[revisionKey(r.wiki?.id || course.home_wiki?.id, r.mw_rev_id || r.revid)]?.status === 'invalidated').length;
     const reviewedCount = validatedCount + invalidatedCount;
     const validatedPct = total > 0 ? Math.round((validatedCount / total) * 100) : 0;
     const invalidatedPct = total > 0 ? Math.round((invalidatedCount / total) * 100) : 0;
