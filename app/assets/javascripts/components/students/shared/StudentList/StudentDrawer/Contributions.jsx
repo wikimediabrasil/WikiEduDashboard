@@ -10,6 +10,8 @@ import FullHistoryRow from './FullHistoryRow';
 
 // Actions
 import { fetchRevisionAcceptances, acceptRevision, unacceptRevision, invalidateRevision } from '../../../../../actions/revision_acceptance_actions';
+import { revisionKey } from '../../../../../reducers/revision_acceptances';
+import request from '../../../../../utils/request';
 
 // Auto-dismiss duration for error banner (ms)
 const ERROR_DISMISS_MS = 5000;
@@ -26,12 +28,31 @@ export const Contributions = ({
   const current_user = propCurrentUser || propCurrentUserSnake || storeCurrentUser;
   const [reviewError, setReviewError] = useState(null);
   const [page, setPage] = useState(0);
+  const [suggestions, setSuggestions] = useState([]);
 
   useEffect(() => {
-    if (!revisionAcceptances.loaded) {
+    if (!current_user?.isAdvancedRole || !revisions.length) return undefined;
+    let cancelled = false;
+    const candidates = revisions.map(revision => ({
+      wiki_id: revision.wiki?.id || course.home_wiki?.id,
+      title: revision.article?.title
+    })).filter(candidate => candidate.wiki_id && candidate.title);
+    if (!candidates.length) return undefined;
+    request(`/courses/${course.slug}/revision_suggestions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ candidates })
+    }).then(response => response.ok ? response.json() : { matches: [] })
+      .then(data => { if (!cancelled) setSuggestions(data.matches); })
+      .catch(() => { if (!cancelled) setSuggestions([]); });
+    return () => { cancelled = true; };
+  }, [course.slug, course.home_wiki?.id, current_user?.isAdvancedRole, revisions]);
+
+  useEffect(() => {
+    if (!revisionAcceptances.loaded || revisionAcceptances.courseSlug !== course.slug) {
       doFetch(course.slug);
     }
-  }, [course.slug, doFetch, revisionAcceptances.loaded]);
+  }, [course.slug, doFetch, revisionAcceptances.loaded, revisionAcceptances.courseSlug]);
 
   // Auto-dismiss error after ERROR_DISMISS_MS
   useEffect(() => {
@@ -49,13 +70,13 @@ export const Contributions = ({
     }
   }, []);
 
-  const wikiId = course.home_wiki?.id;
   const totalPages = Math.ceil(revisions.length / PAGE_SIZE);
   const pageRevisions = revisions.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
   const rows = pageRevisions.map((revision, index) => {
     const mwRevId = revision.mw_rev_id || revision.revid;
-    const acceptance = revisionAcceptances.byMwRevId[mwRevId];
+    const wikiId = revision.wiki?.id || course.home_wiki?.id;
+    const acceptance = revisionAcceptances.byMwRevId[revisionKey(wikiId, mwRevId)];
     const globalIndex = page * PAGE_SIZE + index;
     return (
       <RevisionRow
@@ -63,7 +84,7 @@ export const Contributions = ({
         current_user={current_user}
         currentUser={current_user}
         index={globalIndex}
-        key={mwRevId || globalIndex}
+        key={revisionKey(wikiId, mwRevId || globalIndex)}
         revision={revision}
         revisions={revisions}
         selectedIndex={selectedIndex}
@@ -71,9 +92,10 @@ export const Contributions = ({
         student={student}
         wikidataLabels={wikidataLabels}
         acceptance={acceptance}
+        suggested={suggestions.some(match => match.wiki_id === wikiId && match.title === revision.article?.title)}
         onAccept={withErrorFeedback(() => doAccept(course.slug, mwRevId, wikiId, student.id))}
         onUnaccept={withErrorFeedback(() => doInvalidate(course.slug, mwRevId, wikiId, student.id))}
-        onClear={acceptance ? withErrorFeedback(() => doClear(course.slug, acceptance.id, mwRevId)) : null}
+        onClear={acceptance ? withErrorFeedback(() => doClear(course.slug, acceptance.id, mwRevId, wikiId)) : null}
       />
     );
   });

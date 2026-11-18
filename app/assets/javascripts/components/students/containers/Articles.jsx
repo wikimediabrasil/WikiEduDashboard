@@ -19,6 +19,8 @@ import { getModulesAndBlocksFromWeeks } from '@components/util/helpers';
 import groupArticlesCoursesByUserId from '@components/students/utils/groupArticlesCoursesByUserId';
 import ScrollToTopOnMount from '../../util/ScrollToTopOnMount';
 
+const EMPTY_REVISIONS = {};
+
 const Articles = ({ articles, course, current_user, prefix, notify, sortSelect, sortUsers }) => {
   const dispatch = useDispatch();
 
@@ -29,7 +31,7 @@ const Articles = ({ articles, course, current_user, prefix, notify, sortSelect, 
   const trainingStatus = useSelector(state => state.trainingStatus);
   const weeks = useSelector(state => getWeeksArray(state));
   const wikidataLabels = useSelector(state => state.wikidataLabels.labels);
-  const userRevisions = useSelector(state => state.userRevisions);
+  const userRevisions = useSelector(state => state.userRevisions[course.slug]) || EMPTY_REVISIONS;
 
   const [selected, setSelected] = useState({});
 

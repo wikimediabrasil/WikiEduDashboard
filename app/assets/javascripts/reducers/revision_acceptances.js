@@ -4,7 +4,8 @@ import {
   UNACCEPT_REVISION
 } from '../constants/revision_acceptances';
 
-// State shape: { byMwRevId: { [mw_rev_id]: acceptance_record }, loaded: bool }
+// Revision IDs are scoped to a wiki.
+export const revisionKey = (wikiId, revisionId) => `${wikiId}:${revisionId}`;
 const initialState = { byMwRevId: {}, loaded: false };
 
 export default function revisionAcceptances(state = initialState, action) {
@@ -12,20 +13,20 @@ export default function revisionAcceptances(state = initialState, action) {
     case RECEIVE_REVISION_ACCEPTANCES: {
       if (!Array.isArray(action.data)) return state;
       const byMwRevId = Object.fromEntries(
-        action.data.filter(a => a?.mw_rev_id).map(a => [a.mw_rev_id, a])
+        action.data.filter(a => a?.mw_rev_id).map(a => [revisionKey(a.wiki_id, a.mw_rev_id), a])
       );
-      return { byMwRevId, loaded: true };
+      return { byMwRevId, loaded: true, courseSlug: action.courseSlug };
     }
     // Handles both validate and invalidate — any upsert of a review record
     case UPSERT_REVISION_ACCEPTANCE: {
       if (!action.acceptance?.mw_rev_id) return state;
       return {
         ...state,
-        byMwRevId: { ...state.byMwRevId, [action.acceptance.mw_rev_id]: action.acceptance }
+        byMwRevId: { ...state.byMwRevId, [revisionKey(action.acceptance.wiki_id, action.acceptance.mw_rev_id)]: action.acceptance }
       };
     }
     case UNACCEPT_REVISION: {
-      const { [action.mwRevId]: _removed, ...rest } = state.byMwRevId;
+      const { [revisionKey(action.wikiId, action.mwRevId)]: _removed, ...rest } = state.byMwRevId;
       return { ...state, byMwRevId: rest };
     }
     default:

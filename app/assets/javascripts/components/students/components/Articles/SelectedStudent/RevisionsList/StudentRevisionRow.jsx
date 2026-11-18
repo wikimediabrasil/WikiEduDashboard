@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 // Components
 import ContentAdded from '@components/students/shared/StudentList/Student/ContentAdded.jsx';
 import { setUploadFilters } from '~/app/assets/javascripts/actions/uploads_actions';
+import { revisionKey } from '~/app/assets/javascripts/reducers/revision_acceptances';
 
 export const StudentRevisionRow = ({ course, isOpen, toggleDrawer, student, uploadsLink, userRevisions, revisionAcceptances }) => {
   const revisions = userRevisions?.[student.username] || [];
@@ -13,12 +14,12 @@ export const StudentRevisionRow = ({ course, isOpen, toggleDrawer, student, uplo
 
   const validatedCount = revisions.filter((r) => {
     const mwRevId = r.mw_rev_id || r.revid;
-    return revisionAcceptances?.byMwRevId?.[mwRevId]?.status === 'validated';
+    return revisionAcceptances?.byMwRevId?.[revisionKey(r.wiki?.id || course.home_wiki?.id, mwRevId)]?.status === 'validated';
   }).length;
 
   const invalidatedCount = revisions.filter((r) => {
     const mwRevId = r.mw_rev_id || r.revid;
-    return revisionAcceptances?.byMwRevId?.[mwRevId]?.status === 'invalidated';
+    return revisionAcceptances?.byMwRevId?.[revisionKey(r.wiki?.id || course.home_wiki?.id, mwRevId)]?.status === 'invalidated';
   }).length;
 
   const reviewedCount = validatedCount + invalidatedCount;

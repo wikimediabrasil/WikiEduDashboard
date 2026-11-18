@@ -615,6 +615,10 @@ class Course < ApplicationRecord
     flags[:retain_available_articles].present?
   end
 
+  def reviewed_contributions?
+    flags[:reviewed_contributions] == true
+  end
+
   # True once MarkPurgeableCourses has flagged this course for timeslice purging
   # (it ended long ago and has no pending timeslice work).
   def purgeable?

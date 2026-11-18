@@ -16,6 +16,23 @@ json.courses_details @courses_users.reverse_each do |c|
   json.course_slug c.course.slug
 end
 
+json.validated_contributions_by_course @courses_users.select { |cu|
+  cu.role == CoursesUsers::Roles::STUDENT_ROLE
+} do |cu|
+  reviewed = @reviewed_stats[cu.course_id]
+  json.course_id cu.course_id
+  json.course_title cu.course.title
+  json.course_slug cu.course.slug
+  json.count @validated_revision_counts.fetch(cu.course_id, 0)
+  json.reviewed_contributions !!reviewed
+  json.revision_count reviewed ? reviewed[:revision_count] : cu.revision_count
+  json.word_count reviewed ? reviewed[:word_count] : WordCount.from_characters(cu.character_sum_ms.to_i)
+  json.references_count reviewed ? reviewed[:references_count] : cu.references_count
+  json.article_count reviewed ? reviewed[:article_count] : @historical_article_counts.fetch(cu.course_id, 0)
+  json.commons_upload_count reviewed ? nil : cu.total_uploads
+  json.wiki_contributions @wiki_contribution_counts.for_course(cu.course)
+end
+
 if @user.course_instructor?
   json.as_instructor do
     json.course_string_prefix @courses_presenter.course_string_prefix
@@ -40,11 +57,17 @@ if @user.course_student?
   json.as_student do
     json.course_string_prefix @individual_stats_presenter.course_string_prefix
     json.individual_courses_count @individual_stats_presenter.individual_courses.count
-    json.individual_word_count number_to_human @individual_stats_presenter.individual_word_count
-    json.individual_references_count number_to_human @individual_stats_presenter
-      .individual_references_count
-    json.individual_article_count number_to_human @individual_stats_presenter
-      .individual_article_count
+    if @reviewed_stats.empty?
+      json.individual_word_count number_to_human @individual_stats_presenter.individual_word_count
+      json.individual_references_count number_to_human @individual_stats_presenter
+        .individual_references_count
+      json.individual_article_count number_to_human @individual_stats_presenter
+        .individual_article_count
+    else
+      json.individual_word_count nil
+      json.individual_references_count nil
+      json.individual_article_count nil
+    end
     json.individual_upload_count number_to_human @individual_stats_presenter
       .individual_upload_count
     json.individual_upload_usage_count number_to_human @individual_stats_presenter

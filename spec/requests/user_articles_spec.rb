@@ -84,6 +84,14 @@ describe 'User articles and language statistics', type: :request do
 
         expect(sql_queries).to all(include('course_id'))
       end
+
+      it 'returns articles only from the selected course' do
+        get '/users/StudentA/user_articles.json', params: { course_id: course.id }
+        expect(response.parsed_body['articles_by_course'].pluck('course_id')).to eq([course.id])
+
+        get '/users/StudentA/user_articles.json', params: { course_id: course.id + 10_000 }
+        expect(response.parsed_body['articles_by_course']).to be_empty
+      end
     end
 
     context 'with a finalized course whose timeslices were purged' do

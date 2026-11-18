@@ -14,7 +14,7 @@ export const fetchRevisionAcceptances = courseSlug => async (dispatch) => {
       return;
     }
     const data = await response.json();
-    dispatch({ type: RECEIVE_REVISION_ACCEPTANCES, data: data.revision_acceptances });
+    dispatch({ type: RECEIVE_REVISION_ACCEPTANCES, data: data.revision_acceptances, courseSlug });
   } catch (e) {
     dispatch({ type: API_FAIL, data: e });
   }
@@ -29,12 +29,13 @@ export const acceptRevision = (courseSlug, mwRevId, wikiId, userId) => async (di
     });
     if (!response.ok) {
       dispatch({ type: API_FAIL, data: response });
-      return;
+      throw response;
     }
     const data = await response.json();
     dispatch({ type: UPSERT_REVISION_ACCEPTANCE, acceptance: data });
   } catch (e) {
     dispatch({ type: API_FAIL, data: e });
+    throw e;
   }
 };
 
@@ -47,16 +48,17 @@ export const invalidateRevision = (courseSlug, mwRevId, wikiId, userId) => async
     });
     if (!response.ok) {
       dispatch({ type: API_FAIL, data: response });
-      return;
+      throw response;
     }
     const data = await response.json();
     dispatch({ type: UPSERT_REVISION_ACCEPTANCE, acceptance: data });
   } catch (e) {
     dispatch({ type: API_FAIL, data: e });
+    throw e;
   }
 };
 
-export const unacceptRevision = (courseSlug, acceptanceId, mwRevId) => async (dispatch) => {
+export const unacceptRevision = (courseSlug, acceptanceId, mwRevId, wikiId) => async (dispatch) => {
   try {
     const response = await request(
       `/courses/${courseSlug}/revision_acceptances/${acceptanceId}.json`,
@@ -64,10 +66,11 @@ export const unacceptRevision = (courseSlug, acceptanceId, mwRevId) => async (di
     );
     if (!response.ok) {
       dispatch({ type: API_FAIL, data: response });
-      return;
+      throw response;
     }
-    dispatch({ type: UNACCEPT_REVISION, acceptanceId, mwRevId });
+    dispatch({ type: UNACCEPT_REVISION, acceptanceId, mwRevId, wikiId });
   } catch (e) {
     dispatch({ type: API_FAIL, data: e });
+    throw e;
   }
 };

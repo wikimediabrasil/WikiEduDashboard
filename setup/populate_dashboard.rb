@@ -57,8 +57,11 @@ end
 
 # Set up some example data in the dashboard
 def populate_dashboard
-  puts "Setting up example courses..."
-  example_courses = [
+
+  puts "Importing real dashboard programs..."
+  populate_real_campaigns
+  populate_example_campaigns if ENV['POPULATE_DEMO_DATA'] == 'true'
+  example_courses = ENV.fetch('POPULATE_COURSE_URLS', [
     'https://outreachdashboard.wmflabs.org/courses/Uffizi/WDG_-_AF_2018_Florence',
     'https://outreachdashboard.wmflabs.org/courses/QCA/Brisbane_QCA_ArtandFeminism_2018',
     'https://dashboard.wikiedu.org/courses/Stanford_Law_School/Advanced_Legal_Research_Winter_2020_(Winter)',
@@ -92,7 +95,7 @@ def populate_dashboard
     'https://outreachdashboard.wmflabs.org/courses/UNIFESP/Oficina_de_Literatura_Infantil',
     'https://outreachdashboard.wmflabs.org/courses/UNIFESP/Oficina_Hist%C3%B3ria_do_Brasil_Contempor%C3%A2neo',
     'https://outreachdashboard.wmflabs.org/courses/UNIFESP/Sess%C3%A3o_Comunit%C3%A1ria_Projeto_LER_UNIFESP'
-  ]
+  ].join(',')).split(',').map(&:strip).reject(&:empty?)
 
   example_courses.each do |url|
     begin
@@ -119,4 +122,100 @@ def populate_dashboard
       Rails.logger.error("An error occurred for course at #{url}: #{e.message}")
     end
   end
+end
+
+def populate_real_campaigns
+  campaign_urls = ENV.fetch('POPULATE_CAMPAIGN_URLS', '').split(',').map(&:strip).reject(&:empty?)
+  campaign_urls.each do |campaign_url|
+    import_campaign_from_url(campaign_url)
+  rescue StandardError => e
+    Rails.logger.error("Could not import campaign #{campaign_url}: #{e.message}")
+  end
+end
+
+def import_campaign_from_url(campaign_url)
+  uri = URI(campaign_url)
+  slug = uri.path.split('/').reject(&:empty?).last
+  raise ArgumentError, 'Campaign URL has no slug' if slug.blank?
+
+  payload = JSON.parse(Net::HTTP.get(URI("#{uri.scheme}://#{uri.host}/campaigns/#{slug}.json")))
+  campaign_data = payload.fetch('campaign')
+  campaign = Campaign.find_or_initialize_by(slug:)
+  campaign.assign_attributes(title: campaign_data.fetch('title'),
+                             description: campaign_data['description'],
+                             default_course_type: campaign_data['default_course_type'])
+  campaign.save!
+
+  html = Net::HTTP.get(URI("#{uri.scheme}://#{uri.host}/campaigns/#{slug}/programs"))
+  course_paths = html.scan(%r{href=["'](/courses/[^"']+)}).flatten.uniq
+  course_paths.each do |course_path|
+    course = make_copy_of("#{uri.scheme}://#{uri.host}#{course_path}")
+    campaign.courses << course unless campaign.courses.exists?(course.id)
+  end
+  puts "Imported #{campaign.title}: #{course_paths.length} programs"
+end
+
+def populate_example_campaigns
+  campaign_names = [
+    'African History and Heritage', 'Art and Feminism', 'Climate Change',
+    'Digital Humanities', 'Education and Social Justice', 'Environmental Science',
+    'Feminist Knowledge', 'Food and Agriculture', 'Global Health',
+    'Indigenous Knowledge', 'Journalism and Media', 'Language and Culture',
+    'Law and Public Policy', 'Literature and Writing', 'Local History',
+    'Mathematics and Statistics', 'Medicine and Society', 'Migration Studies',
+    'Museum Studies', 'Music and Sound', 'Open Knowledge', 'Philosophy and Ethics',
+    'Political Science', 'Public History', 'Reference and Libraries',
+    'Science Communication', 'Sociology and Community', 'Technology and Society',
+    'Theatre and Performance', 'Urban Studies', 'Visual Arts', 'Women in Science'
+  ]
+
+  campaign_names.each_with_index do |title, index|
+    campaign = Campaign.find_or_initialize_by(title:)
+    campaign.description = "Development campaign for #{title.downcase}."
+    campaign.default_course_type = Campaign::ALLOWED_TYPES[index % Campaign::ALLOWED_TYPES.length]
+    campaign.start = index.months.ago.beginning_of_month
+    campaign.end = (index + 2).months.from_now.end_of_month
+    campaign.save!
+    populate_campaign_course(campaign, index)
+  end
+
+  puts "Created or reused #{campaign_names.length} example campaigns."
+end
+
+def populate_campaign_course(campaign, index)
+  wiki = Wiki.get_or_create(language: 'en', project: 'wikipedia')
+  course = Course.find_or_initialize_by(title: "#{campaign.title} Demo Course")
+  course.assign_attributes(
+    slug: "Demo_University/#{campaign.slug}", school: 'Development University',
+    term: 'Demo term', start: campaign.start, end: campaign.end,
+    passcode: 'demo-passcode', type: campaign.default_course_type.presence || 'ClassroomProgramCourse',
+    home_wiki: wiki
+  )
+  course.save!
+  campaign.courses << course unless campaign.courses.exists?(course.id)
+
+  instructor = User.find_or_create_by!(username: "demo-instructor-#{index}")
+  add_demo_course_user(course, instructor, CoursesUsers::Roles::INSTRUCTOR_ROLE)
+
+  3.times do |student_index|
+    student = User.find_or_create_by!(username: "demo-editor-#{index}-#{student_index}")
+    course_user = add_demo_course_user(course, student, CoursesUsers::Roles::STUDENT_ROLE)
+    course_user.update!(recent_revisions: 8 + student_index, revision_count: 8 + student_index,
+                        character_sum_ms: 450 + (student_index * 100), references_count: 2)
+    article_title = "Demo #{campaign.slug} article #{student_index}"
+    mw_page_id = 100_000 + (index * 10) + student_index + 1
+    article = Article.find_or_initialize_by(mw_page_id:, wiki:)
+    article.assign_attributes(title: article_title, namespace: 0, language: 'en')
+    article.save!
+    ArticlesCourses.find_or_create_by!(course:, article:)
+    Assignment.find_or_create_by!(course:, user: student, article:, article_title: article.title,
+                                  role: Assignment::Roles::ASSIGNED_ROLE, wiki:)
+  end
+  course.update!(user_count: course.users.count, article_count: course.articles.count,
+                 revision_count: course.students.sum(:revision_count),
+                 character_sum: course.students.sum(:character_sum_ms))
+end
+
+def add_demo_course_user(course, user, role)
+  CoursesUsers.find_or_create_by!(course:, user:, role:)
 end

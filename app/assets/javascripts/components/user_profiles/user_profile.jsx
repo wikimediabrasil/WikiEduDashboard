@@ -12,6 +12,8 @@ import request, { ensureOk } from '../../utils/request';
 import UserDetails from './user_details.jsx';
 import Notifications from '../common/notifications.jsx';
 import ProfileNav from './profile_nav.jsx';
+import CourseContributions from './course_contributions.jsx';
+
 
 const UserProfile = () => {
   const dispatch = useDispatch();
@@ -67,6 +69,10 @@ const UserProfile = () => {
         <Route
           path="training"
           element={<UserTrainingStatus trainingModules={userTrainingStatus} username={params.username} />}
+        />
+        <Route
+          path="stats/contributions"
+          element={<CourseContributions username={params.username} />}
         />
         <Route
           path="stats/:metric"

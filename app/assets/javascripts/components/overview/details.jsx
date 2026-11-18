@@ -23,6 +23,7 @@ import DisableStudentEmailsToggle from './disable_student_emails.jsx';
 import StayInSandboxToggle from './stay_in_sandbox_toggle';
 import NoSandboxesToggle from './no_sandboxes_toggle';
 import RetainAvailableArticlesToggle from './retain_available_articles_toggle';
+import YesNoSelector from './yes_no_selector';
 
 import WikiEditsToggle from './wiki_edits_toggle';
 import EditSettingsToggle from './edit_settings_toggle';
@@ -758,6 +759,14 @@ const Details = createReactClass({
               {stayInSandboxToggle}
               {noSandboxesToggle}
               {retainAvailableArticlesToggle}
+              <YesNoSelector
+                courseProperty="reviewed_contributions"
+                label={I18n.t('revisions.reviewed_contributions_setting')}
+                tooltip={I18n.t('revisions.reviewed_contributions_setting_info')}
+                course={this.props.course}
+                editable={this.props.editable}
+                updateCourse={this.props.updateCourse}
+              />
               {maxGroupSizeInput}
               {privacySelector}
               {timelineToggle}

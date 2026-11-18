@@ -13,12 +13,14 @@ import RandomPeerAssignButton from '@components/students/components/RandomPeerAs
 import Loading from '@components/common/loading.jsx';
 import AddToWatchlistButton from '@components/students/components/AddToWatchlistButton.jsx';
 
+const EMPTY_REVISIONS = {};
+
 const Overview = ({ course, current_user, prefix, sortUsers, notify, sortSelect }) => {
   const assignments = useSelector(state => state.assignments.assignments);
   const loadingAssignments = useSelector(state => state.assignments.loading);
   const students = useSelector(state => getStudentUsers(state));
   const revisionAcceptances = useSelector(state => state.revisionAcceptances);
-  const userRevisions = useSelector(state => state.userRevisions);
+  const userRevisions = useSelector(state => state.userRevisions[course.slug]) || EMPTY_REVISIONS;
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -29,10 +31,10 @@ const Overview = ({ course, current_user, prefix, sortUsers, notify, sortSelect 
 
   useEffect(() => {
     // Load revision acceptances on page load for persistence
-    if (!revisionAcceptances.loaded) {
+    if (!revisionAcceptances.loaded || revisionAcceptances.courseSlug !== course.slug) {
       dispatch(fetchRevisionAcceptances(course.slug));
     }
-  }, [course.slug, revisionAcceptances.loaded, dispatch]);
+  }, [course.slug, revisionAcceptances.loaded, revisionAcceptances.courseSlug, dispatch]);
 
   useEffect(() => {
     // Load all student revisions on page load for badge calculations

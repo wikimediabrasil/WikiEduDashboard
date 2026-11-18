@@ -4,6 +4,7 @@ import InstructorStats from './instructor_stats.jsx';
 import StudentStats from './student_stats.jsx';
 import DropdownSortSelect from '../common/dropdown_sort_select';
 import ProfileDownloadButtons from './profile_download_buttons.jsx';
+import { Link } from 'react-router-dom';
 
 const defaultParams = {
   wiki: 'all'
@@ -77,6 +78,7 @@ const ContributionStats = ({ params, stats, statsGraphsData }) => {
   const graphWidth = 800;
   const graphHeight = 250;
   const articlesByLanguage = stats.articles_by_language || [];
+  const reviewedPrograms = (stats.validated_contributions_by_course || []).some(course => course.reviewed_contributions);
   const wikiOptions = useMemo(() => getWikiOptions(articlesByLanguage), [articlesByLanguage]);
   const filteredArticlesByLanguage = useMemo(
     () => articlesByLanguage.filter(row => matchesWikiFilter(row, wikiFilter)),
@@ -115,18 +117,7 @@ const ContributionStats = ({ params, stats, statsGraphsData }) => {
       <InstructorStats
         username={params.username}
         stats={stats}
-        isStudent={isStudent.student}
-        statsGraphsData={statsGraphsData}
-        graphWidth={graphWidth}
-        graphHeight={graphHeight}
-        maxProject={stats.max_project}
-      />
-    );
-  } else if (isStudent.student) {
-    contriStats = (
-      <StudentStats
-        username={params.username}
-        stats={stats.as_student}
+        isStudent={false}
         statsGraphsData={statsGraphsData}
         graphWidth={graphWidth}
         graphHeight={graphHeight}
@@ -152,7 +143,84 @@ const ContributionStats = ({ params, stats, statsGraphsData }) => {
           data={{ username: params.username, ...stats, articles_by_language: filteredArticlesByLanguage }}
         />
       </div>
-      {showWikiFilter && (
+      {isStudent.student && (stats.validated_contributions_by_course || []).length > 0 && (
+        <div className="user-articles-list profile-course-statistics">
+          {stats.validated_contributions_by_course.map((course) => {
+            const profileUrl = `/users/${encodeURIComponent(params.username)}`;
+            const courseQuery = `course_id=${course.course_id}`;
+            const metrics = [
+              [I18n.t('metrics.word_count'), course.word_count, `${profileUrl}/stats/words?${courseQuery}`],
+              [I18n.t('metrics.references_count'), course.references_count, `${profileUrl}/stats/references?${courseQuery}`],
+              [I18n.t('metrics.article_count'), course.article_count, `${profileUrl}/stats/articles?${courseQuery}`],
+              [I18n.t('revisions.evaluation_validated'), course.count, `${profileUrl}/stats/contributions?${courseQuery}&validated=1`]
+            ];
+            const hasCommonsActivity = course.commons_upload_count > 0
+              || (course.wiki_contributions || []).some(wiki => wiki.domain === 'commons.wikimedia.org');
+            if (hasCommonsActivity) {
+              metrics.unshift([I18n.t('metrics.upload_count'), course.commons_upload_count, `${profileUrl}/uploads?${courseQuery}`]);
+            }
+            return (
+              <section key={course.course_id} className="user-details-course">
+                <div className="user-details-course__header">
+                  <div>
+                    <h4>{course.course_title}</h4>
+                    <p>{I18n.t('revisions.attribution_mode')}: {' '}
+                      {I18n.t(course.reviewed_contributions ? 'revisions.attribution_reviewed' : 'revisions.attribution_automatic')}
+                    </p>
+                    <p>{I18n.t('users.course_contributions_total')}: {' '}
+                      <Link to={`/users/${encodeURIComponent(params.username)}/stats/contributions?course_id=${course.course_id}`}>
+                        <strong>{course.revision_count ?? '—'}</strong>
+                      </Link>
+                    </p>
+                  </div>
+                  <a href={`/courses/${course.course_slug}`} className="button border">
+                    {I18n.t(Features.wikiEd ? 'courses.view_page' : 'courses_generic.view_page')}
+                  </a>
+                </div>
+                <dl className="user-details-course__stats">
+                  {metrics.map(([label, value, href]) => (
+                    <div className="user-details-course__stat" key={label}>
+                      <dt className="user-details-course__stat-label">{label}</dt>
+                      <dd className="user-details-course__stat-value">{value ?? '—'}</dd>
+                      {value != null && <Link className="user-details-course__stat-link" to={href} aria-label={`${label}: ${value}`} />}
+                    </div>
+                  ))}
+                </dl>
+                {(course.wiki_contributions || []).length > 0 && (
+                  <div className="profile-wiki-contributions">
+                    <h5>{I18n.t('articles.project')}</h5>
+                    <ul>
+                      {course.wiki_contributions.map(wiki => (
+                        <li key={wiki.wiki_id}>
+                          <Link to={`/users/${encodeURIComponent(params.username)}/stats/contributions?course_id=${course.course_id}&wiki_id=${wiki.wiki_id}`}>
+                            {wiki.domain}: {wiki.revision_count} {I18n.t('users.edits')}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                <Link
+                  className="button border ghost small"
+                  to={`/users/${encodeURIComponent(params.username)}/stats/contributions?course_id=${course.course_id}`}
+                >
+                  {I18n.t('users.course_contributions_details')}
+                </Link>
+              </section>
+            );
+          })}
+        </div>
+      )}
+
+      {isStudent.student && !reviewedPrograms && stats.as_student && (
+        <details className="profile-student-summary">
+          <summary>{I18n.t('user_profiles.student_impact', { username: params.username })}</summary>
+          <StudentStats username={params.username} stats={stats.as_student} maxProject={stats.max_project} />
+        </details>
+      )}
+      {contriStats}
+
+      {showWikiFilter && !reviewedPrograms && (
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '12px', marginBottom: '24px' }}>
           <div
             className="user-articles__filters"
@@ -171,15 +239,13 @@ const ContributionStats = ({ params, stats, statsGraphsData }) => {
           </div>
         </div>
       )}
-      {contriStats}
-
       {/* Stats by Language/Project */}
-      {filteredArticlesByLanguage.length > 0 && (
+      {!reviewedPrograms && filteredArticlesByLanguage.length > 0 && (
         <div className="user-articles__header" style={{ marginTop: '30px' }}>
           <h3 className="user_stats__title">{I18n.t('users.contributions_by_language')}</h3>
         </div>
       )}
-      {filteredArticlesByLanguage.length > 0 && (
+      {!reviewedPrograms && filteredArticlesByLanguage.length > 0 && (
         <div className="user-details-table-wrap">
           <table className="table user-details-table">
             <thead>
@@ -205,7 +271,7 @@ const ContributionStats = ({ params, stats, statsGraphsData }) => {
           </table>
         </div>
       )}
-      {articlesByLanguage.length > 0 && filteredArticlesByLanguage.length === 0 && (
+      {!reviewedPrograms && articlesByLanguage.length > 0 && filteredArticlesByLanguage.length === 0 && (
         <div className="user-articles__empty-state" style={{ marginTop: '24px' }}>
           <p>{I18n.t('user_profiles.no_articles_match')}</p>
         </div>

@@ -564,6 +564,7 @@ class CoursesController < ApplicationController
     :stay_in_sandbox,
     :no_sandboxes,
     :retain_available_articles,
+    :reviewed_contributions,
     :declined
   ].freeze
   def update_boolean_flags

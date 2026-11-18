@@ -69,6 +69,10 @@ Rails.application.routes.draw do
         constraints: { username: /[^\/]+/, format: 'json' }
     get 'users/:username/user_articles' => 'user_profiles#user_articles',
         constraints: { username: /[^\/]+/, format: 'json' }
+    get 'users/:username/course_contributions' => 'user_profiles#course_contributions',
+        constraints: { username: /[^\/]+/, format: 'json' }
+    get 'users/:username/course_uploads' => 'user_profiles#course_uploads',
+        constraints: { username: /[^\/]+/, format: 'json' }
     get 'users/:username/stats' => 'user_profiles#stats',
         constraints: { username: /[^\/]+/, format: 'json' }
     get 'users/:username/stats_graphs' => 'user_profiles#stats_graphs',
@@ -250,6 +254,7 @@ Rails.application.routes.draw do
         constraints: { slug: /.*/ }
     get  'courses/*course_id/revision_acceptances' => 'revision_acceptances#index'
     post 'courses/*course_id/revision_acceptances' => 'revision_acceptances#create'
+    post 'courses/*course_id/revision_suggestions' => 'revision_acceptances#suggestions'
     delete 'courses/*course_id/revision_acceptances/:ra_id' => 'revision_acceptances#destroy'
 
     get 'courses/:slug/lms_integration_status.json' => 'lms_integration_status#show',

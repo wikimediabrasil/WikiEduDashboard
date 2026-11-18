@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useLocation, useParams } from 'react-router-dom';
 import API from '../../utils/api.js';
 import Loading from '../common/loading.jsx';
 import ProfileDownloadButtons from './profile_download_buttons.jsx';
@@ -103,6 +103,8 @@ const updateSearchParams = (filter, value) => {
 const UserDetails = ({ username }) => {
   const encodedUsername = encodeURIComponent(username);
   const { metric } = useParams();
+  const location = useLocation();
+  const courseId = new URLSearchParams(location.search).get('course_id');
   const [loading, setLoading] = useState(true);
   const [coursesData, setCoursesData] = useState([]);
   const [wikiFilter, setWikiFilter] = useState(() => wikiValueToFilter(getSearchParam('wiki', defaultParams.wiki)));
@@ -112,7 +114,7 @@ const UserDetails = ({ username }) => {
     let cancelled = false;
     setLoading(true);
 
-    API.fetchUserArticles(encodedUsername)
+    API.fetchUserArticles(encodedUsername, courseId)
       .then((data) => {
         if (cancelled) return;
         setCoursesData(data.articles_by_course || []);
@@ -126,7 +128,7 @@ const UserDetails = ({ username }) => {
     return () => {
       cancelled = true;
     };
-  }, [encodedUsername]);
+  }, [encodedUsername, courseId]);
 
   const allArticles = useMemo(
     () => coursesData.flatMap(courseGroup => (courseGroup.articles || [])),
@@ -345,7 +347,7 @@ const UserDetails = ({ username }) => {
                         <strong>
                           {metric === 'words' && (courseGroup.word_count != null ? courseGroup.word_count : '-')}
                           {metric === 'references' && (courseGroup.references_count != null ? courseGroup.references_count : '-')}
-                          {metric !== 'words' && metric !== 'references' && (courseGroup.articles_edited || 0)}
+                          {metric !== 'words' && metric !== 'references' && (courseGroup.articles_edited ?? '—')}
                         </strong>
                       </p>
                     </div>

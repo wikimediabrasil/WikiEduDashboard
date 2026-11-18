@@ -22,12 +22,26 @@ class UserProfilesController < ApplicationController
     return render json: { error: 'User not found' }, status: :not_found unless @user
 
     @user_articles = fetch_user_articles(params[:course_id])
+                     .reject { |row| row.course.reviewed_contributions? }
     course_ids = @user_articles.map(&:course_id).uniq
     @user_article_stats = fetch_user_article_stats(course_ids)
     @courses_with_acuwt = courses_with_acuwt(course_ids)
     @courses_users = @user.courses_users.where(course_id: course_ids,
                                                role: CoursesUsers::Roles::STUDENT_ROLE)
                           .index_by(&:course_id)
+    set_reviewed_articles
+  end
+
+  def course_contributions
+    render json: GetProfileCourseContributions.new(public_student_enrollment,
+                                                    validated_only: params[:validated] == '1').data
+  end
+
+  def course_uploads
+    enrollment = public_student_enrollment
+    @course = enrollment.course
+    @uploads = @course.uploads.where(commons_uploads: { user_id: @user.id })
+                      .includes(:user).order(uploaded_at: :desc)
   end
 
   def show
@@ -73,9 +87,10 @@ class UserProfilesController < ApplicationController
                                               courses_list: @courses_list)
     @user_uploads = CommonsUpload.where(user_id: @user.id).order(uploaded_at: :desc).first(20)
     @max_project = max_project
+    set_reviewed_contribution_stats
 
     # Get articles by language/project for stats
-    @articles_by_language = get_articles_by_language
+    @articles_by_language = @reviewed_stats.empty? ? get_articles_by_language : []
   end
 
   def stats_graphs
@@ -100,4 +115,40 @@ class UserProfilesController < ApplicationController
   end
 
   private
+
+  def public_student_enrollment
+    raise ActiveRecord::RecordNotFound unless @user
+    @user.courses_users.joins(:course)
+         .where(role: CoursesUsers::Roles::STUDENT_ROLE,
+                courses: { private: false, id: params[:course_id] }).first!
+  end
+
+  def set_reviewed_articles
+    @reviewed_courses = public_courses
+                        .where(courses_users: { role: CoursesUsers::Roles::STUDENT_ROLE })
+                        .select(&:reviewed_contributions?)
+    if params[:course_id].present?
+      @reviewed_courses.select! { |course| course.id == params[:course_id].to_i }
+    end
+    @reviewed_articles = @reviewed_courses.to_h do |course|
+      [course.id, GetReviewedArticles.new(course:, user: @user).articles]
+    end
+  end
+
+  def set_reviewed_contribution_stats
+    @wiki_contribution_counts = GetCourseWikiContributionCounts.new(
+      user: @user, courses: @courses_users.map(&:course).uniq
+    )
+    @historical_article_counts = student_articles_count_by_course(@courses_users.map(&:course_id))
+    @validated_revision_counts = RevisionAcceptance
+                                 .where(user: @user, status: 'validated',
+                                        course_id: @courses_users.map(&:course_id))
+                                 .group(:course_id).count
+    reviewed = @courses_users.select do |cu|
+      cu.role == CoursesUsers::Roles::STUDENT_ROLE && cu.course.reviewed_contributions?
+    end
+    @reviewed_stats = reviewed.to_h do |cu|
+      [cu.course_id, SummarizeReviewedContributions.new(course: cu.course, user: @user).stats]
+    end
+  end
 end

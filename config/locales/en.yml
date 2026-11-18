@@ -1704,6 +1704,12 @@ en:
     usage_count: Usage Count
 
   revisions:
+    reviewed_contributions_setting: Require instructor review for profile statistics
+    reviewed_contributions_setting_info: Count only edits validated by an instructor in this program's participant profile statistics. Existing reviews without edit details must be reviewed again to calculate all metrics.
+    category_suggestion: Suggested by a program category
+    attribution_mode: Attribution
+    attribution_reviewed: Instructor reviewed
+    attribution_automatic: Automatic by program dates
     chars_added: Chars Added
     references: References Added
     class: Class
@@ -2240,6 +2246,13 @@ en:
     wiki_big: Wiki
 
   users:
+    course_contributions_title: Contributions by program
+    course_contributions_total: Total edits
+    course_contributions_details: View contributions
+    course_contributions_live_notice: This list is retrieved from Wikimedia and may differ from the program's saved total if edits or program data have changed.
+    course_contributions_load_failed: Contributions could not be loaded. Please try again.
+    course_contributions_partial: Some wiki histories could not be loaded. The list may be incomplete; please try again later.
+    course_contributions_empty: No contributions were found for this program.
     back_to_profile: Back to Profile
     back_to_stats: "Back to Stats"
     already_enrolled: That user is already enrolled!

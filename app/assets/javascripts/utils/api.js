@@ -105,8 +105,9 @@ const API = {
     return response.json();
   },
 
-  async fetchUserArticles(username) {
-    const response = await request(`/users/${username}/user_articles.json`);
+  async fetchUserArticles(username, courseId = null) {
+    const query = courseId ? `?course_id=${encodeURIComponent(courseId)}` : '';
+    const response = await request(`/users/${username}/user_articles.json${query}`);
 
     await ensureOk(response);
     return response.json();
