@@ -63,7 +63,8 @@ const Details = createReactClass({
 
   getInitialState() {
     return {
-      updateCount: 0
+      updateCount: 0,
+      shortUrlCopied: false
     };
   },
 
@@ -75,6 +76,22 @@ const Details = createReactClass({
     if (this.timeout) {
       clearInterval(this.timeout); // End it
     }
+    if (this.copyTimeout) {
+      clearTimeout(this.copyTimeout);
+    }
+  },
+
+  copyShortUrl() {
+    const shortUrl = this.props.course.short_url
+      || (this.props.course.id && `${window.location.origin}/s/${this.props.course.id}`);
+    if (!shortUrl || !navigator.clipboard) { return; }
+    navigator.clipboard.writeText(shortUrl).then(() => {
+      this.setState({ shortUrlCopied: true });
+      if (this.copyTimeout) { clearTimeout(this.copyTimeout); }
+      this.copyTimeout = setTimeout(() => {
+        this.setState({ shortUrlCopied: false });
+      }, 2000);
+    });
   },
 
   updateDetails(valueKey, value) {
@@ -330,6 +347,26 @@ const Details = createReactClass({
           />
         );
       }
+    }
+
+    let shortUrl;
+    const courseShortUrl = this.props.course.short_url
+      || (this.props.course.id && `${window.location.origin}/s/${this.props.course.id}`);
+    if (!this.props.editable && courseShortUrl) {
+      shortUrl = (
+        <p className="short-url">
+          <span className="text-input-component__label">
+            <strong>{I18n.t('courses.short_url')}: </strong>
+          </span>
+          <span className="text-input-component__value">
+            <a href={courseShortUrl}>{courseShortUrl}</a>
+          </span>
+          {' '}
+          <button type="button" className="button small" onClick={this.copyShortUrl}>
+            {this.state.shortUrlCopied ? I18n.t('courses.short_url_copied') : I18n.t('courses.copy_short_url')}
+          </button>
+        </p>
+      );
     }
 
     let expectedStudents;
@@ -676,6 +713,7 @@ const Details = createReactClass({
               {namespaceSelector}
               <form>
                 {passcode}
+                {shortUrl}
                 {expectedStudents}
                 <DatePicker
                   onChange={this.updateCourseDates}

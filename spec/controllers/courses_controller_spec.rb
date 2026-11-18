@@ -1091,6 +1091,22 @@ describe CoursesController, type: :request do
       get "/find_course/#{course.id}"
       expect(response).to redirect_to("/courses/#{course.slug}")
     end
+
+    it 'redirects a short course URL to the course page' do
+      get "/s/#{course.id}"
+      expect(response).to redirect_to("/courses/#{course.slug}")
+    end
+
+    it 'preserves subpaths and query parameters on short course URLs' do
+      get "/s/#{course.id}/enroll/passcode123?role=student"
+      expect(response).to redirect_to("/courses/#{course.slug}/enroll/passcode123?role=student")
+    end
+
+    it 'returns 404 for a private course the visitor cannot see' do
+      private_course = create(:course, private: true)
+      get "/s/#{private_course.id}"
+      expect(response).to have_http_status(:not_found)
+    end
   end
 
   describe 'program participant JSON endpoints' do

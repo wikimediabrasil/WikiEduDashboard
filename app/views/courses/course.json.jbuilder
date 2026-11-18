@@ -38,6 +38,7 @@ json.course do
   json.published CampaignsCourses.exists?(course_id: @course.id)
   json.closed @course.closed?
   json.enroll_url "#{request.base_url}#{course_slug_path(@course.slug)}/enroll/"
+  json.short_url "#{request.base_url}#{short_course_path(course_id: @course.id)}"
   json.wiki_string_prefix @course.home_wiki.string_prefix
   json.returning_instructor @course.returning_instructor?
   json.eligible_for_active_research_experiment @course.eligible_for_active_research_experiment?

@@ -92,7 +92,10 @@ class CoursesController < ApplicationController
   def find
     course = Course.find(params[:course_id])
     require_course_visible(course)
-    redirect_to "/courses/#{course.slug}"
+    target = "/courses/#{course.slug}"
+    target = "#{target}/#{params[:subpath]}" if params[:subpath].present?
+    target = "#{target}?#{request.query_string}" if request.query_string.present?
+    redirect_to target
   end
 
   def search

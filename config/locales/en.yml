@@ -1086,6 +1086,9 @@ en:
     school_and_term: Institution/Term
     search_all_tickets_for_this_course: Search all tickets for this course
     search_courses: Search courses
+    short_url: Short URL
+    copy_short_url: Copy
+    short_url_copied: Copied!
     start: Start
     start_typing: Start typing
     stay_in_sandbox: Stay in sandbox

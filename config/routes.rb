@@ -323,6 +323,8 @@ Rails.application.routes.draw do
         id: /.*/
       }
     get 'find_course/:course_id' => 'courses#find'
+    get 's/:course_id(/*subpath)' => 'courses#find', as: :short_course,
+        constraints: { course_id: /\d+/ }
   end
 
   # Course Notes
