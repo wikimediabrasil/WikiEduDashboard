@@ -59,12 +59,14 @@ const Details = createReactClass({
     editable: PropTypes.bool,
     updateCourse: PropTypes.func.isRequired,
     refetchCourse: PropTypes.func.isRequired,
-    firstErrorMessage: PropTypes.string
+    firstErrorMessage: PropTypes.string,
+    grantIdValidation: PropTypes.object
   },
 
   getInitialState() {
     return {
-      updateCount: 0
+      updateCount: 0,
+      shortUrlCopied: false
     };
   },
 
@@ -76,6 +78,22 @@ const Details = createReactClass({
     if (this.timeout) {
       clearInterval(this.timeout); // End it
     }
+    if (this.copyTimeout) {
+      clearTimeout(this.copyTimeout);
+    }
+  },
+
+  copyShortUrl() {
+    const shortUrl = this.props.course.short_url
+      || (this.props.course.id && `${window.location.origin}/s/${this.props.course.id}`);
+    if (!shortUrl || !navigator.clipboard) { return; }
+    navigator.clipboard.writeText(shortUrl).then(() => {
+      this.setState({ shortUrlCopied: true });
+      if (this.copyTimeout) { clearTimeout(this.copyTimeout); }
+      this.copyTimeout = setTimeout(() => {
+        this.setState({ shortUrlCopied: false });
+      }, 2000);
+    });
   },
 
   updateDetails(valueKey, value) {
@@ -85,6 +103,13 @@ const Details = createReactClass({
       [valueKey]: value
     };
     return this.props.updateCourse(updatedCourse);
+  },
+
+  // A grant ID the server turned down stays marked until it is changed.
+  updateGrantId(valueKey, value) {
+    const { grantIdValidation } = this.props;
+    if (grantIdValidation && !grantIdValidation.valid) { this.props.setValid(valueKey); }
+    return this.updateDetails(valueKey, value);
   },
 
   updateSlugPart(valueKey, value) {
@@ -326,6 +351,26 @@ const Details = createReactClass({
       }
     }
 
+    let shortUrl;
+    const courseShortUrl = this.props.course.short_url
+      || (this.props.course.id && `${window.location.origin}/s/${this.props.course.id}`);
+    if (!this.props.editable && courseShortUrl) {
+      shortUrl = (
+        <p className="short-url">
+          <span className="text-input-component__label">
+            <strong>{I18n.t('courses.short_url')}: </strong>
+          </span>
+          <span className="text-input-component__value">
+            <a href={courseShortUrl}>{courseShortUrl}</a>
+          </span>
+          {' '}
+          <button type="button" className="button small" onClick={this.copyShortUrl}>
+            {this.state.shortUrlCopied ? I18n.t('courses.short_url_copied') : I18n.t('courses.copy_short_url')}
+          </button>
+        </p>
+      );
+    }
+
     let expectedStudents;
     if ((this.props.course.expected_students || this.props.course.expected_students === 0 || this.props.editable) && isClassroomProgramType) {
       expectedStudents = (
@@ -534,6 +579,37 @@ const Details = createReactClass({
       );
     }
 
+    // The grant ID is checked by the server when the details are saved. Its
+    // field shows that the check is running, and then the error if there is one.
+    const grantIdValidation = this.props.grantIdValidation || {};
+    const grantIdError = grantIdValidation.valid === false && grantIdValidation.message;
+    let grantIdInput;
+    if (!Features.wikiEd && (this.props.editable || this.props.course.grant_id)) {
+      let grantIdStatus;
+      if (this.props.editable && grantIdValidation.validating) {
+        grantIdStatus = <p className="form-help-text" role="status">{I18n.t('courses.grant_id_checking')}</p>;
+      } else if (this.props.editable && grantIdError) {
+        grantIdStatus = <p className="red" role="alert">{grantIdError}</p>;
+      }
+      grantIdInput = (
+        <div className="grant-id">
+          {this.props.editable && (
+            <p className="form-help-text">{I18n.t('courses.grant_id_help')}</p>
+          )}
+          <TextInput
+            id="course-grant-id"
+            onChange={this.updateGrantId}
+            value={this.props.course.grant_id || ''}
+            value_key="grant_id"
+            editable={this.props.editable}
+            type="text"
+            label={I18n.t('courses.grant_id')}
+          />
+          {grantIdStatus}
+        </div>
+      );
+    }
+
     // Users who can rename a course can enable Online Volunteers to join
     if (canRename && !Features.wikiEd) {
       onlineVolunteersToggle = (
@@ -630,7 +706,9 @@ const Details = createReactClass({
               {online}
               {campus}
               {staff}
-              <div><p className="red">{this.props.firstErrorMessage}</p></div>
+              {this.props.firstErrorMessage !== grantIdError && (
+                <div><p className="red">{this.props.firstErrorMessage}</p></div>
+              )}
               {school}
               {title}
               {term}
@@ -641,6 +719,7 @@ const Details = createReactClass({
               {namespaceSelector}
               <form>
                 {passcode}
+                {shortUrl}
                 {expectedStudents}
                 <DatePicker
                   onChange={this.updateCourseDates}
@@ -670,6 +749,7 @@ const Details = createReactClass({
               {timelineStart}
               {timelineEnd}
               {subject}
+              {grantIdInput}
               {courseLevelSelector}
               {courseFormatSelector}
               {tags}

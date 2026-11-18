@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_04_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_12_120100) do
   create_table "admin_course_notes", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "courses_id"
     t.string "title"
@@ -67,6 +67,44 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_04_000000) do
     t.index ["revision_id"], name: "index_alerts_on_revision_id"
     t.index ["target_user_id"], name: "index_alerts_on_target_user_id"
     t.index ["user_id"], name: "index_alerts_on_user_id"
+  end
+
+  create_table "article_audit_check_results", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.bigint "article_audit_id", null: false
+    t.string "check_key", null: false
+    t.string "check_version"
+    t.string "engine"
+    t.string "status", default: "running", null: false
+    t.text "error"
+    t.text "findings", size: :medium
+    t.text "artifacts", size: :medium
+    t.text "usage"
+    t.integer "duration_ms"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["article_audit_id"], name: "index_article_audit_check_results_on_article_audit_id"
+  end
+
+  create_table "article_audits", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.integer "wiki_id", null: false
+    t.integer "mw_rev_id", null: false
+    t.integer "mw_page_id"
+    t.integer "namespace"
+    t.string "article_title"
+    t.string "url", limit: 1000
+    t.integer "article_id"
+    t.integer "requester_id"
+    t.integer "course_id"
+    t.integer "user_id"
+    t.string "status", default: "queued", null: false
+    t.text "error"
+    t.text "usage"
+    t.datetime "started_at"
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["requester_id"], name: "index_article_audits_on_requester_id"
+    t.index ["wiki_id", "mw_rev_id"], name: "index_article_audits_on_wiki_id_and_mw_rev_id"
   end
 
   create_table "article_course_timeslices", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -285,6 +323,32 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_04_000000) do
     t.index ["user_id"], name: "index_commons_uploads_on_user_id"
   end
 
+  create_table "course_application_forms", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.integer "course_id", null: false
+    t.boolean "open", default: false, null: false
+    t.text "intro"
+    t.text "question_group_ids"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.text "acceptance_email"
+    t.index ["course_id"], name: "index_course_application_forms_on_course_id", unique: true
+  end
+
+  create_table "course_applications", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.integer "course_id", null: false
+    t.integer "user_id", null: false
+    t.integer "status", default: 0, null: false
+    t.integer "decided_by_id"
+    t.datetime "decided_at"
+    t.text "staff_notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "salesforce_contact_id"
+    t.string "salesforce_course_contact_id"
+    t.index ["course_id", "user_id"], name: "index_course_applications_on_course_id_and_user_id", unique: true
+    t.index ["user_id"], name: "index_course_applications_on_user_id"
+  end
+
   create_table "course_stats", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.text "stats_hash"
     t.integer "course_id"
@@ -379,6 +443,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_04_000000) do
     t.boolean "private", default: false
     t.boolean "withdrawn", default: false
     t.integer "references_count", default: 0
+    t.string "grant_id"
     t.index ["slug"], name: "index_courses_on_slug", unique: true
   end
 
@@ -601,6 +666,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_04_000000) do
     t.datetime "created_at", precision: nil
     t.datetime "updated_at", precision: nil
     t.integer "course_id"
+    t.bigint "course_application_id"
+    t.index ["course_application_id"], name: "index_rapidfire_answer_groups_on_course_application_id"
     t.index ["question_group_id"], name: "index_rapidfire_answer_groups_on_question_group_id"
     t.index ["user_id", "user_type"], name: "index_rapidfire_answer_groups_on_user_id_and_user_type"
   end
@@ -931,6 +998,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_04_000000) do
     t.index ["username"], name: "index_users_on_username", unique: true
   end
 
+  create_table "valid_grant_ids", charset: "utf8mb4", collation: "utf8mb4_unicode_ci", force: :cascade do |t|
+    t.string "grant_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["grant_id"], name: "index_valid_grant_ids_on_grant_id", unique: true
+  end
+
   create_table "verification_claim_assignments", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "user_id", null: false
     t.integer "course_id", null: false
@@ -1005,6 +1079,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_04_000000) do
   end
 
   add_foreign_key "admin_course_notes", "courses", column: "courses_id"
+  add_foreign_key "course_application_forms", "courses", on_delete: :cascade
   add_foreign_key "course_stats", "courses"
   add_foreign_key "course_wiki_namespaces", "courses_wikis", column: "courses_wikis_id", on_delete: :cascade
   add_foreign_key "facilitator_stats", "users"

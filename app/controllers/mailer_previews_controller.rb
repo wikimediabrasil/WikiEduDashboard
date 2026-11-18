@@ -35,6 +35,7 @@ class MailerPreviewsController < ApplicationController
         EnrollmentReminderMailerPreview
         OverdueTrainingAlertMailerPreview
         WikiEmailMailerPreview
+        CourseApplicationMailerPreview
       ]
     },
     {
@@ -51,6 +52,7 @@ class MailerPreviewsController < ApplicationController
         EarlyEnrollmentMailerPreview
         TicketNotificationMailerPreview
         AlertMailerPreview
+        ArticleAuditMailerPreview
       ]
     }
   ].freeze

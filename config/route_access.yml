@@ -91,6 +91,10 @@ analytics#tagged_courses_csv: admin
 analytics#ungreeted: signed_in
 analytics#usage: public
 
+article_audits#create: admin
+article_audits#index: admin
+article_audits#rerun_check: admin
+article_audits#show: signed_in
 article_finder#index: public
 
 articles#details: public
@@ -154,6 +158,19 @@ copy_available_articles#preview: editor
 
 copy_course#copy: signed_in  # admin on Wiki Ed
 copy_course#index: signed_in  # admin on Wiki Ed
+
+course_application_forms#edit: admin
+course_application_forms#update: admin
+
+course_application_reviews#accept: admin
+course_application_reviews#decline: admin
+course_application_reviews#destroy: admin
+course_application_reviews#index: admin
+course_application_reviews#show: admin
+course_application_reviews#update: admin
+
+course_applications#create: signed_in
+course_applications#show: public
 
 course_canvas_credentials#create: editor
 course_canvas_credentials#show: editor
